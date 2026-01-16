@@ -127,7 +127,7 @@ export default function CheckoutPage() {
     const PaymentCardContent = () => (
         <div className="space-y-4">
             {/* Total Price Card inside Payment Section */}
-            <div className="p-4 rounded-xl bg-brand-primary/5 border border-brand-primary/10 flex items-center justify-between shadow-xs">
+            <div className="p-4 rounded-xl bg-brand-primary/5 border border-secondary flex items-center justify-between shadow-xs">
                 <div>
                     <span className="text-sm font-semibold text-secondary">Total Pembayaran</span>
                     <p className="text-[10px] text-tertiary">{selectedItems.length} item dipilih</p>

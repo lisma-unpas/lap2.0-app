@@ -95,16 +95,19 @@
         0% {
             transform: translateX(0);
         }
+
         100% {
             transform: translateX(-100%);
         }
     }
 
     @keyframes caret-blink {
+
         0%,
         50% {
             opacity: 1;
         }
+
         51%,
         100% {
             opacity: 0;
@@ -133,6 +136,10 @@
     --color-brand-800: rgb(83 56 158);
     --color-brand-900: rgb(66 48 125);
     --color-brand-950: rgb(44 28 95);
+
+    --color-brand-primary: var(--color-brand-600);
+    --color-brand-secondary: var(--color-brand-500);
+    --color-brand-tertiary: var(--color-brand-400);
 
     --color-error-25: rgb(255 251 250);
     --color-error-50: rgb(254 243 242);

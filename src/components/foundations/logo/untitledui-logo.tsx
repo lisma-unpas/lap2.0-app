@@ -14,7 +14,7 @@ export const UntitledLogo = (props: HTMLAttributes<HTMLOrSVGElement>) => {
             <div className="aspect-[0.3] h-full" />
 
             {/* Logomark */}
-            <h1 className="text-lg font-bold text-black">Demo LAP 2.0</h1>
+            <h1 className="text-lg font-bold dark:text-white:text-black">Demo LAP 2.0</h1>
         </div>
     );
 };

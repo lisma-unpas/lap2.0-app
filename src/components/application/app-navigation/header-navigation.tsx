@@ -36,8 +36,10 @@ interface HeaderNavigationBaseProps {
     items: NavItem[];
     /** List of sub-items to display. */
     subItems?: NavItem[];
-    /** Content to display in the trailing position. */
-    trailingContent?: ReactNode;
+    /** Content to display in the mobile header (next to hamburger). */
+    mobileHeaderContent?: ReactNode;
+    /** Content to display in the mobile drawer header (next to logo). */
+    mobileDrawerHeaderContent?: ReactNode;
     /** Whether to show the avatar dropdown. */
     showAvatarDropdown?: boolean;
     /** Whether to hide the bottom border. */
@@ -49,6 +51,8 @@ export const HeaderNavigationBase = ({
     items,
     subItems,
     trailingContent,
+    mobileHeaderContent,
+    mobileDrawerHeaderContent,
     showAvatarDropdown = true,
     hideBorder = false,
 }: HeaderNavigationBaseProps) => {
@@ -58,11 +62,13 @@ export const HeaderNavigationBase = ({
 
     return (
         <>
-            <MobileNavigationHeader>
-                <aside className="flex h-full max-w-full flex-col justify-between overflow-auto border-r border-secondary bg-primary pt-4 lg:pt-6">
-                    <div className="flex flex-col gap-5 px-4 lg:px-5">
-                        <UntitledLogo className="h-8" />
-                        <Input shortcut size="sm" aria-label="Search" placeholder="Search" icon={SearchLg} />
+            <MobileNavigationHeader mobileContent={mobileHeaderContent}>
+                <aside className="flex h-full max-w-full flex-col justify-between overflow-auto bg-primary pt-4 lg:pt-6">
+                    <div className="flex flex-col px-4 lg:px-5">
+                        <UntitledLogo className="h-8 mb-4" />
+                        <div className="flex items-center gap-2">
+                            {mobileDrawerHeaderContent}
+                        </div>
                     </div>
 
                     <NavList items={items} />

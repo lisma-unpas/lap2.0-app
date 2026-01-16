@@ -58,6 +58,8 @@
         "@types/node": "^24.2.1",
         "@types/react": "^19.1.9",
         "@types/react-dom": "^19.1.7",
+        "eslint": "9.39.2",
+        "eslint-config-next": "16.1.2",
         "hast-util-to-jsx-runtime": "^2.3.6",
         "postcss": "^8.5.6",
         "postcss-loader": "^8.1.1",
