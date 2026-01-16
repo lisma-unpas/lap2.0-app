@@ -261,6 +261,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                     value={formData[field.id] || (field.type === "number" ? (field.defaultValue?.toString() || "") : "")}
                                     onChange={(val) => handleInputChange(field.id, val)}
                                     size="md"
+                                    errorMessage={field.type === "email" ? "Format email tidak valid" : field.type === "url" ? "Format URL tidak valid" : undefined}
                                 />
                             );
                         })}

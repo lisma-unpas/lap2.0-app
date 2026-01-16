@@ -257,6 +257,8 @@ interface InputProps extends InputBaseProps, BaseProps {
     hideRequiredIndicator?: boolean;
     /** Class name for the hint text. */
     hintClassName?: string;
+    /** Custom error message to display */
+    errorMessage?: ReactNode | ((validation: any) => ReactNode);
 }
 
 export const Input = ({
@@ -278,13 +280,14 @@ export const Input = ({
     hintClassName,
     iconTrailing,
     onIconTrailingClick,
+    errorMessage,
     ...props
 }: InputProps) => {
     return (
         <TextField aria-label={!label ? placeholder : undefined} {...props} className={className}>
-            {({ isRequired, isInvalid }) => (
+            {(state) => (
                 <>
-                    {label && <Label isRequired={hideRequiredIndicator ? !hideRequiredIndicator : isRequired}>{label}</Label>}
+                    {label && <Label isRequired={hideRequiredIndicator ? !hideRequiredIndicator : state.isRequired}>{label}</Label>}
 
                     <InputBase
                         {...{
@@ -299,12 +302,19 @@ export const Input = ({
                             wrapperClassName,
                             tooltipClassName,
                             tooltip,
+                            isInvalid: state.isInvalid,
                             iconTrailing,
                             onIconTrailingClick,
                         }}
                     />
 
-                    {hint && <HintText isInvalid={isInvalid} className={hintClassName}>{hint}</HintText>}
+                    {state.isInvalid ? (
+                        <HintText isInvalid className={hintClassName}>
+                            {typeof errorMessage === "function" ? errorMessage(state) : (errorMessage || "Format input tidak valid")}
+                        </HintText>
+                    ) : (
+                        hint && <HintText className={hintClassName}>{hint}</HintText>
+                    )}
                 </>
             )}
         </TextField>
