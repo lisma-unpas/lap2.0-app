@@ -28,7 +28,7 @@ export default function Header() {
                         { label: "TESAS", href: "/tesas" },
                         { label: "KDS", href: "/kds" },
                         { label: "PSM", href: "/psm" },
-                        { label: "TAKRE", href: "/tari" },
+                        { label: "TAKRE", href: "/takre" },
                         { label: "FG", href: "/fg" },
                     ]
                 },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
 import {
     Users01 as Users,
     CheckCircle,
@@ -282,7 +282,7 @@ export default function DashboardClient({
                                     </Table.Row>,
                                     ...(isExpanded ? [
                                         <Table.Row key={`${reg.id}-detail`} className="md:hidden bg-secondary_alt/50">
-                                            <Table.Cell colSpan={3} className="px-5 py-6">
+                                            <Table.Cell colSpan={6} className="px-5 py-6">
                                                 <div className="flex flex-col gap-5">
                                                     <div>
                                                         <p className="text-[10px] font-bold text-quaternary uppercase tracking-wider mb-1.5">Email & HP</p>

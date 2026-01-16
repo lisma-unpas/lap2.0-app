@@ -28,7 +28,7 @@ async function main() {
         {
             name: 'TAKRE',
             description: `LISMA ART PARADE 2.0 (LAP 2.0): K-POP DANCE COMPETITION\n\nInilah saatnya kamu bersinar dan menunjukkan bakat terbaikmu di dunia K-Pop dance! Lisma Art Parade mengajak seluruh dancer untuk bergabung dalam K-Pop Dance Competition dengan kategori Dance Solo, Rookie, dan Hoosun.\n\n✨ Jangan lewatkan keseruannya! akan ada Random Play Dance dan Noraebang yang siap bikin acara makin pecah! 🔥`,
-            subEvents: ['Dance Solo', 'Rookie', 'Hoosun', 'Random Play Dance'],
+            subEvents: ['SOLO', 'Grup', 'RPD'],
             startDate: new Date('2026-05-17'),
             price: 50000
         },

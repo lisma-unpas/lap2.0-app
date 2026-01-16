@@ -8,7 +8,7 @@ const units = [
     { id: 'tesas', name: "TESAS", description: "Teater & Sastra", color: "purple", image: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=2069&auto=format&fit=crop" },
     { id: 'kds', name: "KDS", description: "Kesenian Daerah Sunda", color: "orange", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1945&auto=format&fit=crop" },
     { id: 'psm', name: "PSM", description: "Paduan Suara & Musik", color: "blue", image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=2070&auto=format&fit=crop" },
-    { id: 'tari', name: "TAKRE", description: "Tari Kreasi", color: "pink", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2069&auto=format&fit=crop" },
+    { id: 'takre', name: "TAKRE", description: "Tari Kreasi", color: "pink", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2069&auto=format&fit=crop" },
     { id: 'fg', name: "FG", description: "Fotografi & Fun Games", color: "indigo", image: "https://images.unsplash.com/photo-1452784444945-3f422708fe5e?q=80&w=2072&auto=format&fit=crop" },
 ];
 

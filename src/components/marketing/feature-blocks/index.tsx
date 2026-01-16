@@ -39,7 +39,7 @@ const unitUnits = [
         description: "Ekspresi modern: modern dance, K-Pop, dan berbagai genre tari masa kini.",
         icon: PlayCircle,
         color: "pink",
-        href: "/tari",
+        href: "/takre",
         image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2069&auto=format&fit=crop"
     },
     {

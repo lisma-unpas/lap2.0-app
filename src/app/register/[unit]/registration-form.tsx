@@ -25,6 +25,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const config = UNIT_CONFIG[unit.toLowerCase()];
     const { addToCart, userIdentity, updateUserIdentity } = useCart();
 
+    if (!config) return null;
+
     const [selectedSubEvent, setSelectedSubEvent] = useState<string>(subEvents[0]?.name || "");
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [isAddedToCart, setIsAddedToCart] = useState(false);

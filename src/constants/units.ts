@@ -78,7 +78,7 @@ export const UNIT_CONFIG: Record<string, any> = {
         ],
         fixedPrice: 300000
     },
-    tari: {
+    takre: {
         dbName: "TAKRE",
         name: "TAKRE (Tari)",
         badgeText: "💃 Tari Kreatif & Dance",
@@ -93,8 +93,9 @@ export const UNIT_CONFIG: Record<string, any> = {
         subEventConfigs: {
             "SOLO": {
                 fields: [
-                    { id: "fullName", label: "Nama Lengkap atau Panggung", type: "text", required: true, persistent: true },
-                    { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true }
+                    { id: "fullName", label: "Nama Lengkap atau Nama Panggung", type: "text", required: true, persistent: true },
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "paymentProof", label: "Bukti Regis (Pembayaran)", type: "file", required: true }
                 ],
                 price: 125000
             },
@@ -104,7 +105,7 @@ export const UNIT_CONFIG: Record<string, any> = {
                     {
                         id: "category", label: "Kategori Grup", type: "radio",
                         options: [
-                            { label: "Hoosun (Sunbae) - Rp250.000", value: "hoosun", price: 250000 },
+                            { label: "Hoosun - Rp250.000", value: "hoosun", price: 250000 },
                             { label: "Rookie - Rp200.000", value: "rookie", price: 200000 }
                         ], required: true
                     },
@@ -112,13 +113,15 @@ export const UNIT_CONFIG: Record<string, any> = {
                     { id: "groupPhoto", label: "Foto Grup", type: "file", required: true },
                     { id: "members", label: "Nama Anggota", type: "textarea", required: true },
                     { id: "count", label: "Jumlah Anggota", type: "number", min: 2, required: true },
-                    { id: "phoneNumber", label: "Nomor WhatsApp", type: "text", required: true, persistent: true }
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "paymentProof", label: "Bukti Regis (Pembayaran)", type: "file", required: true }
                 ]
             },
             "RPD": {
                 fields: [
-                    { id: "fullName", label: "Nama Lengkap atau Panggilan", type: "text", required: true, persistent: true },
-                    { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true }
+                    { id: "fullName", label: "Nama Lengkap atau Nama Panggilan", type: "text", required: true, persistent: true },
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "paymentProof", label: "Bukti Regis (Pembayaran)", type: "file", required: true }
                 ],
                 price: 10000
             }

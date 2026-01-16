@@ -4,8 +4,7 @@ import { RouteProvider } from "@/providers/router-provider";
 import { Theme } from "@/providers/theme";
 import "@/styles/globals.css";
 import { cx } from "@/utils/cx";
-import Header from "@/components/shared/header";
-import Footer from "@/components/shared/footer";
+import ConditionalLayout from "@/components/shared/conditional-layout";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -36,13 +35,9 @@ export default function RootLayout({
                 <RouteProvider>
                     <CartProvider>
                         <Theme>
-                            <div className="flex min-h-screen flex-col">
-                                <Header />
-                                <main className="flex-1">
-                                    {children}
-                                </main>
-                                <Footer />
-                            </div>
+                            <ConditionalLayout>
+                                {children}
+                            </ConditionalLayout>
                         </Theme>
                     </CartProvider>
                 </RouteProvider>
