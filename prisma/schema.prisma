@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RegStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  password      String?
+  role          Role           @default(USER)
+  registrations Registration[]
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  name        String     @unique // TESAS, KDS, PSM, TAKRE, FG, Main Event
+  description String?    @db.Text
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean    @default(true)
+  subEvents   SubEvent[]
+}
+
+model SubEvent {
+  id            String         @id @default(cuid())
+  eventId       String
+  name          String         // e.g. Solo Dance, Teater, Band Audition
+  description   String?        @db.Text
+  price         Int            @default(0)
+  event         Event          @relation(fields: [eventId], references: [id])
+  registrations Registration[]
+
+  @@unique([name, eventId])
+}
+
+model Registration {
+  id           String    @id @default(cuid())
+  userId       String?
+  subEventId   String
+  status       RegStatus @default(PENDING)
+  fullName     String
+  nim          String?
+  major        String?
+  phoneNumber  String
+  email        String
+  detailedData Json?     // For dynamic form fields per unit
+  documentUrls Json?
+  paymentProof String?
+  totalPrice   Int       @default(0)
+  createdAt    DateTime  @default(now())
+  subEvent     SubEvent  @relation(fields: [subEventId], references: [id])
+  user         User?     @relation(fields: [userId], references: [id])
+  ticket       Ticket?
+}
+
+model Ticket {
+  id             String       @id @default(cuid())
+  registrationId String       @unique
+  ticketCode     String       @unique
+  qrUrl          String?
+  isUsed         Boolean      @default(false)
+  issuedAt       DateTime     @default(now())
+  registration   Registration @relation(fields: [registrationId], references: [id])
+}
+
+model ContactPerson {
+  id       String  @id @default(cuid())
+  name     String
+  whatsapp String
+  email    String?
+  division String
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  body      String   @db.Text
+  category  String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+}

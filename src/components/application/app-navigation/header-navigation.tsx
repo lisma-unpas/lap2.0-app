@@ -68,28 +68,7 @@ export const HeaderNavigationBase = ({
                     <NavList items={items} />
 
                     <div className="mt-auto flex flex-col gap-4 px-2 py-4 lg:px-4 lg:py-6">
-                        <div className="flex flex-col gap-1">
-                            <NavItemBase type="link" href="#" icon={LifeBuoy01}>
-                                Support
-                            </NavItemBase>
-                            <NavItemBase
-                                type="link"
-                                href="#"
-                                icon={Settings01}
-                                badge={
-                                    <BadgeWithDot color="success" type="modern" size="sm">
-                                        Online
-                                    </BadgeWithDot>
-                                }
-                            >
-                                Settings
-                            </NavItemBase>
-                            <NavItemBase type="link" href="https://www.untitledui.com/" icon={Settings01}>
-                                Open in browser
-                            </NavItemBase>
-                        </div>
-
-                        <NavAccountCard />
+                        {/* Mobile admin links removed */}
                     </div>
                 </aside>
             </MobileNavigationHeader>
@@ -127,24 +106,7 @@ export const HeaderNavigationBase = ({
                         <div className="flex items-center gap-3">
                             {trailingContent}
 
-                            <div className="flex gap-0.5">
-                                <NavItemButton
-                                    current={activeUrl === "/settings-01"}
-                                    size="md"
-                                    icon={Settings01}
-                                    label="Settings"
-                                    href="/settings-01"
-                                    tooltipPlacement="bottom"
-                                />
-                                <NavItemButton
-                                    current={activeUrl === "/notifications-01"}
-                                    size="md"
-                                    icon={Bell01}
-                                    label="Notifications"
-                                    href="/notifications-01"
-                                    tooltipPlacement="bottom"
-                                />
-                            </div>
+                            {/* Removed Settings and Notifications for public view */}
 
                             {showAvatarDropdown && (
                                 <DialogTrigger>
@@ -165,9 +127,9 @@ export const HeaderNavigationBase = ({
                                             cx(
                                                 "will-change-transform",
                                                 isEntering &&
-                                                    "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
+                                                "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
                                                 isExiting &&
-                                                    "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
+                                                "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
                                             )
                                         }
                                     >

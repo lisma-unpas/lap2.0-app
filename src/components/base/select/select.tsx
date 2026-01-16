@@ -35,6 +35,7 @@ interface SelectProps extends Omit<AriaSelectProps<SelectItemType>, "children" |
     items?: SelectItemType[];
     popoverClassName?: string;
     placeholderIcon?: FC | ReactNode;
+    isLoading?: boolean;
     children: ReactNode | ((item: SelectItemType) => ReactNode);
 }
 
@@ -43,6 +44,7 @@ interface SelectValueProps {
     size: "sm" | "md";
     isFocused: boolean;
     isDisabled: boolean;
+    isLoading?: boolean;
     placeholder?: string;
     ref?: Ref<HTMLButtonElement>;
     placeholderIcon?: FC | ReactNode;
@@ -53,14 +55,15 @@ export const sizes = {
     md: { root: "py-2.5 px-3.5", shortcut: "pr-3" },
 };
 
-const SelectValue = ({ isOpen, isFocused, isDisabled, size, placeholder, placeholderIcon, ref }: SelectValueProps) => {
+const SelectValue = ({ isOpen, isFocused, isDisabled, isLoading, size, placeholder, placeholderIcon, ref }: SelectValueProps) => {
     return (
         <AriaButton
             ref={ref}
+            isDisabled={isDisabled || isLoading}
             className={cx(
                 "relative flex w-full cursor-pointer items-center rounded-lg bg-primary shadow-xs ring-1 ring-primary outline-hidden transition duration-100 ease-linear ring-inset",
                 (isFocused || isOpen) && "ring-2 ring-brand",
-                isDisabled && "cursor-not-allowed bg-disabled_subtle text-disabled",
+                (isDisabled || isLoading) && "cursor-not-allowed bg-disabled_subtle text-disabled",
             )}
         >
             <AriaSelectValue<SelectItemType>
@@ -91,13 +94,32 @@ const SelectValue = ({ isOpen, isFocused, isDisabled, size, placeholder, placeho
                                     {state.selectedItem?.supportingText && <p className="text-md text-tertiary">{state.selectedItem?.supportingText}</p>}
                                 </section>
                             ) : (
-                                <p className={cx("text-md text-placeholder", isDisabled && "text-disabled")}>{placeholder}</p>
+                                <p className={cx("text-md text-placeholder", (isDisabled || isLoading) && "text-disabled")}>{placeholder}</p>
                             )}
 
-                            <ChevronDown
-                                aria-hidden="true"
-                                className={cx("ml-auto shrink-0 text-fg-quaternary", size === "sm" ? "size-4 stroke-[2.5px]" : "size-5")}
-                            />
+                            {isLoading ? (
+                                <div className="ml-auto shrink-0 flex items-center justify-center">
+                                    <svg className="animate-spin size-4 text-fg-brand-primary" viewBox="0 0 32 32" fill="none">
+                                        <circle className="text-bg-tertiary" cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="4" />
+                                        <circle
+                                            className="stroke-fg-brand-primary"
+                                            cx="16"
+                                            cy="16"
+                                            r="14"
+                                            fill="none"
+                                            strokeWidth="4"
+                                            strokeDashoffset="75"
+                                            strokeDasharray="100"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                </div>
+                            ) : (
+                                <ChevronDown
+                                    aria-hidden="true"
+                                    className={cx("ml-auto shrink-0 text-fg-quaternary", size === "sm" ? "size-4 stroke-[2.5px]" : "size-5")}
+                                />
+                            )}
                         </>
                     );
                 }}
@@ -108,10 +130,14 @@ const SelectValue = ({ isOpen, isFocused, isDisabled, size, placeholder, placeho
 
 export const SelectContext = createContext<{ size: "sm" | "md" }>({ size: "sm" });
 
-const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", children, items, label, hint, tooltip, className, ...rest }: SelectProps) => {
+const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", isLoading, children, items, label, hint, tooltip, className, ...rest }: SelectProps) => {
     return (
         <SelectContext.Provider value={{ size }}>
-            <AriaSelect {...rest} className={(state) => cx("flex flex-col gap-1.5", typeof className === "function" ? className(state) : className)}>
+            <AriaSelect
+                {...rest}
+                isDisabled={rest.isDisabled || isLoading}
+                className={(state) => cx("flex flex-col gap-1.5", typeof className === "function" ? className(state) : className)}
+            >
                 {(state) => (
                     <>
                         {label && (
@@ -120,7 +146,7 @@ const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", children
                             </Label>
                         )}
 
-                        <SelectValue {...state} {...{ size, placeholder }} placeholderIcon={placeholderIcon} />
+                        <SelectValue {...state} {...{ size, placeholder, isLoading }} placeholderIcon={placeholderIcon} />
 
                         <Popover size={size} className={rest.popoverClassName}>
                             <AriaListBox items={items} className="size-full outline-hidden">

@@ -33,6 +33,10 @@ export interface InputBaseProps extends TextFieldProps {
     groupRef?: Ref<HTMLDivElement>;
     /** Icon component to display on the left side of the input. */
     icon?: ComponentType<HTMLAttributes<HTMLOrSVGElement>>;
+    /** Icon component to display on the right side of the input. */
+    iconTrailing?: ComponentType<HTMLAttributes<HTMLOrSVGElement>>;
+    /** Callback function to execute when the trailing icon is clicked. */
+    onIconTrailingClick?: () => void;
 }
 
 export const InputBase = ({
@@ -44,6 +48,8 @@ export const InputBase = ({
     isInvalid,
     isDisabled,
     icon: Icon,
+    iconTrailing: IconTrailing,
+    onIconTrailingClick,
     placeholder,
     wrapperClassName,
     tooltipClassName,
@@ -53,16 +59,20 @@ export const InputBase = ({
     isRequired: _isRequired,
     ...inputProps
 }: Omit<InputBaseProps, "label" | "hint">) => {
-    // Check if the input has a leading icon or tooltip
-    const hasTrailingIcon = tooltip || isInvalid;
+    // Check if the input has a leading icon or trailing icons
+    const hasTrailingIcon = tooltip || isInvalid || IconTrailing;
     const hasLeadingIcon = Icon;
 
     // If the input is inside a `TextFieldContext`, use its context to simplify applying styles
     const context = useContext(TextFieldContext);
 
-    const inputSize = context?.size || size;
+    const inputSize = (context?.size || size || 'sm') as 'sm' | 'md';
 
-    const sizes = sortCx({
+    // Ensure inputSize is valid, fallback to 'sm' if not
+    const validSize: 'sm' | 'md' = (inputSize === 'sm' || inputSize === 'md') ? inputSize : 'sm';
+
+    // Define sizes object with explicit type
+    const sizes: Record<'sm' | 'md', { root: string; iconLeading: string; iconTrailing: string; shortcut: string }> = {
         sm: {
             root: cx("px-3 py-2", hasTrailingIcon && "pr-9", hasLeadingIcon && "pl-10"),
             iconLeading: "left-3",
@@ -75,7 +85,10 @@ export const InputBase = ({
             iconTrailing: "right-3.5",
             shortcut: "pr-3",
         },
-    });
+    };
+
+    // Safety check: ensure validSize exists in sizes
+    const sizeConfig = sizes[validSize] || sizes.sm;
 
     return (
         <AriaGroup
@@ -110,7 +123,7 @@ export const InputBase = ({
                     className={cx(
                         "pointer-events-none absolute size-5 text-fg-quaternary",
                         isDisabled && "text-fg-disabled",
-                        sizes[inputSize].iconLeading,
+                        sizeConfig.iconLeading,
                         context?.iconClassName,
                         iconClassName,
                     )}
@@ -123,9 +136,9 @@ export const InputBase = ({
                 ref={ref}
                 placeholder={placeholder}
                 className={cx(
-                    "m-0 w-full bg-transparent text-md text-primary ring-0 outline-hidden placeholder:text-placeholder autofill:rounded-lg autofill:text-primary",
+                    "m-0 w-full bg-transparent text-sm md:text-md text-primary ring-0 outline-hidden placeholder:text-placeholder autofill:rounded-lg autofill:text-primary",
                     isDisabled && "cursor-not-allowed text-disabled",
-                    sizes[inputSize].root,
+                    sizeConfig.root,
                     context?.inputClassName,
                     inputClassName,
                 )}
@@ -137,7 +150,7 @@ export const InputBase = ({
                     <TooltipTrigger
                         className={cx(
                             "absolute cursor-pointer text-fg-quaternary transition duration-200 hover:text-fg-quaternary_hover focus:text-fg-quaternary_hover",
-                            sizes[inputSize].iconTrailing,
+                            sizeConfig.iconTrailing,
                             context?.tooltipClassName,
                             tooltipClassName,
                         )}
@@ -152,11 +165,34 @@ export const InputBase = ({
                 <InfoCircle
                     className={cx(
                         "pointer-events-none absolute size-4 text-fg-error-secondary",
-                        sizes[inputSize].iconTrailing,
+                        sizeConfig.iconTrailing,
                         context?.tooltipClassName,
                         tooltipClassName,
                     )}
                 />
+            )}
+
+            {/* Trailing icon */}
+            {IconTrailing && !isInvalid && !tooltip && (
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        if (onIconTrailingClick) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onIconTrailingClick();
+                        }
+                    }}
+                    className={cx(
+                        "absolute size-5 text-fg-quaternary transition duration-200 hover:text-fg-quaternary_hover focus:outline-hidden",
+                        onIconTrailingClick ? "cursor-pointer" : "pointer-events-none",
+                        sizeConfig.iconTrailing,
+                        context?.iconClassName,
+                        iconClassName,
+                    )}
+                >
+                    <IconTrailing className="size-full" />
+                </button>
             )}
 
             {/* Shortcut */}
@@ -164,7 +200,7 @@ export const InputBase = ({
                 <div
                     className={cx(
                         "pointer-events-none absolute inset-y-0.5 right-0.5 z-10 flex items-center rounded-r-[inherit] bg-linear-to-r from-transparent to-bg-primary to-40% pl-8",
-                        sizes[inputSize].shortcut,
+                        sizeConfig.shortcut,
                     )}
                 >
                     <span
@@ -193,8 +229,8 @@ interface BaseProps {
 
 interface TextFieldProps
     extends BaseProps,
-        AriaTextFieldProps,
-        Pick<InputBaseProps, "size" | "wrapperClassName" | "inputClassName" | "iconClassName" | "tooltipClassName"> {
+    AriaTextFieldProps,
+    Pick<InputBaseProps, "size" | "wrapperClassName" | "inputClassName" | "iconClassName" | "tooltipClassName"> {
     ref?: Ref<HTMLDivElement>;
 }
 
@@ -219,6 +255,8 @@ TextField.displayName = "TextField";
 interface InputProps extends InputBaseProps, BaseProps {
     /** Whether to hide required indicator from label */
     hideRequiredIndicator?: boolean;
+    /** Class name for the hint text. */
+    hintClassName?: string;
 }
 
 export const Input = ({
@@ -237,6 +275,9 @@ export const Input = ({
     inputClassName,
     wrapperClassName,
     tooltipClassName,
+    hintClassName,
+    iconTrailing,
+    onIconTrailingClick,
     ...props
 }: InputProps) => {
     return (
@@ -258,10 +299,12 @@ export const Input = ({
                             wrapperClassName,
                             tooltipClassName,
                             tooltip,
+                            iconTrailing,
+                            onIconTrailingClick,
                         }}
                     />
 
-                    {hint && <HintText isInvalid={isInvalid}>{hint}</HintText>}
+                    {hint && <HintText isInvalid={isInvalid} className={hintClassName}>{hint}</HintText>}
                 </>
             )}
         </TextField>
@@ -269,3 +312,5 @@ export const Input = ({
 };
 
 Input.displayName = "Input";
+
+export { Label, HintText };

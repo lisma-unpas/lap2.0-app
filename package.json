@@ -5,9 +5,11 @@
     "scripts": {
         "dev": "next dev --turbopack",
         "build": "next build",
-        "start": "next start"
+        "start": "next start",
+        "lint": "next lint"
     },
     "dependencies": {
+        "@hookform/resolvers": "^5.2.2",
         "@internationalized/date": "^3.10.0",
         "@react-aria/utils": "^3.31.0",
         "@react-email/components": "^0.4.0",
@@ -25,7 +27,9 @@
         "@tiptap/starter-kit": "^3.0.9",
         "@untitledui/file-icons": "^0.0.9",
         "@untitledui/icons": "^0.0.19",
+        "bcryptjs": "^3.0.3",
         "embla-carousel-react": "^8.6.0",
+        "imagekit": "^6.0.0",
         "input-otp": "^1.4.2",
         "motion": "^12.23.12",
         "next": "^15.4.6",
@@ -35,6 +39,7 @@
         "react-aria": "^3.44.0",
         "react-aria-components": "^1.13.0",
         "react-dom": "19.1.1",
+        "react-hook-form": "^7.71.1",
         "react-hotkeys-hook": "^5.1.0",
         "react-image-crop": "^11.0.10",
         "recharts": "^3.1.2",
@@ -43,10 +48,13 @@
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^4.1.11",
         "tailwindcss-animate": "^1.0.7",
-        "tailwindcss-react-aria-components": "^2.0.0"
+        "tailwindcss-react-aria-components": "^2.0.0",
+        "zod": "^4.3.5"
     },
     "devDependencies": {
+        "@prisma/client": "^6.19.2",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "@types/bcryptjs": "^2.4.6",
         "@types/node": "^24.2.1",
         "@types/react": "^19.1.9",
         "@types/react-dom": "^19.1.7",
@@ -55,6 +63,10 @@
         "postcss-loader": "^8.1.1",
         "prettier": "^3.6.2",
         "prettier-plugin-tailwindcss": "^0.6.14",
+        "prisma": "^6.19.2",
         "typescript": "^5.9.2"
+    },
+    "prisma": {
+        "seed": "node prisma/seed.js"
     }
 }

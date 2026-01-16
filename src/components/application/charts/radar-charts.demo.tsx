@@ -9,7 +9,7 @@ interface CustomRadarChartTickProps {
     payload: { value: string };
     x: number;
     y: number;
-    textAnchor: string;
+    textAnchor: any;
     stroke: string;
     radius: number;
 }
