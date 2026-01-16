@@ -40,6 +40,8 @@ interface HeaderNavigationBaseProps {
     mobileHeaderContent?: ReactNode;
     /** Content to display in the mobile drawer header (next to logo). */
     mobileDrawerHeaderContent?: ReactNode;
+    /** Content to display at the end of the desktop header. */
+    trailingContent?: ReactNode;
     /** Whether to show the avatar dropdown. */
     showAvatarDropdown?: boolean;
     /** Whether to hide the bottom border. */
