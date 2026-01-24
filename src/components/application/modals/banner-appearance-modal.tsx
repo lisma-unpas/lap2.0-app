@@ -90,13 +90,13 @@ export const BannerAppearanceModal = () => {
                                     >
                                         {({ isSelected, isDisabled, isFocusVisible }) => (
                                             <>
-                                                <section className="relative h-16 w-24 rounded-md bg-utility-gray-100 sm:h-40 sm:w-60 sm:rounded-[10px]">
+                                                <section className="relative h-16 w-24 rounded-lg bg-utility-gray-100 sm:h-40 sm:w-60 sm:rounded-[10px]">
                                                     <banner.component className="h-full object-cover object-center max-sm:hidden" />
                                                     <banner.componentSM className="h-full object-cover object-center sm:hidden" />
 
                                                     <span
                                                         className={cx(
-                                                            "pointer-events-none absolute top-0 left-0 z-1 size-full rounded-md ring-1 ring-primary ring-inset sm:rounded-[10px]",
+                                                            "pointer-events-none absolute top-0 left-0 z-1 size-full rounded-lg ring-1 ring-primary ring-inset sm:rounded-[10px]",
                                                             isSelected && "ring-2 ring-brand",
                                                         )}
                                                     />
@@ -117,7 +117,7 @@ export const BannerAppearanceModal = () => {
                                                                 color="secondary"
                                                                 className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 sm:hidden"
                                                             />
-                                                            <span className="absolute top-0 left-0 size-full rounded-md bg-linear-to-l from-[rgba(0,0,0,0.02)] to-[rgba(0,0,0,0.17)] to-90% backdrop-blur-[2.14px] sm:rounded-[10px]" />
+                                                            <span className="absolute top-0 left-0 size-full rounded-lg bg-linear-to-l from-[rgba(0,0,0,0.02)] to-[rgba(0,0,0,0.17)] to-90% backdrop-blur-[2.14px] sm:rounded-[10px]" />
                                                         </>
                                                     )}
                                                 </section>

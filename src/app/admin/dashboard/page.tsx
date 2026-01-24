@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/actions/auth";
-import { getRegistrations, getDashboardStats } from "@/actions/admin";
+import { getDashboardStats } from "@/actions/admin";
 import DashboardClient from "./dashboard-client";
 
 export default async function AdminDashboardPage() {
@@ -10,16 +10,11 @@ export default async function AdminDashboardPage() {
         redirect("/admin/login");
     }
 
-    const [regRes, statsRes] = await Promise.all([
-        getRegistrations(),
-        getDashboardStats()
-    ]);
+    const statsRes = await getDashboardStats();
 
     return (
         <DashboardClient
-            initialData={regRes.success ? (regRes.data ?? []) : []}
             initialStats={statsRes.success ? statsRes.data : null}
-            initialTotal={regRes.success ? (regRes.total ?? 0) : 0}
         />
     );
 }

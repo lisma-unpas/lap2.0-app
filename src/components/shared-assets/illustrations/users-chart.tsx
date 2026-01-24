@@ -6,7 +6,7 @@ export const UsersChart = (props: HTMLAttributes<HTMLDivElement>) => {
     return (
         <div
             {...props}
-            className={cx("flex h-65 w-108 flex-col overflow-hidden rounded-xl bg-primary p-5 shadow-2xl ring-1 ring-secondary_alt", props.className)}
+            className={cx("flex h-65 w-108 flex-col overflow-hidden rounded-lg bg-primary p-5 shadow-2xl ring-1 ring-secondary_alt", props.className)}
         >
             <div className="text-sm font-semibold text-primary">Users over time</div>
             <div className="relative flex min-h-0 min-w-0 flex-1 items-center">

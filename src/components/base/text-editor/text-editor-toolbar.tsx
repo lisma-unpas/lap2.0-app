@@ -73,7 +73,7 @@ export const TextEditorToolbar = ({ className, ref, type = "simple", floating = 
             ref={ref}
             className={cx(
                 "flex w-max flex-col items-start justify-center gap-2 md:flex-row md:items-center md:justify-start md:gap-3",
-                floating && "rounded-xl bg-primary p-2 shadow-lg ring-1 ring-secondary_alt",
+                floating && "rounded-lg bg-primary p-2 shadow-lg ring-1 ring-secondary_alt",
                 className,
             )}
         >

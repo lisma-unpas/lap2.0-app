@@ -74,7 +74,7 @@ const sizes = {
 const getHorizontalStyles = ({ size, fullWidth }: { size?: "sm" | "md"; fullWidth?: boolean }) => ({
     "button-brand": "gap-1",
     "button-gray": "gap-1",
-    "button-border": cx("gap-1 rounded-[10px] bg-secondary_alt p-1 ring-1 ring-secondary ring-inset", size === "md" && "rounded-xl p-1.5"),
+    "button-border": cx("gap-1 rounded-[10px] bg-secondary_alt p-1 ring-1 ring-secondary ring-inset", size === "md" && "rounded-lg p-1.5"),
     "button-minimal": "gap-0.5 rounded-lg bg-secondary_alt ring-1 ring-inset ring-secondary",
     underline: cx("gap-3", fullWidth && "w-full gap-4"),
     line: "gap-2",
@@ -137,8 +137,8 @@ export const TabList = <T extends Orientation>({
 
                         // Only horizontal tabs with underline type have bottom border
                         orientation === "horizontal" &&
-                            type === "underline" &&
-                            "relative before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border-secondary",
+                        type === "underline" &&
+                        "relative before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border-secondary",
 
                         typeof className === "function" ? className(state) : className,
                     )
@@ -182,7 +182,7 @@ export const Tab = (props: TabComponentProps) => {
             {...otherProps}
             className={(prop) =>
                 cx(
-                    "z-10 flex h-max cursor-pointer items-center justify-center gap-2 rounded-md whitespace-nowrap text-quaternary transition duration-100 ease-linear",
+                    "z-10 flex h-max cursor-pointer items-center justify-center gap-2 rounded-lg whitespace-nowrap text-quaternary transition duration-100 ease-linear",
                     "group-orientation-vertical:justify-start",
                     fullWidth && "w-full flex-1",
                     sizes[size][type],

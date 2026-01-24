@@ -88,7 +88,7 @@ export const NewProjectModal = () => {
 
                             {uploadedFile && (
                                 <div className="px-4 sm:px-6">
-                                    <div className="relative aspect-[1.33] w-full overflow-hidden rounded-xl">
+                                    <div className="relative aspect-[1.33] w-full overflow-hidden rounded-lg">
                                         {uploadedFilePreview && (
                                             <>
                                                 <img alt={uploadedFile.name} src={uploadedFilePreview} className="size-full object-cover" />
@@ -120,7 +120,7 @@ export const NewProjectModal = () => {
                                         >
                                             {uploadedFile.progress}%
                                         </p>
-                                        <div className="absolute inset-0 rounded-xl border border-secondary_alt"></div>
+                                        <div className="absolute inset-0 rounded-lg border border-secondary_alt"></div>
                                     </div>
                                 </div>
                             )}
@@ -168,17 +168,17 @@ export const NewProjectModal = () => {
                                 <div className="flex flex-col gap-3">
                                     <TextArea label="Add tags (optional)" placeholder="Type to search..." textAreaClassName="h-25.5" />
                                     <div className="flex flex-wrap gap-2">
-                                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                                             <BadgeWithIcon color="gray" type="modern" size="md" iconLeading={Plus}>
                                                 User interface
                                             </BadgeWithIcon>
                                         </button>
-                                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                                             <BadgeWithIcon color="gray" type="modern" size="md" iconLeading={Plus}>
                                                 Figma
                                             </BadgeWithIcon>
                                         </button>
-                                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                                             <BadgeWithIcon color="gray" type="modern" size="md" iconLeading={Plus}>
                                                 UI Design
                                             </BadgeWithIcon>

@@ -156,7 +156,7 @@ export const StatsCardMockupCarousel = ({ className, ...svgProps }: SVGProps<SVG
                     />
                 </defs>
             </svg>
-            <svg width="216" height="106" viewBox="0 0 216 106" fill="none" className="absolute -right-16 -bottom-12 rounded-xl">
+            <svg width="216" height="106" viewBox="0 0 216 106" fill="none" className="absolute -right-16 -bottom-12 rounded-lg">
                 <g filter="url(#filter0_b_17046_12393)">
                     <path
                         d="M0 12C0 5.37258 5.37258 0 12 0H204C210.627 0 216 5.37258 216 12V94C216 100.627 210.627 106 204 106H12C5.37259 106 0 100.627 0 94V12Z"
@@ -192,7 +192,7 @@ export const StatsCardMockupCarousel = ({ className, ...svgProps }: SVGProps<SVG
                     </clipPath>
                 </defs>
             </svg>
-            <svg width="280" height="148" viewBox="0 0 280 148" fill="none" className="absolute -top-12 -left-12 rounded-xl shadow-2xl">
+            <svg width="280" height="148" viewBox="0 0 280 148" fill="none" className="absolute -top-12 -left-12 rounded-lg shadow-2xl">
                 <g filter="url(#filter0_b_17046_12382)">
                     <path
                         d="M0 12C0 5.37258 5.37258 0 12 0H268C274.627 0 280 5.37258 280 12V136C280 142.627 274.627 148 268 148H12C5.37259 148 0 142.627 0 136V12Z"

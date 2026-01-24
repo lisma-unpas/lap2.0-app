@@ -39,7 +39,7 @@ const UsersMenuPreview = ({
     return (
         <div className={cx("relative flex w-90 flex-col items-center border-l border-secondary bg-primary", className)}>
             <div className="w-full px-1 pt-1">
-                <div className={cx("w-full rounded-xl bg-linear-to-t from-[#FBC5EC] to-[#A5C0EE]", size === "sm" ? "h-22" : "h-28")} />
+                <div className={cx("w-full rounded-lg bg-linear-to-t from-[#FBC5EC] to-[#A5C0EE]", size === "sm" ? "h-22" : "h-28")} />
             </div>
 
             <div className="relative -mt-8 w-full max-w-(--breakpoint-xl) px-4">

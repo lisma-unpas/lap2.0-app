@@ -2,29 +2,23 @@
 
 import prisma from "@/lib/prisma";
 
-export async function getRegistrationStatus(query: { email?: string; nim?: string }) {
-    if (!query.email && !query.nim) return { success: false, error: "Email atau NIM diperlukan" };
+export async function getRegistrationStatus(query: { code: string }) {
+    if (!query.code) return { success: false, error: "Kode Pendaftaran diperlukan" };
 
     try {
         const registrations = await prisma.registration.findMany({
             where: {
-                OR: [
-                    { email: query.email },
-                    { nim: query.nim }
-                ]
-            },
+                registrationCode: query.code
+            } as any,
             include: {
-                subEvent: {
-                    include: {
-                        event: true
-                    }
-                }
+                tickets: true
             },
             orderBy: { createdAt: 'desc' }
         });
 
         return { success: true, data: registrations };
     } catch (error) {
+        console.error("[StatusAction] Error:", error);
         return { success: false, error: "Gagal mengambil data" };
     }
 }

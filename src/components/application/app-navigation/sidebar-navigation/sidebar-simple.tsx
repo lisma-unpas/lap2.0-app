@@ -1,8 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { SearchLg } from "@untitledui/icons";
-import { Input } from "@/components/base/input/input";
 import { UntitledLogo } from "@/components/foundations/logo/untitledui-logo";
 import { cx } from "@/utils/cx";
 import { MobileNavigationHeader } from "../base-components/mobile-header";
@@ -26,6 +24,8 @@ interface SidebarNavigationProps {
     hideBorder?: boolean;
     /** Additional CSS classes to apply to the sidebar. */
     className?: string;
+    /** Admin email for the account card. */
+    adminEmail?: string;
 }
 
 export const SidebarNavigationSimple = ({
@@ -36,6 +36,7 @@ export const SidebarNavigationSimple = ({
     showAccountCard = true,
     hideBorder = false,
     className,
+    adminEmail,
 }: SidebarNavigationProps) => {
     const MAIN_SIDEBAR_WIDTH = 296;
 
@@ -53,8 +54,7 @@ export const SidebarNavigationSimple = ({
             )}
         >
             <div className="flex flex-col gap-5 px-4 lg:px-5">
-                <UntitledLogo className="h-8" />
-                <Input shortcut size="sm" aria-label="Search" placeholder="Search" icon={SearchLg} />
+                <UntitledLogo className="h-8 shrink-0" />
             </div>
 
             <NavList activeUrl={activeUrl} items={items} />
@@ -64,7 +64,7 @@ export const SidebarNavigationSimple = ({
                     <ul className="flex flex-col">
                         {footerItems.map((item) => (
                             <li key={item.label} className="py-0.5">
-                                <NavItemBase badge={item.badge} icon={item.icon} href={item.href} type="link" current={item.href === activeUrl}>
+                                <NavItemBase badge={item.badge} icon={item.icon} href={item.href} type="link" current={item.href === activeUrl} onClick={item.onClick}>
                                     {item.label}
                                 </NavItemBase>
                             </li>
@@ -74,7 +74,7 @@ export const SidebarNavigationSimple = ({
 
                 {featureCard}
 
-                {showAccountCard && <NavAccountCard />}
+                {showAccountCard && <NavAccountCard email={adminEmail} />}
             </div>
         </aside>
     );

@@ -39,7 +39,7 @@ const BreadcrumbBase = ({ href, children, icon: Icon, type = "text", current, cl
             {...otherProps}
             href={href}
             className={cx(
-                "group inline-flex cursor-pointer items-center justify-center gap-1 rounded-md outline-focus-ring transition duration-100 ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 in-current:max-w-full",
+                "group inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg outline-focus-ring transition duration-100 ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 in-current:max-w-full",
                 baseStyles[type].root,
                 current && baseStyles[type].current.root,
                 !href && !otherProps.onClick && "cursor-default",

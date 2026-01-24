@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowLeft, ShoppingCart01, InfoCircle, CheckCircle, Upload01 } from "@untitledui/icons";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, ShoppingCart01, InfoCircle, CheckCircle, Upload01, Copy01, Eraser, LogIn01, RefreshCw01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { TextArea } from "@/components/base/textarea/textarea";
@@ -15,6 +16,8 @@ import { useCart } from "@/context/cart-context";
 import { cx } from "@/utils/cx";
 import { uploadImage } from "@/actions/upload";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
+import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
+import { useToast } from "@/context/toast-context";
 
 interface RegistrationFormProps {
     unit: string;
@@ -24,6 +27,8 @@ interface RegistrationFormProps {
 export default function RegistrationForm({ unit, subEvents }: RegistrationFormProps) {
     const config = UNIT_CONFIG[unit.toLowerCase()];
     const { addToCart, userIdentity, updateUserIdentity } = useCart();
+    const { toastSuccess, toastError } = useToast();
+    const router = useRouter();
 
     if (!config) return null;
 
@@ -31,6 +36,46 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [isAddedToCart, setIsAddedToCart] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
+    const [showDraftModal, setShowDraftModal] = useState(false);
+    const [pendingDraft, setPendingDraft] = useState<{ subEvent: string; data: any } | null>(null);
+
+    const hasCheckedDraft = useRef(false);
+    const DRAFT_KEY = `lisma_draft_${unit.toLowerCase()}`;
+
+    // 1. Initial Check for Draft - Only once on mount
+    useEffect(() => {
+        if (hasCheckedDraft.current) return;
+
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+            try {
+                const draft = JSON.parse(saved);
+                if (draft.data && Object.keys(draft.data).length > 0) {
+                    setPendingDraft(draft);
+                    setShowDraftModal(true);
+                }
+            } catch (e) {
+                console.error("Failed to parse draft", e);
+            }
+        }
+        hasCheckedDraft.current = true;
+    }, [unit, DRAFT_KEY]);
+
+    // 2. Persist Data as User Types - Debounced manually or just guarded
+    useEffect(() => {
+        // Skip saving if we are currently showing the modal or if data is empty
+        if (showDraftModal || !formData || Object.keys(formData).length === 0) return;
+
+        const timeout = setTimeout(() => {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({
+                subEvent: selectedSubEvent,
+                data: formData
+            }));
+        }, 1000); // 1s debounce
+
+        return () => clearTimeout(timeout);
+    }, [formData, selectedSubEvent, unit, DRAFT_KEY, showDraftModal]);
 
     const subEventConfig = config?.subEventConfigs?.[selectedSubEvent];
     const fields = subEventConfig?.fields || config?.formFields || [];
@@ -40,8 +85,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             setFormData(prev => ({
                 ...prev,
                 fullName: userIdentity.fullName,
-                phoneNumber: userIdentity.phoneNumber,
-                email: userIdentity.email
+                phoneNumber: userIdentity.phoneNumber
             }));
         }
     }, [userIdentity, selectedSubEvent]);
@@ -58,9 +102,10 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             const res = await uploadImage(fd);
             if (res.success) {
                 handleInputChange(id, res.url);
+                toastSuccess("Berhasil", "File berhasil diunggah.");
             }
         } catch (err) {
-            alert("Gagal upload gambar.");
+            toastError("Gagal", "Gagal upload gambar.");
         } finally {
             setIsUploading(false);
         }
@@ -96,42 +141,54 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         updateUserIdentity({
             fullName: formData.fullName || userIdentity?.fullName || "",
             phoneNumber: formData.phoneNumber || userIdentity?.phoneNumber || "",
-            email: formData.email || userIdentity?.email || ""
+            email: userIdentity?.email || ""
         });
 
         addToCart(item);
-        setIsAddedToCart(true);
+
+        // Clear draft after adding to cart
+        localStorage.removeItem(DRAFT_KEY);
+
+        // After adding to cart, navigate directly to the cart page
+        setIsNavigating(true);
+        router.push('/checkout');
     };
 
-    if (isAddedToCart) {
-        return (
-            <Section className="flex-1 flex items-center justify-center">
-                <Container>
-                    <div className="max-w-md mx-auto text-center p-8 rounded-3xl border border-secondary shadow-xl bg-primary">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-100 text-success-600">
-                            <CheckCircle className="size-10" />
-                        </div>
-                        <h2 className="mt-6 text-2xl font-bold text-primary">Masuk Keranjang!</h2>
-                        <p className="mt-2 text-tertiary">
-                            Pendaftaran {config.name} telah ditambahkan ke keranjang. Kamu bisa mendaftar di unit lain atau langsung checkout.
-                        </p>
-                        <div className="mt-8 flex flex-col gap-3">
-                            <Button className="w-full" color="primary" href="/checkout" size="lg">
-                                Lanjut ke Checkout
-                            </Button>
-                            <Button className="w-full" color="secondary" href="/" size="lg">
-                                Kembali ke Beranda
-                            </Button>
-                        </div>
-                    </div>
-                </Container>
-            </Section>
-        );
-    }
 
     return (
-        <Section>
+        <Section className="py-12 bg-primary">
             <Container>
+                {/* Modal Pemulihan Draft */}
+                <SharedModal
+                    isOpen={showDraftModal}
+                    onOpenChange={setShowDraftModal}
+                    title="Lanjutkan Pendaftaran?"
+                    description="Kami menemukan data pendaftaran sebelumnya yang belum selesai. Apakah Anda ingin melanjutkan pengisian atau mulai dari awal?"
+                    icon={RefreshCw01}
+                    iconColor="brand"
+                    primaryAction={{
+                        label: "Lanjutkan Pengisian",
+                        onClick: () => {
+                            if (pendingDraft) {
+                                setSelectedSubEvent(pendingDraft.subEvent);
+                                setFormData(pendingDraft.data);
+                            }
+                            setShowDraftModal(false);
+                        },
+                        icon: LogIn01
+                    }}
+                    secondaryAction={{
+                        label: "Mulai Baru",
+                        onClick: () => {
+                            localStorage.removeItem(DRAFT_KEY);
+                            setFormData({});
+                            setShowDraftModal(false);
+                        },
+                        color: "secondary"
+                        // icon: Eraser (Eraser is available now)
+                    }}
+                />
+
                 <div className="max-w-2xl mx-auto">
                     <Button color="link-gray" iconLeading={ArrowLeft} href={`/${unit.toLowerCase()}`}>
                         Kembali ke Detail Unit
@@ -151,7 +208,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         key={se.id}
                                         onClick={() => setSelectedSubEvent(se.name)}
                                         className={cx(
-                                            "p-4 rounded-xl border text-sm font-bold transition-all text-left shadow-xs",
+                                            "p-4 rounded-lg border text-sm font-bold transition-all text-left shadow-xs",
                                             selectedSubEvent === se.name
                                                 ? "border-brand-solid bg-brand-primary/5 text-brand-secondary ring-2 ring-brand-solid/20"
                                                 : "border-secondary bg-primary text-secondary hover:border-tertiary"
@@ -168,7 +225,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                         {fields.map((field: any) => {
                             if (field.type === "info") {
                                 return (
-                                    <div key={field.id} className="p-4 rounded-xl bg-utility-blue-50 border border-utility-blue-100 flex gap-3">
+                                    <div key={field.id} className="p-4 rounded-lg bg-utility-blue-50 border border-utility-blue-100 flex gap-3">
                                         <InfoCircle className="size-5 text-utility-blue-700 shrink-0 mt-0.5" />
                                         <p className="text-sm text-utility-blue-700 whitespace-pre-line leading-relaxed">{field.text}</p>
                                     </div>
@@ -234,7 +291,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         <Label isRequired={field.required}>{field.label}</Label>
                                         <div className="relative">
                                             <label className={cx(
-                                                "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all",
+                                                "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all",
                                                 formData[field.id] ? "border-brand-solid bg-brand-primary/5" : "border-secondary hover:bg-bg-secondary"
                                             )}>
                                                 <div className="flex flex-col items-center justify-center">
@@ -267,7 +324,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                         })}
                     </div>
 
-                    <div className="mt-12 p-8 rounded-3xl bg-secondary_alt border border-secondary flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div className="mt-12 p-8 rounded-lg bg-secondary_alt border border-secondary flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
                         <div>
                             <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
                             <p className="text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
@@ -277,7 +334,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             color="primary"
                             iconLeading={ShoppingCart01}
                             onClick={handleAddToCart}
-                            isLoading={isUploading}
+                            isLoading={isUploading || isNavigating}
                             className="w-full sm:w-auto px-10"
                         >
                             Daftar & Checkout

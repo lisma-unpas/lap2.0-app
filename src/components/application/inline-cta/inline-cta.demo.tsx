@@ -10,7 +10,7 @@ import { VisaIcon } from "@/components/foundations/payment-icons";
 
 export const InlineCTAImage = () => {
     return (
-        <div className="flex w-full flex-col overflow-hidden rounded-xl bg-primary shadow-xs sm:flex-row">
+        <div className="flex w-full flex-col overflow-hidden rounded-lg bg-primary shadow-xs sm:flex-row">
             <div className="relative h-50 w-full sm:h-auto sm:w-60">
                 <img src="https://www.untitledui.com/application/smiling-girl-2.webp" alt="Smiling girl" className="absolute inset-0 size-full object-cover" />
                 <div className="absolute inset-0 size-full rounded-t-xl border border-black/10 sm:rounded-l-xl sm:rounded-tr-none" />
@@ -33,7 +33,7 @@ export const InlineCTAImage = () => {
 
 export const InlineCTAActions = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
+        <div className="w-full flex-1 rounded-lg bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">We've just released a new update!</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Check out the all new dashboard view. Pages and now load faster.</p>
@@ -50,7 +50,7 @@ export const InlineCTAActions = () => {
 
 export const InlineCTAEmailField = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary px-4 py-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
+        <div className="w-full flex-1 rounded-lg bg-primary px-4 py-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">We've just released a new update!</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Check out the all new dashboard view. Pages and now load faster.</p>
@@ -84,7 +84,7 @@ export const InlineCTAEmailField = () => {
 
 export const InlineCTAChangePlan = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary px-4 pt-5 pb-4 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
+        <div className="w-full flex-1 rounded-lg bg-primary px-4 pt-5 pb-4 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">Change your plan</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Flexible pricing that grows with you.</p>
@@ -120,7 +120,7 @@ export const InlineCTAChangePlan = () => {
 
 export const InlineCTAUpgradePlan = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary px-4 py-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
+        <div className="w-full flex-1 rounded-lg bg-primary px-4 py-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">Upgrade your plan</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Need more space? Upgrade your plan today.</p>
@@ -152,7 +152,7 @@ export const InlineCTAUpgradePlan = () => {
 
 export const InlineCTAPaymentMethod = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary p-4 pt-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
+        <div className="w-full flex-1 rounded-lg bg-primary p-4 pt-5 shadow-xs ring-1 ring-secondary ring-inset sm:p-6">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">Payment method</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Change how you pay for your plan.</p>
@@ -181,7 +181,7 @@ export const InlineCTAPaymentMethod = () => {
 
 export const InlineCTAReceipt = () => {
     return (
-        <div className="w-full flex-1 rounded-xl bg-primary p-6 shadow-xs ring-1 ring-secondary ring-inset">
+        <div className="w-full flex-1 rounded-lg bg-primary p-6 shadow-xs ring-1 ring-secondary ring-inset">
             <div className="flex flex-col">
                 <h3 className="text-md font-semibold text-primary">Your latest receipt is available</h3>
                 <p className="mt-0.5 text-sm text-tertiary">Download receipt for January 2025.</p>

@@ -76,7 +76,7 @@ export const MessageActionAdvanced = ({ className, onSubmit, textAreaClassName, 
 
     return (
         <form
-            className={cx("relative flex h-max flex-col rounded-xl bg-secondary ring-1 ring-secondary ring-inset", className)}
+            className={cx("relative flex h-max flex-col rounded-lg bg-secondary ring-1 ring-secondary ring-inset", className)}
             onSubmit={handleSubmit}
             {...props}
         >
@@ -85,7 +85,7 @@ export const MessageActionAdvanced = ({ className, onSubmit, textAreaClassName, 
                     aria-label="Message"
                     placeholder="Ask me anything..."
                     name="message"
-                    className={cx("h-32 w-full resize-y rounded-xl", textAreaClassName)}
+                    className={cx("h-32 w-full resize-y rounded-lg", textAreaClassName)}
                 />
                 <ButtonUtility icon={Microphone02} size="xs" color="tertiary" className="absolute top-2 right-2" />
             </div>

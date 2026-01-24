@@ -31,7 +31,7 @@ export const RadioGroupIconSimple = ({ items, size = "sm", className, ...props }
                     value={plan.value}
                     className={({ isDisabled, isSelected, isFocusVisible }) =>
                         cx(
-                            "relative flex cursor-pointer items-start gap-1 rounded-xl bg-primary p-4 outline-focus-ring ring-inset",
+                            "relative flex cursor-pointer items-start gap-1 rounded-lg bg-primary p-4 outline-focus-ring ring-inset",
                             isSelected ? "ring-2 ring-brand" : "ring-1 ring-secondary",
                             isDisabled && "cursor-not-allowed bg-disabled_subtle ring-disabled",
                             isFocusVisible && "outline-2 outline-offset-2",

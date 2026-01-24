@@ -177,7 +177,7 @@ export const MessageItem = ({ msg, showUserLabel = true, ...props }: MessageItem
                                 <img
                                     src={msg.image.src}
                                     alt={msg.image.alt}
-                                    className="w-full rounded-md object-cover outline-1 -outline-offset-[0.5px] outline-black/10"
+                                    className="w-full rounded-lg object-cover outline-1 -outline-offset-[0.5px] outline-black/10"
                                 />
                             </figure>
                         )}
@@ -202,7 +202,7 @@ export const MessageItem = ({ msg, showUserLabel = true, ...props }: MessageItem
                             <img
                                 src={msg.image.src}
                                 alt={msg.image.alt}
-                                className="w-full rounded-md object-cover outline-1 -outline-offset-[0.5px] outline-black/10"
+                                className="w-full rounded-lg object-cover outline-1 -outline-offset-[0.5px] outline-black/10"
                             />
                             {renderActions()}
                         </div>

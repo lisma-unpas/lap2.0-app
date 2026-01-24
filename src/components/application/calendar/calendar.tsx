@@ -481,9 +481,9 @@ const MonthView = ({
                                     const spanStyle =
                                         span > 1
                                             ? {
-                                                  zIndex: 1,
-                                                  width: `calc(${span * 100}% + ${(span - 1) * 16}px)`,
-                                              }
+                                                zIndex: 1,
+                                                width: `calc(${span * 100}% + ${(span - 1) * 16}px)`,
+                                            }
                                             : undefined;
 
                                     return (
@@ -1123,7 +1123,7 @@ export const Calendar = ({ events, view: defaultView = "month", className }: Cal
             role="application"
             aria-label="Calendar"
             className={cx(
-                "flex flex-col overflow-hidden rounded-xl bg-primary shadow-xs ring ring-secondary",
+                "flex flex-col overflow-hidden rounded-lg bg-primary shadow-xs ring ring-secondary",
                 view === "month" ? "h-full md:min-h-[912px]" : "h-[912px]",
                 className,
             )}

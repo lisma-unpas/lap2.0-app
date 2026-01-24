@@ -12,7 +12,7 @@ interface CalendarDwViewEventProps {
 
 export const CalendarDwViewEvent = ({ label, supportingText, withDot, color = "gray" }: CalendarDwViewEventProps) => {
     return (
-        <div className={cx("flex h-full w-full flex-1 cursor-pointer flex-col gap-0.5 rounded-md px-2 py-1.5 ring-1 ring-inset", eventViewColors[color].root)}>
+        <div className={cx("flex h-full w-full flex-1 cursor-pointer flex-col gap-0.5 rounded-lg px-2 py-1.5 ring-1 ring-inset", eventViewColors[color].root)}>
             <div className="flex w-full justify-between gap-0.5">
                 <span className={cx("flex-1 truncate text-xs font-semibold", eventViewColors[color].label)}>{label}</span>
                 {withDot && (

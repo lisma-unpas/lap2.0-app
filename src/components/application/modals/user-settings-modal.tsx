@@ -70,7 +70,7 @@ export const UserSettingsModal = () => {
                                 <img
                                     aria-hidden="true"
                                     src="https://www.untitledui.com/application/clouds.webp"
-                                    className="h-26 w-full rounded-xl object-cover md:h-32"
+                                    className="h-26 w-full rounded-lg object-cover md:h-32"
                                     alt="Clouds"
                                 />
                             </div>

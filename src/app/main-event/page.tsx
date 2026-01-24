@@ -39,7 +39,7 @@ export default function MainEventPage() {
                     </div>
 
                     <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div className="relative rounded-3xl overflow-hidden aspect-square lg:aspect-auto lg:h-[600px] border border-secondary shadow-2xl">
+                        <div className="relative rounded-lg overflow-hidden aspect-square lg:aspect-auto lg:h-[600px] border border-secondary shadow-2xl">
                             <img
                                 src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"
                                 alt="Main Event Showcase"

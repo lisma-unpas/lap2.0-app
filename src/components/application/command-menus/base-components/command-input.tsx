@@ -20,7 +20,7 @@ export const CommandInput = ({ placeholder, shortcutKeys, tooltip, className, ..
     return (
         <AriaGroup
             className={({ isFocusWithin }) =>
-                cx("flex items-center gap-x-2 rounded-xl bg-primary p-4", isFocusWithin && "outline-2 outline-focus-ring", className)
+                cx("flex items-center gap-x-2 rounded-lg bg-primary p-4", isFocusWithin && "outline-2 outline-focus-ring", className)
             }
         >
             <div className="pointer-events-none absolute">

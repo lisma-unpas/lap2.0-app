@@ -46,7 +46,7 @@ export const IconNotification = ({
     const showProgress = typeof progress === "number";
 
     return (
-        <div className="relative z-[var(--z-index)] flex max-w-full flex-col gap-4 rounded-xl bg-primary_alt p-4 shadow-lg ring ring-secondary_alt xs:w-[var(--width)] xs:flex-row">
+        <div className="relative z-[var(--z-index)] flex max-w-full flex-col gap-4 rounded-lg bg-primary_alt p-4 shadow-lg ring ring-secondary_alt xs:w-[var(--width)] xs:flex-row">
             <FeaturedIcon
                 icon={icon || iconMap[color]}
                 color={color === "default" ? "gray" : color}
@@ -109,7 +109,7 @@ export const AvatarNotification = ({
     onConfirm,
 }: AvatarNotificationProps) => {
     return (
-        <div className="relative z-[var(--z-index)] flex max-w-full flex-col items-start gap-4 rounded-xl bg-primary_alt p-4 shadow-lg ring ring-secondary_alt xs:w-[var(--width)] xs:flex-row">
+        <div className="relative z-[var(--z-index)] flex max-w-full flex-col items-start gap-4 rounded-lg bg-primary_alt p-4 shadow-lg ring ring-secondary_alt xs:w-[var(--width)] xs:flex-row">
             <Avatar size="md" src={avatar} alt={name} status="online" />
 
             <div className="flex flex-col gap-3 pr-8">
@@ -172,7 +172,7 @@ export const ImageNotification = ({
                     "--width": "496px",
                 } as React.CSSProperties
             }
-            className="relative z-[var(--z-index)] flex max-w-full flex-col gap-3 rounded-xl bg-primary_alt p-4 shadow-lg max-md:ring-1 max-md:ring-secondary_alt xs:w-[var(--width)] xs:flex-row xs:gap-0 md:p-0"
+            className="relative z-[var(--z-index)] flex max-w-full flex-col gap-3 rounded-lg bg-primary_alt p-4 shadow-lg max-md:ring-1 max-md:ring-secondary_alt xs:w-[var(--width)] xs:flex-row xs:gap-0 md:p-0"
         >
             <div className="-my-px hidden w-40 shrink-0 overflow-hidden rounded-l-xl outline-1 -outline-offset-1 outline-black/10 md:block">
                 <img aria-hidden="true" src={imageMobile} alt="Image Mobile" className="t size-full object-cover" />
@@ -184,7 +184,7 @@ export const ImageNotification = ({
                     <p className="text-sm text-fg-secondary">{description}</p>
                 </div>
 
-                <div className="h-40 w-full overflow-hidden rounded-md bg-secondary md:hidden">
+                <div className="h-40 w-full overflow-hidden rounded-lg bg-secondary md:hidden">
                     <img src={imageDesktop} alt="Image Desktop" className="size-full object-cover" />
                 </div>
 

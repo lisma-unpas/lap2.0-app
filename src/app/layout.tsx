@@ -23,6 +23,7 @@ export const viewport: Viewport = {
 };
 
 import { CartProvider } from "@/context/cart-context";
+import { ToastProvider } from "@/context/toast-context";
 
 export default function RootLayout({
     children,
@@ -34,11 +35,13 @@ export default function RootLayout({
             <body className={cx(inter.variable, "bg-primary antialiased")}>
                 <RouteProvider>
                     <CartProvider>
-                        <Theme>
-                            <ConditionalLayout>
-                                {children}
-                            </ConditionalLayout>
-                        </Theme>
+                        <ToastProvider>
+                            <Theme>
+                                <ConditionalLayout>
+                                    {children}
+                                </ConditionalLayout>
+                            </Theme>
+                        </ToastProvider>
                     </CartProvider>
                 </RouteProvider>
             </body>

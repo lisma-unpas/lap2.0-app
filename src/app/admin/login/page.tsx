@@ -13,8 +13,8 @@ import { AlertFloating } from '@/components/application/alerts/alerts';
 import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-icon';
 import { BackgroundPattern } from '@/components/shared-assets/background-patterns';
 import { Lock01, Eye, EyeOff } from '@untitledui/icons';
-import { toast } from 'sonner';
 import { PasswordInput } from '@/components/base/input/input-password';
+import { useToast } from '@/context/toast-context';
 
 const loginSchema = z.object({
   email: z.string().email('Email tidak valid'),
@@ -29,6 +29,7 @@ function LoginPageContent() {
   const [showAlert, setShowAlert] = useState(false);
   const router = useRouter();
 
+  const { toastSuccess, toastError } = useToast();
   const {
     control,
     handleSubmit,
@@ -54,10 +55,11 @@ function LoginPageContent() {
       const result = await adminLogin(formData);
 
       if (result.success) {
-        toast.success("Login berhasil! Mengalihkan ke dashboard...");
+        toastSuccess("Berhasil", "Login berhasil! Mengalihkan ke dashboard...");
         router.push('/admin/dashboard');
       } else {
         setServerError(result.message || "Login gagal.");
+        toastError("Gagal", result.message || "Login gagal.");
         setShowAlert(true);
         setIsLoading(false);
       }
@@ -170,7 +172,7 @@ export default function AdminLoginPage() {
       <section className="min-h-screen overflow-hidden bg-primary px-4 py-12 md:px-8 md:pt-24 flex items-center justify-center">
         <div className="mx-auto flex w-full max-w-md flex-col gap-8">
           <div className="flex flex-col items-center gap-6 text-center text-primary">
-            <div className="h-14 w-14 animate-pulse rounded-xl bg-secondary"></div>
+            <div className="h-14 w-14 animate-pulse rounded-lg bg-secondary"></div>
             <div className="h-8 w-48 animate-pulse rounded bg-secondary"></div>
           </div>
         </div>

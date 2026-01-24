@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { config } from "@/lib/config";
 
 export async function adminLogin(formData: FormData) {
     const email = formData.get("email") as string;
@@ -30,11 +31,12 @@ export async function adminLogin(formData: FormData) {
             return { success: false, message: "Password salah." };
         }
 
+
         // Set a simple cookie for "session" - in a real app, use JWT or specialized auth library
         const cookieStore = await cookies();
         cookieStore.set("admin_session", user.id, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: config.isProduction,
             maxAge: 60 * 60 * 24, // 1 day
             path: "/",
         });

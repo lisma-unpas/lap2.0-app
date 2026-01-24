@@ -34,7 +34,7 @@ export const RadioGroupIconCard = ({ items, size = "sm", className, ...props }: 
                     value={plan.value}
                     className={({ isDisabled, isSelected, isFocusVisible }) =>
                         cx(
-                            "relative block cursor-pointer rounded-xl bg-primary outline-focus-ring ring-inset",
+                            "relative block cursor-pointer rounded-lg bg-primary outline-focus-ring ring-inset",
                             isSelected ? "ring-2 ring-brand" : "ring-1 ring-secondary",
                             isDisabled && "cursor-not-allowed bg-disabled_subtle ring-disabled",
                             isSelected && isDisabled && "ring-disabled_subtle",

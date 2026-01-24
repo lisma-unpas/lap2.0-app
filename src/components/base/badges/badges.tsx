@@ -81,11 +81,11 @@ const withPillTypes = {
         styles: filledColors,
     },
     [badgeTypes.badgeColor]: {
-        common: "size-max flex items-center whitespace-nowrap rounded-md ring-1 ring-inset",
+        common: "size-max flex items-center whitespace-nowrap rounded-lg ring-1 ring-inset",
         styles: filledColors,
     },
     [badgeTypes.badgeModern]: {
-        common: "size-max flex items-center whitespace-nowrap rounded-md ring-1 ring-inset shadow-xs",
+        common: "size-max flex items-center whitespace-nowrap rounded-lg ring-1 ring-inset shadow-xs",
         styles: {
             gray: {
                 root: "bg-primary text-secondary ring-primary",
@@ -102,11 +102,11 @@ const withBadgeTypes = {
         styles: filledColors,
     },
     [badgeTypes.badgeColor]: {
-        common: "size-max flex items-center whitespace-nowrap rounded-md ring-1 ring-inset",
+        common: "size-max flex items-center whitespace-nowrap rounded-lg ring-1 ring-inset",
         styles: filledColors,
     },
     [badgeTypes.badgeModern]: {
-        common: "size-max flex items-center whitespace-nowrap rounded-md ring-1 ring-inset bg-primary text-secondary ring-primary shadow-xs",
+        common: "size-max flex items-center whitespace-nowrap rounded-lg ring-1 ring-inset bg-primary text-secondary ring-primary shadow-xs",
         styles: addonOnlyColors,
     },
 };

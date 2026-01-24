@@ -4,7 +4,7 @@ import { CircleChart } from "./circle-chart";
 
 export const ActiveUsersChart = (props: HTMLAttributes<HTMLDivElement>) => {
     return (
-        <div {...props} className={cx("relative flex items-center justify-center rounded-xl bg-alpha-white/90 backdrop-blur", props.className)}>
+        <div {...props} className={cx("relative flex items-center justify-center rounded-lg bg-alpha-white/90 backdrop-blur", props.className)}>
             <CircleChart className="h-full max-h-full w-full max-w-full" />
 
             <div className="absolute flex flex-col items-center text-center md:gap-0.5">

@@ -18,7 +18,7 @@ const baseClasses: Record<Theme, { root?: string; addon?: string; icon?: string 
     },
     modern: {
         root: "rounded-[10px] bg-primary text-secondary shadow-xs ring-1 ring-inset ring-primary hover:bg-secondary",
-        addon: "flex items-center rounded-md bg-primary shadow-xs ring-1 ring-inset ring-primary",
+        addon: "flex items-center rounded-lg bg-primary shadow-xs ring-1 ring-inset ring-primary",
         icon: "text-utility-gray-500",
     },
 };

@@ -252,7 +252,7 @@ export const AIAssistantMessageMenu = () => {
                                     >
                                         {msg.meetings.map((meeting) => (
                                             <div key={meeting.id} className="flex gap-2">
-                                                <div className="size-6 rounded-md ring-1 ring-secondary ring-inset">
+                                                <div className="size-6 rounded-lg ring-1 ring-secondary ring-inset">
                                                     <GoogleCalendarIcon className="shrink-0" />
                                                 </div>
 
@@ -276,7 +276,7 @@ export const AIAssistantMessageMenu = () => {
                                                     size="sm"
                                                     key={action.id}
                                                     color={action.type === "secondary" ? "link-gray" : "link-color"}
-                                                    onClick={() => {}}
+                                                    onClick={() => { }}
                                                 >
                                                     {action.text}
                                                 </Button>

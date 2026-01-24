@@ -27,7 +27,7 @@ export const Modal = (props: AriaModalOverlayProps) => (
         {...props}
         className={(state) =>
             cx(
-                "max-h-full w-full align-middle outline-hidden max-sm:overflow-y-auto max-sm:rounded-xl",
+                "max-h-full w-full align-middle outline-hidden max-sm:overflow-y-auto max-sm:rounded-lg",
                 state.isEntering && "duration-300 ease-out animate-in zoom-in-95",
                 state.isExiting && "duration-200 ease-in animate-out zoom-out-95",
                 typeof props.className === "function" ? props.className(state) : props.className,

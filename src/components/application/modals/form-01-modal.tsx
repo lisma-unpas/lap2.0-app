@@ -61,7 +61,7 @@ export const Form01Modal = () => {
             <ModalOverlay isDismissable>
                 <Modal>
                     <Dialog className="overflow-hidden">
-                        <Carousel.Root className="relative w-full overflow-hidden! rounded-xl bg-primary shadow-xl sm:max-w-160">
+                        <Carousel.Root className="relative w-full overflow-hidden! rounded-lg bg-primary shadow-xl sm:max-w-160">
                             <CloseButton onClick={() => setIsOpen(false)} theme="light" size="lg" className="absolute top-3 right-3" />
                             <div className="flex flex-col gap-4 px-4 pt-5 sm:px-6 sm:pt-6">
                                 <div className="relative w-max max-sm:hidden">

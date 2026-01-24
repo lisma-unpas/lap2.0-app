@@ -53,7 +53,7 @@ export default function FloatingWhatsApp({ cpName, cpWhatsapp, cpDescription, un
                     color: "secondary"
                 }}
             >
-                <div className="mt-4 w-full rounded-xl bg-secondary/30 p-4 border border-secondary">
+                <div className="mt-4 w-full rounded-lg bg-secondary/30 p-4 border border-secondary">
                     <p className="text-[10px] font-bold text-fg-quaternary uppercase tracking-widest">Kontak Person</p>
                     <p className="text-md font-bold text-primary mt-1">{cpName}</p>
                     <p className="text-sm text-tertiary mt-1 leading-relaxed">

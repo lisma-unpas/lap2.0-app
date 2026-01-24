@@ -51,13 +51,13 @@ const CommandMenuContext = createContext<CommandMenuContextType>({
     hasFooter: false,
     flatItems: [],
     selectedKeys: new Set(),
-    setSelectedKeys: () => {},
+    setSelectedKeys: () => { },
 });
 
 interface CommandMenuRootProps
     extends Omit<ListBoxProps<CommandMenuGroupType>, "children" | "selectedKeys" | "className">,
-        Omit<AutocompleteProps, "filter">,
-        DialogTriggerProps {
+    Omit<AutocompleteProps, "filter">,
+    DialogTriggerProps {
     placeholder?: string;
     emptyState?: ReactNode;
     dialogClassName?: ModalOverlayProps["className"];
@@ -178,7 +178,7 @@ export const CommandDialog = ({ className, dialogClassName, children, ...combobo
                 <AriaModal
                     className={(state) =>
                         cx(
-                            "flex max-h-full w-160 flex-col overflow-hidden rounded-xl bg-primary text-left align-middle shadow-xl",
+                            "flex max-h-full w-160 flex-col overflow-hidden rounded-lg bg-primary text-left align-middle shadow-xl",
                             state.isEntering && "duration-300 ease-out animate-in zoom-in-95",
                             state.isExiting && "duration-200 ease-in animate-out zoom-out-95",
                             typeof dialogClassName === "function" ? dialogClassName(state) : dialogClassName,
@@ -194,7 +194,7 @@ export const CommandDialog = ({ className, dialogClassName, children, ...combobo
     );
 };
 
-interface CommandMenuListProps extends Omit<ListBoxProps<CommandMenuGroupType>, "items"> {}
+interface CommandMenuListProps extends Omit<ListBoxProps<CommandMenuGroupType>, "items"> { }
 
 export const CommandMenuList = ({ className, selectionMode = "single", ...props }: CommandMenuListProps) => {
     const { hasFooter, emptyState, ...listBoxProps } = useContext(CommandMenuContext);

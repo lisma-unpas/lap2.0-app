@@ -78,7 +78,7 @@ export const CalendarMonthViewEvent = ({ label, supportingText, color = "gray", 
 
             <div
                 className={cx(
-                    "flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-1 ring-1 ring-inset",
+                    "flex w-full cursor-pointer items-center gap-1 rounded-lg px-2 py-1 ring-1 ring-inset",
                     collapseOnMobile && "max-md:hidden",
                     eventViewColors[color].root,
                 )}

@@ -49,7 +49,7 @@ export const PaymentDetailsMenu = () => {
                     </section>
                 </SlideoutMenu.Header>
                 <SlideoutMenu.Content>
-                    <div className="relative flex min-h-53 w-full items-center justify-center overflow-hidden rounded-xl py-6 md:min-h-59.5">
+                    <div className="relative flex min-h-53 w-full items-center justify-center overflow-hidden rounded-lg py-6 md:min-h-59.5">
                         <img
                             src="https://www.untitledui.com/application/card-mockup.webp"
                             alt="Card Mockup"

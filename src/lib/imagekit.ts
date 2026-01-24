@@ -1,11 +1,13 @@
 import ImageKit from "imagekit";
 
-if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+import { config } from "@/lib/config";
+
+if (!config.imagekit.publicKey || !config.imagekit.privateKey || !config.imagekit.urlEndpoint) {
   throw new Error("Missing ImageKit environment variables");
 }
 
 export const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+  publicKey: config.imagekit.publicKey,
+  privateKey: config.imagekit.privateKey,
+  urlEndpoint: config.imagekit.urlEndpoint,
 });

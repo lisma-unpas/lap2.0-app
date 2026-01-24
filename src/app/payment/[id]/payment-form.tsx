@@ -9,6 +9,7 @@ import { uploadImage } from "@/actions/upload";
 import { uploadPaymentProof } from "@/actions/payment";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { UNIT_CONFIG } from "@/constants/units";
+import { useToast } from "@/context/toast-context";
 
 interface PaymentFormProps {
     registrationId: string;
@@ -22,6 +23,7 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
     const [file, setFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const { toastSuccess, toastError } = useToast();
     const config = UNIT_CONFIG[eventName.toLowerCase()];
 
     const handleUpload = async () => {
@@ -37,15 +39,16 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                 const saveRes = await uploadPaymentProof(registrationId, uploadRes.url!);
                 if (saveRes.success) {
                     setIsSuccess(true);
+                    toastSuccess("Berhasil", "Bukti pembayaran berhasil diunggah.");
                 } else {
-                    alert("Gagal menyimpan data pembayaran.");
+                    toastError("Gagal", "Gagal menyimpan data pembayaran.");
                 }
             } else {
-                alert("Gagal mengupload gambar.");
+                toastError("Gagal", "Gagal mengupload gambar.");
             }
         } catch (error) {
             console.error(error);
-            alert("Terjadi kesalahan.");
+            toastError("Kesalahan", "Terjadi kesalahan sistem saat memproses.");
         } finally {
             setIsSubmitting(false);
         }
@@ -56,7 +59,7 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
             <>
                 <Section className="flex-1 flex items-center justify-center">
                     <Container>
-                        <div className="max-w-md mx-auto text-center p-8 rounded-3xl border border-secondary shadow-xl bg-primary">
+                        <div className="max-w-md mx-auto text-center p-8 rounded-lg border border-secondary shadow-xl bg-primary">
                             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-100 text-success-600">
                                 <CheckCircle className="size-10" />
                             </div>
@@ -123,7 +126,7 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                         <div className="mt-10 space-y-4">
                             <label className="block text-sm font-medium text-primary">Upload Bukti Transfer</label>
                             <div className="flex items-center justify-center w-full">
-                                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-secondary rounded-xl cursor-pointer hover:bg-secondary/10 transition-colors">
+                                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-secondary rounded-lg cursor-pointer hover:bg-secondary/10 transition-colors">
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
                                         <Upload01 className="w-8 h-8 mb-3 text-tertiary" />
                                         <p className="mb-2 text-sm text-tertiary font-semibold">

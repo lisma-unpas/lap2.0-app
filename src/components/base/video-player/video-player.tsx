@@ -276,7 +276,7 @@ export const VideoPlayer = ({
                         className={cx(
                             "flex size-16 items-center justify-center",
                             size !== "sm" &&
-                                "rounded-full bg-alpha-white/30 backdrop-blur transition duration-100 ease-linear group-hover:bg-alpha-white/40 hover:bg-alpha-white/40",
+                            "rounded-full bg-alpha-white/30 backdrop-blur transition duration-100 ease-linear group-hover:bg-alpha-white/40 hover:bg-alpha-white/40",
                             thumbnailUrl && showThumbnail ? "scale-100" : "scale-90 duration-500",
                             thumbnailButtonClassName,
                         )}
@@ -358,7 +358,7 @@ export const VideoPlayer = ({
                     )}
                     {/* Show both the volume control button and the progress bar on lg size */}
                     {size === "lg" && (
-                        <div className="flex items-center rounded-md pr-2 outline-hidden transition duration-100 ease-linear hover:bg-alpha-white/20 hover:backdrop-blur-sm focus-visible:outline-offset-2 focus-visible:outline-white">
+                        <div className="flex items-center rounded-lg pr-2 outline-hidden transition duration-100 ease-linear hover:bg-alpha-white/20 hover:backdrop-blur-sm focus-visible:outline-offset-2 focus-visible:outline-white">
                             <button
                                 tabIndex={-1}
                                 onClick={toggleMute}
@@ -493,7 +493,7 @@ const VideoPlayerButton = ({
                 <button
                     {...props}
                     className={cx(
-                        "flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-md p-2 text-white outline-hidden transition duration-100 ease-linear before:absolute before:size-6 hover:bg-alpha-white/20 hover:backdrop-blur-sm focus-visible:outline-offset-2 focus-visible:outline-white",
+                        "flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-lg p-2 text-white outline-hidden transition duration-100 ease-linear before:absolute before:size-6 hover:bg-alpha-white/20 hover:backdrop-blur-sm focus-visible:outline-offset-2 focus-visible:outline-white",
                         props.className,
                     )}
                 >

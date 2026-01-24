@@ -203,7 +203,7 @@ export const Modal = ({
                 <BaseModal
                     className={(state) => cx(
                         maxWidthClasses[maxWidth],
-                        isDrawer && "max-h-[100vh] sm:max-h-[90vh] !rounded-t-3xl md:!rounded-3xl",
+                        isDrawer && "max-h-[100vh] sm:max-h-[90vh] !rounded-t-3xl md:!rounded-lg",
                         isDrawer ? (state.isEntering ? 'slide-in-from-bottom' : (state.isExiting ? 'slide-out-to-bottom' : '')) : (state.isEntering ? 'zoom-in-95' : (state.isExiting ? 'zoom-out-95' : ''))
                     )}
                 >

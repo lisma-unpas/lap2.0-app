@@ -148,32 +148,32 @@ export const AIAssistantIntroMenu = () => {
                 </SlideoutMenu.Header>
                 <SlideoutMenu.Content className="gap-0">
                     <div className="flex flex-wrap justify-center gap-2">
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="success" size="lg" type="modern" iconLeading={ImageUser}>
                                 Create image
                             </BadgeWithIcon>
                         </button>
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="blue" size="lg" type="modern" iconLeading={BarChart04}>
                                 Analyze data
                             </BadgeWithIcon>
                         </button>
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="purple" size="lg" type="modern" iconLeading={Zap}>
                                 Make a plan
                             </BadgeWithIcon>
                         </button>
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="pink" size="lg" type="modern" iconLeading={File02}>
                                 Summarize text
                             </BadgeWithIcon>
                         </button>
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="orange" size="lg" type="modern" iconLeading={Edit04}>
                                 Help me write
                             </BadgeWithIcon>
                         </button>
-                        <button className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <button className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                             <BadgeWithIcon color="gray" size="lg" type="modern" iconLeading={Stars02}>
                                 More
                             </BadgeWithIcon>

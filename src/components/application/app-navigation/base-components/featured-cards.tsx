@@ -38,7 +38,7 @@ export const FeaturedCardProgressBar = ({
     progress: number;
 }) => {
     return (
-        <div className={cx("relative flex flex-col rounded-xl bg-secondary p-4", className)}>
+        <div className={cx("relative flex flex-col rounded-lg bg-secondary p-4", className)}>
             <p className="text-sm font-semibold text-primary">{title}</p>
             <p className="mt-1 text-sm text-tertiary">{description}</p>
             <div className="absolute top-2 right-2">
@@ -71,7 +71,7 @@ export const FeaturedCardProgressCircle = ({
     progress: number;
 }) => {
     return (
-        <div className={cx("relative flex flex-col rounded-xl bg-secondary p-4", className)}>
+        <div className={cx("relative flex flex-col rounded-lg bg-secondary p-4", className)}>
             <div className="w-16">
                 <ProgressBarCircle value={progress} size="xxs" />
             </div>
@@ -107,7 +107,7 @@ export const FeaturedCardImage = ({
     imageSrc: string;
 }) => {
     return (
-        <div className={cx("relative flex flex-col rounded-xl bg-secondary p-4", className)}>
+        <div className={cx("relative flex flex-col rounded-lg bg-secondary p-4", className)}>
             <p className="text-sm font-semibold text-primary">{title}</p>
             <p className="mt-1 text-sm text-tertiary">{description}</p>
 
@@ -138,7 +138,7 @@ export const FeaturedCardImage = ({
 
 export const FeaturedCardCookiePreferences = ({ title, description, confirmLabel, className, onDismiss, onConfirm }: FeaturedCardCommonProps) => {
     return (
-        <div className={cx("relative flex flex-col rounded-xl bg-secondary p-4", className)}>
+        <div className={cx("relative flex flex-col rounded-lg bg-secondary p-4", className)}>
             <FeaturedIcon color="brand" icon={AlertCircle} theme="outline" size="md" />
             <div className="absolute top-2 right-2">
                 <CloseButton onClick={onDismiss} size="sm" />
@@ -169,7 +169,7 @@ export const FeaturedCardReferralLink = ({
     const [value, setValue] = useState("uui.com/4060020");
 
     return (
-        <div className={cx("relative flex flex-col rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset", className)}>
+        <div className={cx("relative flex flex-col rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset", className)}>
             <FeaturedIcon color="gray" icon={Link03} theme="modern" size="md" />
             <div className="absolute top-2 right-2">
                 <CloseButton onClick={onDismiss} size="sm" />
@@ -195,7 +195,7 @@ export const FeaturedCardOnboardingSteps = ({
     onConfirm,
 }: FeaturedCardCommonProps & { supportingText: string; progress: number }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="flex flex-col gap-3">
                 <div className="flex justify-between">
                     <span className="text-sm font-semibold text-primary">{title}</span>
@@ -224,7 +224,7 @@ export const FeaturedCardUpgradeCTA = ({
     onDismiss,
 }: FeaturedCardCommonProps & { icon: FC<HTMLAttributes<HTMLOrSVGElement>>; badge?: string }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>
@@ -252,7 +252,7 @@ export const FeaturedCardUpgradeCTA = ({
 
 export const FeaturedCardSupportCTA = ({ badge, title, description, confirmLabel, onConfirm, onDismiss }: FeaturedCardCommonProps & { badge?: string }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>
@@ -277,7 +277,7 @@ export const FeaturedCardSupportCTA = ({ badge, title, description, confirmLabel
 
 export const FeaturedCardEventCTA = ({ title, badge, description, confirmLabel, onConfirm, onDismiss }: FeaturedCardCommonProps & { badge?: string }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>
@@ -351,7 +351,7 @@ export const FeaturedCardMessage = ({
     onDismiss,
 }: FeaturedCardCommonProps & { supportingText: string }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>
@@ -383,7 +383,7 @@ export const FeaturedCardMessage = ({
 
 export const FeaturedCardCurrentProjects = ({ title, description, confirmLabel, onConfirm, onDismiss }: FeaturedCardCommonProps) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>
@@ -410,7 +410,7 @@ export const FeaturedCardFreeTrialCTA = ({
     onConfirm,
 }: Omit<FeaturedCardCommonProps, "description"> & { supportingText: string; progress: number }) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-1">
                     <span className="text-sm font-semibold text-primary">{title}</span>
@@ -430,7 +430,7 @@ export const FeaturedCardFreeTrialCTA = ({
 
 export const FeaturedCardQRCode = ({ title, description, confirmLabel, onConfirm, onDismiss }: FeaturedCardCommonProps) => {
     return (
-        <div className="relative flex flex-col gap-4 rounded-xl bg-primary p-4 ring-1 ring-secondary ring-inset">
+        <div className="relative flex flex-col gap-4 rounded-lg bg-primary p-4 ring-1 ring-secondary ring-inset">
             <div className="absolute top-2 right-2">
                 <CloseButton size="sm" onClick={onDismiss} />
             </div>

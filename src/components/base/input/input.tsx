@@ -37,6 +37,10 @@ export interface InputBaseProps extends TextFieldProps {
     iconTrailing?: ComponentType<HTMLAttributes<HTMLOrSVGElement>>;
     /** Callback function to execute when the trailing icon is clicked. */
     onIconTrailingClick?: () => void;
+    /** Minimum value for number input. */
+    min?: number | string;
+    /** Maximum value for number input. */
+    max?: number | string;
 }
 
 export const InputBase = ({

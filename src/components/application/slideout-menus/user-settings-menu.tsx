@@ -66,7 +66,7 @@ export const UserSettingsMenu = () => {
                         <img
                             aria-hidden="true"
                             src="https://www.untitledui.com/application/clouds.webp"
-                            className="h-32 w-full rounded-xl object-cover md:h-36"
+                            className="h-32 w-full rounded-lg object-cover md:h-36"
                             alt="Clouds"
                         />
                     </div>

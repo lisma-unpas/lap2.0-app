@@ -87,7 +87,7 @@ export const CodeSnippet = ({ children, code, language, showLineNumbers = true, 
         <div
             {...otherProps}
             className={cx(
-                "max-w-full overflow-hidden rounded-xl border border-secondary bg-primary [&>.shiki]:overflow-x-auto [&>code]:w-full",
+                "max-w-full overflow-hidden rounded-lg border border-secondary bg-primary [&>.shiki]:overflow-x-auto [&>code]:w-full",
                 "font-mono text-sm leading-[22px] whitespace-pre",
                 showLineNumbers ? "line-numbers" : "p-4",
                 className,

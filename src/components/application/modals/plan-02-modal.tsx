@@ -92,7 +92,7 @@ export const Plan02Modal = () => {
                                         value={plan.value}
                                         className={({ isSelected }) =>
                                             cx(
-                                                "relative flex cursor-pointer flex-col items-start rounded-xl bg-primary shadow-xs ring-1 ring-secondary ring-inset",
+                                                "relative flex cursor-pointer flex-col items-start rounded-lg bg-primary shadow-xs ring-1 ring-secondary ring-inset",
                                                 isSelected && "ring-2 ring-brand",
                                             )
                                         }

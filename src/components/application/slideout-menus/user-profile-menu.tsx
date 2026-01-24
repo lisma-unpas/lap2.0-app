@@ -41,7 +41,7 @@ export const UserProfileMenu = () => {
                     </span>
                     <div className="flex size-full flex-col">
                         <div className="px-2">
-                            <div className="h-30 w-full rounded-xl bg-linear-to-tr from-[#A6C0FE] to-[#FFEAF6]" />
+                            <div className="h-30 w-full rounded-lg bg-linear-to-tr from-[#A6C0FE] to-[#FFEAF6]" />
                         </div>
                         <div className="-mt-12 flex flex-col gap-4 px-4 md:px-6">
                             <section className="flex flex-col gap-4">
@@ -65,7 +65,7 @@ export const UserProfileMenu = () => {
                                     UI Design
                                 </Badge>
                                 <Tooltip title="Add more">
-                                    <TooltipTrigger className="cursor-pointer rounded-md outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
+                                    <TooltipTrigger className="cursor-pointer rounded-lg outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2">
                                         <Badge size="sm" type="modern" color="gray" className="p-[5px]">
                                             <Plus className="size-3 stroke-3 text-utility-gray-500" />
                                         </Badge>

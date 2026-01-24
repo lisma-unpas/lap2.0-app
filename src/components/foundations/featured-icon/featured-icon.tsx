@@ -48,10 +48,10 @@ const styles = sortCx({
     dark: {
         base: "text-fg-white shadow-xs-skeumorphic before:absolute before:inset-px before:border before:border-white/12 before:mask-b-from-0%",
         sizes: {
-            sm: "size-8 rounded-md before:rounded-[5px]",
+            sm: "size-8 rounded-lg before:rounded-[5px]",
             md: "size-10 rounded-lg before:rounded-[7px]",
             lg: "size-12 rounded-[10px] before:rounded-[9px]",
-            xl: "size-14 rounded-xl before:rounded-[11px]",
+            xl: "size-14 rounded-lg before:rounded-[11px]",
         },
         colors: {
             brand: "bg-brand-solid before:border-utility-brand-200/12",
@@ -65,10 +65,10 @@ const styles = sortCx({
     modern: {
         base: "bg-primary shadow-xs-skeumorphic ring-1 ring-inset",
         sizes: {
-            sm: "size-8 rounded-md",
+            sm: "size-8 rounded-lg",
             md: "size-10 rounded-lg",
             lg: "size-12 rounded-[10px]",
-            xl: "size-14 rounded-xl",
+            xl: "size-14 rounded-lg",
         },
         colors: {
             brand: "",

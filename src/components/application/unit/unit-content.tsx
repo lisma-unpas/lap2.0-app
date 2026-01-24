@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft, Camera01, MusicNote02, PlayCircle, Ticket01 } from "@untitledui/icons";
+import { ArrowLeft, Camera01, MusicNote02, PlayCircle, Ticket01, Calendar, CheckCircle, Star01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
+import { cx } from "@/utils/cx";
 
 interface UnitContentProps {
     badgeText: string;
@@ -70,28 +71,41 @@ export default function UnitContent({
                             </p>
 
                             <div className="mt-10 flex flex-col gap-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {subEvents.map((se, index) => (
-                                        <div key={index} className="p-4 rounded-xl border border-secondary bg-primary shadow-sm flex items-center gap-3">
-                                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.lightBg} ${colors.text} font-bold`}>
-                                                {index + 1}
+                                {/* Sub-Events Card */}
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-bold text-quaternary uppercase tracking-widest pl-1">Kategori & Lomba</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {subEvents.map((se, index) => (
+                                            <div
+                                                key={index}
+                                                className="p-4 flex items-center gap-3 transition-colors bg-primary border border-secondary rounded-xl hover:bg-secondary_alt/30 shadow-sm"
+                                            >
+                                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colors.lightBg} ${colors.text} border ${colors.border}`}>
+                                                    <Star01 className="size-4" />
+                                                </div>
+                                                <p className="font-bold text-primary text-sm">{se.name}</p>
                                             </div>
-                                            <p className="font-medium text-primary">{se.name}</p>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Date/Location Card */}
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-bold text-quaternary uppercase tracking-widest pl-1">Waktu & Lokasi</p>
+                                    <div className={`flex items-center gap-4 p-4 rounded-2xl border border-secondary ${colors.lightBg}/30 shadow-sm`}>
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${colors.bg} text-white shadow-lg`}>
+                                            <HighlightIcon className="size-6" />
                                         </div>
-                                    ))}
-                                </div>
-
-                                <div className={`flex items-center gap-3 p-4 rounded-xl border border-secondary ${colors.lightBg}/50 shadow-sm`}>
-                                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colors.lightBg} ${colors.text}`}>
-                                        <HighlightIcon className="size-6" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-primary">{highlightTitle}</p>
-                                        <p className="text-sm text-tertiary">{highlightSubtitle}</p>
+                                        <div>
+                                            <p className="font-bold text-primary">{highlightTitle}</p>
+                                            <p className="text-sm text-tertiary">{highlightSubtitle}</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <Button size="xl" color="primary" href={`/register/${unitName.toLowerCase()}`}>Daftar Sekarang</Button>
+                                <Button size="xl" color="primary" href={`/register/${unitName.toLowerCase()}`} className="h-14 rounded-lg shadow-lg shadow-brand-solid/20">
+                                    Daftar Sekarang
+                                </Button>
                             </div>
                         </div>
 

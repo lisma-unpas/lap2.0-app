@@ -49,7 +49,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, [items]);
 
     const addToCart = (item: CartItem) => {
-        setItems(prev => [...prev, item]);
+        setItems(prev => {
+            const newItems = [...prev, item];
+            // Persist immediately so that redirect sees data
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('lisma_cart', JSON.stringify(newItems));
+            }
+            return newItems;
+        });
     };
 
     const removeFromCart = (id: string) => {

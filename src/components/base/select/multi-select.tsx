@@ -41,8 +41,8 @@ const ComboboxContext = createContext<{
     size: "sm",
     selectedKeys: [],
     selectedItems: {} as ListData<SelectItemType>,
-    onRemove: () => {},
-    onInputChange: () => {},
+    onRemove: () => { },
+    onInputChange: () => { },
 });
 
 interface MultiSelectProps extends Omit<AriaComboBoxProps<SelectItemType>, "children" | "items">, RefAttributes<HTMLDivElement> {
@@ -267,7 +267,7 @@ const InnerMultiSelect = ({ isDisabled, shortcut, shortcutClassName, placeholder
         <div className="relative flex w-full flex-1 flex-row flex-wrap items-center justify-start gap-1.5">
             {!isSelectionEmpty &&
                 comboBoxContext?.selectedItems?.items?.map((value) => (
-                    <span key={value.id} className="flex items-center rounded-md bg-primary py-0.5 pr-1 pl-1.25 ring-1 ring-primary ring-inset">
+                    <span key={value.id} className="flex items-center rounded-lg bg-primary py-0.5 pr-1 pl-1.25 ring-1 ring-primary ring-inset">
                         <Avatar size="xxs" alt={value?.label} src={value?.avatarUrl} />
 
                         <p className="ml-1.25 truncate text-sm font-medium whitespace-nowrap text-secondary select-none">{value?.label}</p>

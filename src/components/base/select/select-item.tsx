@@ -15,7 +15,7 @@ const sizes = {
     md: "p-2.5 pl-2",
 };
 
-interface SelectItemProps extends Omit<AriaListBoxItemProps<SelectItemType>, "id">, SelectItemType {}
+interface SelectItemProps extends Omit<AriaListBoxItemProps<SelectItemType>, "id">, SelectItemType { }
 
 export const SelectItem = ({ label, id, value, avatarUrl, supportingText, isDisabled, icon: Icon, className, children, ...props }: SelectItemProps) => {
     const { size } = useContext(SelectContext);
@@ -44,7 +44,7 @@ export const SelectItem = ({ label, id, value, avatarUrl, supportingText, isDisa
             {(state) => (
                 <div
                     className={cx(
-                        "flex cursor-pointer items-center gap-2 rounded-md outline-hidden select-none",
+                        "flex cursor-pointer items-center gap-2 rounded-lg outline-hidden select-none",
                         state.isSelected && "bg-active",
                         state.isDisabled && "cursor-not-allowed",
                         state.isFocused && "bg-primary_hover",

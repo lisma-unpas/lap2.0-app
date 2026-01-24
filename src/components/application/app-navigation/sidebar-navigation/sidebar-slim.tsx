@@ -54,7 +54,7 @@ export const SidebarNavigationSlim = ({ activeUrl, items, footerItems = [], hide
         >
             <div
                 className={cx(
-                    "flex w-auto flex-col justify-between rounded-xl bg-primary pt-5 ring-1 ring-secondary transition duration-300 ring-inset",
+                    "flex w-auto flex-col justify-between rounded-lg bg-primary pt-5 ring-1 ring-secondary transition duration-300 ring-inset",
                     hideBorder && !isSecondarySidebarVisible && "ring-transparent",
                 )}
             >
@@ -110,9 +110,9 @@ export const SidebarNavigationSlim = ({ activeUrl, items, footerItems = [], hide
                                 cx(
                                     "will-change-transform",
                                     isEntering &&
-                                        "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
+                                    "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
                                     isExiting &&
-                                        "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
+                                    "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
                                 )
                             }
                         >

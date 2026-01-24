@@ -66,11 +66,11 @@ export default function FeatureBlocks() {
                     </p>
                 </div>
 
-                <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-16 flex flex-wrap justify-center gap-8">
                     {unitUnits.map((unit) => (
                         <div
                             key={unit.name}
-                            className="group relative flex flex-col items-start rounded-2xl border border-secondary bg-primary overflow-hidden hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                            className="group relative flex flex-col items-start rounded-2xl border border-secondary bg-primary overflow-hidden hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]"
                         >
                             <div className="relative w-full aspect-[4/3] overflow-hidden">
                                 <img

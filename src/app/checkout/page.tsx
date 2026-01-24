@@ -16,16 +16,81 @@ import { cx } from "@/utils/cx";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { DialogTrigger, Modal, ModalOverlay, Dialog } from "@/components/application/modals/modal";
+import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
+import { Input } from "@/components/base/input/input";
 import { CloseButton } from "@/components/base/buttons/close-button";
+import { useToast } from "@/context/toast-context";
+
+// --- Sub-components to prevent re-rendering the whole page on typing ---
+
+interface EmailModalProps {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    currentEmail: string;
+    onEmailChange: (email: string) => void;
+    onConfirm: (email: string) => void;
+    isSubmitting: boolean;
+    userIdentity: any;
+}
+
+const EmailConfirmationModal = ({
+    isOpen,
+    onOpenChange,
+    currentEmail,
+    onEmailChange,
+    onConfirm,
+    isSubmitting
+}: EmailModalProps) => {
+    return (
+        <SharedModal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            title="Konfirmasi Email"
+            description="Masukkan email untuk menerima notifikasi pendaftaran & bukti pembayaran."
+            icon={ShoppingCart01}
+            iconColor="brand"
+            primaryAction={{
+                label: "Konfirmasi & Bayar",
+                onClick: () => onConfirm(currentEmail),
+                isLoading: isSubmitting
+            }}
+            secondaryAction={{
+                label: "Batal",
+                onClick: () => onOpenChange(false)
+            }}
+        >
+            <div className="py-2">
+                <Label isRequired className="mb-1.5">Email Notifikasi</Label>
+                <Input
+                    type="email"
+                    placeholder="contoh@email.com"
+                    value={currentEmail}
+                    onChange={(val) => onEmailChange(val)}
+                    autoFocus
+                />
+            </div>
+        </SharedModal>
+    );
+};
+
 
 export default function CheckoutPage() {
-    const { items, removeFromCart, clearCart } = useCart();
+    const { items, removeFromCart, clearCart, userIdentity, updateUserIdentity } = useCart();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [file, setFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isMobileCollapsed, setIsMobileCollapsed] = useState(true);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+    const [confirmationEmail, setConfirmationEmail] = useState("");
+    const [successfullyGeneratedCode, setSuccessfullyGeneratedCode] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+    const { toastSuccess, toastError } = useToast();
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Initialize selection with all items
     useEffect(() => {
@@ -45,7 +110,9 @@ export default function CheckoutPage() {
     );
 
     const { copy, copied } = useClipboard();
-    const isDesktop = useBreakpoint("lg");
+    const isDesktopValue = useBreakpoint("lg");
+    // Ensure we have a strictly boolean value after mount
+    const isDesktop = isMounted ? !!isDesktopValue : false;
 
     const toggleItem = (id: string) => {
         setSelectedIds(prev =>
@@ -61,26 +128,59 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleCheckout = async () => {
-        if (!file || selectedItems.length === 0) return;
+    const handleCheckout = async (userEmail?: string) => {
         setIsSubmitting(true);
 
         try {
-            const fd = new FormData();
-            fd.append("file", file);
-            const uploadRes = await uploadImage(fd);
-
-            if (uploadRes.success) {
-                const res = await submitBulkRegistration(selectedItems, uploadRes.url!);
-                if (res.success) {
-                    setIsSuccess(true);
-                    clearCart();
-                } else {
-                    alert("Gagal memproses pendaftaran.");
+            // Validate file size (5MB limit) if proof is needed
+            if (selectedTotalPrice > 0 && file) {
+                const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+                if (file.size > MAX_SIZE) {
+                    toastError("Ukuran file terlalu besar", "Maksimal 5MB.");
+                    setIsSubmitting(false);
+                    return;
                 }
             }
-        } catch (err) {
-            alert("Terjadi kesalahan.");
+
+            let proofUrl = "";
+            if (selectedTotalPrice > 0 && file) {
+                const fd = new FormData();
+                fd.append("file", file);
+                const uploadRes = await uploadImage(fd);
+                if (!uploadRes.success) {
+                    toastError("Gagal Mengunggah", uploadRes.error || "Gagal mengunggah bukti pembayaran.");
+                    setIsSubmitting(false);
+                    return;
+                }
+                proofUrl = uploadRes.url!;
+            }
+
+            const res = await submitBulkRegistration(selectedItems, proofUrl, userEmail);
+            if (res.success) {
+                // Save code to local storage history
+                if (typeof window !== 'undefined' && (res as any).registrationCode) {
+                    const code = (res as any).registrationCode;
+                    const existing = JSON.parse(localStorage.getItem('lisma_registrations') || '[]');
+                    if (!existing.some((r: any) => r.code === code)) {
+                        const newEntry = {
+                            code,
+                            unit: selectedItems.map(i => i.unitName).join(", "),
+                            date: new Date().toISOString()
+                        };
+                        localStorage.setItem('lisma_registrations', JSON.stringify([newEntry, ...existing].slice(0, 10)));
+                    }
+                }
+
+                setSuccessfullyGeneratedCode((res as any).registrationCode || null);
+                setIsSuccess(true);
+                clearCart();
+                toastSuccess("Berhasil", "Pendaftaran berhasil!");
+            } else {
+                toastError("Gagal", res.error || "Gagal memproses pendaftaran.");
+            }
+        } catch (err: any) {
+            console.error("[Checkout] Error:", err);
+            toastError("Kesalahan Sistem", err.message || "Unknown error occurred during checkout");
         } finally {
             setIsSubmitting(false);
         }
@@ -88,16 +188,35 @@ export default function CheckoutPage() {
 
     if (isSuccess) {
         return (
-            <Section className="flex-1 flex items-center justify-center">
+            <Section className="flex-1 flex items-center justify-center min-h-[60vh]">
                 <Container>
-                    <div className="max-w-md mx-auto text-center p-8 rounded-3xl border border-secondary shadow-xl bg-primary">
+                    <div className="max-w-md mx-auto text-center p-8 rounded-lg border border-secondary shadow-xl bg-primary">
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-600">
                             <CheckCircle className="size-10" />
                         </div>
-                        <h2 className="mt-6 text-2xl font-bold text-primary">Pembayaran Terkirim!</h2>
+                        <h2 className="mt-6 text-2xl font-bold text-primary">Pendaftaran Terkirim!</h2>
                         <p className="mt-2 text-tertiary">
-                            Terima kasih! Panitia akan memverifikasi pendaftaranmu dalam 1x24 jam. Kamu bisa mengecek status secara berkala.
+                            Terima kasih! Panitia akan memverifikasi pendaftaranmu dalam 1x24 jam. Kamu bisa mengecek status secara berkala menggunakan kode di bawah ini.
                         </p>
+
+                        {successfullyGeneratedCode && (
+                            <div className="mt-6 p-4 rounded-2xl bg-brand-primary/5 border border-brand-solid/20">
+                                <p className="text-[10px] font-bold text-brand-secondary uppercase tracking-widest">Kode Pendaftaran Anda</p>
+                                <div className="flex items-center justify-center gap-3 mt-1">
+                                    <p className="text-xl font-mono font-bold text-primary tracking-wider">{successfullyGeneratedCode}</p>
+                                    <Button
+                                        size="sm"
+                                        color="secondary"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => copy(successfullyGeneratedCode)}
+                                    >
+                                        {copied ? <CheckCircle className="size-4 text-success-600" /> : <Copy07 className="size-4" />}
+                                    </Button>
+                                </div>
+                                <p className="text-[10px] text-tertiary mt-2">Simpan kode ini untuk mengecek status pendaftaran.</p>
+                            </div>
+                        )}
+
                         <Button className="mt-8 w-full" color="primary" href="/check-status" size="lg">
                             Cek Status Pendaftaran
                         </Button>
@@ -124,10 +243,10 @@ export default function CheckoutPage() {
         )
     }
 
-    const PaymentCardContent = () => (
+    const renderPaymentCard = () => (
         <div className="space-y-4">
             {/* Total Price Card inside Payment Section */}
-            <div className="p-4 rounded-xl bg-brand-primary/5 border border-secondary flex items-center justify-between shadow-xs">
+            <div className="p-4 rounded-lg bg-brand-primary/5 border border-secondary flex items-center justify-between shadow-xs">
                 <div>
                     <span className="text-sm font-semibold text-secondary">Total Pembayaran</span>
                     <p className="text-[10px] text-tertiary">{selectedItems.length} item dipilih</p>
@@ -136,7 +255,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-                <div className="p-3.5 rounded-xl bg-primary border border-secondary shadow-xs flex items-center justify-between">
+                <div className="p-3.5 rounded-lg bg-primary border border-secondary shadow-xs flex items-center justify-between">
                     <div>
                         <Label className="text-[10px] uppercase tracking-widest mb-0.5 text-tertiary">Pembayaran via {PAYMENT_INFO.bank}</Label>
                         <p className="text-lg font-bold text-primary font-mono tracking-tighter">{PAYMENT_INFO.accountNumber}</p>
@@ -156,67 +275,78 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
-            <DialogTrigger isOpen={isQrModalOpen} onOpenChange={setIsQrModalOpen}>
-                <Button
-                    color="secondary"
-                    size="lg"
-                    className="w-full gap-2 border-secondary"
-                    iconLeading={QrCode01}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                >
-                    Scan QRIS
-                </Button>
-                <ModalOverlay isDismissable>
-                    <Modal className="max-w-96">
-                        <Dialog className="p-0">
-                            <div className="relative bg-primary rounded-2xl overflow-hidden p-6 text-center">
-                                <CloseButton onClick={() => setIsQrModalOpen(false)} className="absolute top-4 right-4" />
-                                <h3 className="text-lg font-bold text-primary mb-4">Scan QRIS</h3>
-                                <div className="bg-white p-4 rounded-2xl border border-secondary shadow-md aspect-square flex items-center justify-center">
-                                    <img src={PAYMENT_INFO.qrUrl} alt="QRIS" className="max-w-full max-h-full object-contain" />
-                                </div>
-                                <p className="mt-4 text-xs text-tertiary uppercase tracking-widest font-bold">Lisma 2026 Payment</p>
-                            </div>
-                        </Dialog>
-                    </Modal>
-                </ModalOverlay>
-            </DialogTrigger>
+            {selectedTotalPrice > 0 && (
+                <div className="p-3 rounded-lg bg-orange-50 border border-orange-100 flex gap-3">
+                    <div className="shrink-0 text-orange-600">
+                        <CreditCard01 className="size-5" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-orange-900">Kebijakan Non-Refundable</p>
+                        <p className="text-[10px] text-orange-700 leading-normal">
+                            Setelah melakukan transfer dan mendaftar, biaya pendaftaran tidak dapat dikembalikan (non-refundable) dengan alasan apapun.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            <Button
+                color="secondary"
+                size="lg"
+                className="w-full gap-2 border-secondary"
+                iconLeading={QrCode01}
+                onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setIsQrModalOpen(true);
+                }}
+            >
+                Scan QRIS
+            </Button>
 
             <div className="space-y-4 pt-4 border-t border-secondary">
-                <div className="space-y-1.5">
-                    <Label isRequired className="text-[11px] uppercase tracking-wider font-bold">Upload Bukti Transfer</Label>
-                    <label
-                        className={cx(
-                            "flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-xl cursor-pointer transition-all",
-                            file ? "border-success-500 bg-success-50" : "border-secondary hover:bg-white bg-primary shadow-xs"
-                        )}
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    >
-                        <div className="flex flex-col items-center justify-center p-3">
-                            <Upload01 className={cx("size-6 mb-1.5", file ? "text-success-600" : "text-tertiary")} />
-                            <p className="text-xs font-medium text-secondary text-center truncate w-full px-2 max-w-[180px]">
-                                {file ? file.name : "Pilih file bukti bayar"}
-                            </p>
-                        </div>
-                        <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                    </label>
-                </div>
+                {selectedTotalPrice > 0 && (
+                    <div className="space-y-1.5">
+                        <Label isRequired className="text-[11px] uppercase tracking-wider font-bold">Upload Bukti Transfer</Label>
+                        <label
+                            className={cx(
+                                "flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+                                file ? "border-success-500 bg-success-50" : "border-secondary hover:bg-white bg-primary shadow-xs"
+                            )}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        >
+                            <div className="flex flex-col items-center justify-center p-3">
+                                <Upload01 className={cx("size-6 mb-1.5", file ? "text-success-600" : "text-tertiary")} />
+                                <p className="text-xs font-medium text-secondary text-center truncate w-full px-2 max-w-[180px]">
+                                    {file ? file.name : "Pilih file bukti bayar (Gambar)"}
+                                </p>
+                            </div>
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            />
+                        </label>
+                    </div>
+                )}
+
                 <Button
                     size="lg"
                     color="primary"
                     className="w-full shadow-lg h-12"
                     onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
-                        handleCheckout();
+                        setIsEmailModalOpen(true);
                     }}
                     isLoading={isSubmitting}
-                    isDisabled={!file || selectedItems.length === 0}
+                    isDisabled={(selectedTotalPrice > 0 && !file) || selectedItems.length === 0}
                 >
-                    Konfirmasi Pembayaran
+                    {selectedTotalPrice > 0 ? "Konfirmasi Pembayaran" : "Daftar Sekarang"}
                 </Button>
             </div>
         </div>
     );
+
+    if (!isMounted) return <div className="min-h-screen bg-primary" />;
 
     return (
         <Section className="py-12 pb-32 lg:pb-12">
@@ -260,7 +390,7 @@ export default function CheckoutPage() {
                                             e.stopPropagation();
                                             removeFromCart(item.id);
                                         }}
-                                        className="p-2 text-fg-quaternary hover:text-error-600 hover:bg-error-50 rounded-xl transition-all"
+                                        className="p-2 text-fg-quaternary hover:text-error-600 hover:bg-error-50 rounded-lg transition-all"
                                     >
                                         <Trash01 className="size-4.5" />
                                     </button>
@@ -270,27 +400,27 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* Right: Payment Card (Desktop) */}
-                    <div className="hidden lg:block lg:col-span-2 space-y-5 bg-secondary_alt p-6 rounded-3xl border border-secondary h-fit shadow-xs">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-brand-solid text-white shadow-sm">
-                                <CreditCard01 className="size-5" />
+                    {isMounted && isDesktop && (
+                        <div className="lg:col-span-2 space-y-5 bg-secondary_alt p-6 rounded-lg border border-secondary h-fit shadow-xs relative">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-brand-solid text-white shadow-sm">
+                                    <CreditCard01 className="size-5" />
+                                </div>
+                                <h2 className="text-lg font-bold text-primary">Pembayaran</h2>
                             </div>
-                            <h2 className="text-lg font-bold text-primary">Pembayaran</h2>
+                            {renderPaymentCard()}
                         </div>
-                        <PaymentCardContent />
-                    </div>
+                    )}
                 </div>
             </Container>
 
             {/* Mobile Floating Payment Bar */}
-            {!isDesktop && (
+            {isMounted && !isDesktop && (
                 <motion.div
-                    initial={false}
-                    animate={isMobileCollapsed ? "collapsed" : "expanded"}
-                    variants={{
-                        collapsed: { y: "calc(100% - 80px)" },
-                        expanded: { y: 0 }
-                    }}
+                    key="mobile-payment-bar"
+                    initial={{ y: "100%" }}
+                    animate={{ y: isMobileCollapsed ? "calc(100% - 80px)" : 0 }}
+                    exit={{ y: "100%" }}
                     transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
                     drag={isMobileCollapsed ? false : "y"}
                     dragConstraints={{ top: 0, bottom: 0 }}
@@ -301,8 +431,8 @@ export default function CheckoutPage() {
                         }
                     }}
                     className={cx(
-                        "fixed bottom-0 left-0 right-0 z-50 bg-primary border-t border-secondary shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.15)] px-4 pb-safe h-dvh overflow-hidden",
-                        !isMobileCollapsed && "rounded-t-[32px]"
+                        "fixed bottom-0 left-0 right-0 z-50 bg-primary border-t border-secondary shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.15)] px-4 pb-safe h-dvh overflow-hidden transition-all",
+                        !isMobileCollapsed ? "rounded-t-[32px]" : ""
                     )}
                     onClick={() => isMobileCollapsed && setIsMobileCollapsed(false)}
                 >
@@ -323,7 +453,7 @@ export default function CheckoutPage() {
                             <Button
                                 size="sm"
                                 color="secondary"
-                                className="gap-1.5 h-10 px-4 rounded-xl border-secondary font-bold"
+                                className="gap-1.5 h-10 px-4 rounded-lg border-secondary font-bold"
                                 onClick={(e: React.MouseEvent) => {
                                     e.stopPropagation();
                                     setIsMobileCollapsed(!isMobileCollapsed);
@@ -341,15 +471,51 @@ export default function CheckoutPage() {
                         isMobileCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
                     )}>
                         <div className="flex items-center gap-3 mb-6 bg-secondary_alt p-4 rounded-2xl">
-                            <div className="p-2 rounded-xl bg-brand-solid text-white">
+                            <div className="p-2 rounded-lg bg-brand-solid text-white">
                                 <CreditCard01 className="size-5" />
                             </div>
                             <h2 className="text-lg font-bold text-primary">Detail Pembayaran</h2>
                         </div>
-                        <PaymentCardContent />
+                        {renderPaymentCard()}
                     </div>
                 </motion.div>
             )}
+            {/* Centralized Modals */}
+            <EmailConfirmationModal
+                isOpen={isEmailModalOpen}
+                onOpenChange={setIsEmailModalOpen}
+                currentEmail={confirmationEmail}
+                onEmailChange={setConfirmationEmail}
+                onConfirm={(email) => {
+                    if (!email || !email.includes('@')) {
+                        toastError("Input Tidak Valid", "Masukkan email yang valid");
+                        return;
+                    }
+                    updateUserIdentity({
+                        ...userIdentity!,
+                        email: email
+                    });
+                    setIsEmailModalOpen(false);
+                    handleCheckout(email);
+                }}
+                isSubmitting={isSubmitting}
+                userIdentity={userIdentity}
+            />
+
+            <ModalOverlay isDismissable isOpen={isQrModalOpen} onOpenChange={setIsQrModalOpen}>
+                <Modal className="max-w-96">
+                    <Dialog className="p-0">
+                        <div className="relative bg-primary rounded-2xl overflow-hidden p-6 text-center">
+                            <CloseButton onClick={() => setIsQrModalOpen(false)} className="absolute top-4 right-4" />
+                            <h3 className="text-lg font-bold text-primary mb-4">Scan QRIS</h3>
+                            <div className="bg-white p-4 rounded-2xl border border-secondary shadow-md aspect-square flex items-center justify-center">
+                                <img src={PAYMENT_INFO.qrUrl} alt="QRIS" className="max-w-full max-h-full object-contain" />
+                            </div>
+                            <p className="mt-4 text-xs text-tertiary uppercase tracking-widest font-bold">Lisma 2026 Payment</p>
+                        </div>
+                    </Dialog>
+                </Modal>
+            </ModalOverlay>
         </Section>
     )
 }
