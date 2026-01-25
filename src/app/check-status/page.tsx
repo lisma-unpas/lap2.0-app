@@ -219,7 +219,7 @@ export default function CheckStatusPage() {
                     )}
 
                     {localRegistrations.length > 0 && !results && !isLoading && (
-                        <div className="mt-12 text-left bg-secondary_alt/50 p-8 rounded-[32px] border border-secondary/50">
+                        <div className="mt-12 text-left bg-secondary_alt/50 p-8 rounded-lg md:rounded-[32px] border border-secondary/50">
                             <h2 className="text-lg font-bold text-primary mb-6 flex items-center gap-2.5">
                                 <ShoppingBag01 className="size-5.5 text-brand-secondary" />
                                 Riwayat Pendaftaran
@@ -250,7 +250,7 @@ export default function CheckStatusPage() {
 
             {/* Ticket Modal */}
             <ModalOverlay isOpen={isTicketModalOpen} onOpenChange={setIsTicketModalOpen}>
-                <Modal className="max-w-md w-full overflow-hidden rounded-[32px] p-0 border-none shadow-2xl">
+                <Modal className="max-w-md w-full overflow-hidden rounded-lg md:rounded-[32px] p-0 border-none shadow-2xl">
                     <Dialog className="p-0 outline-none">
                         {selectedRegistration && selectedRegistration.tickets && selectedRegistration.tickets.length > 0 && (
                             <div className="relative bg-primary">

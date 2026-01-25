@@ -32,9 +32,13 @@ interface NavItemBaseProps {
     onClick?: MouseEventHandler;
     /** Content to display. */
     children?: ReactNode;
+    /** additional class names */
+    className?: string;
+    /** Style variant. */
+    variant?: "default" | "header";
 }
 
-export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, truncate = true, onClick }: NavItemBaseProps) => {
+export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, truncate = true, onClick, className, variant = "default" }: NavItemBaseProps) => {
     const iconElement = Icon && <Icon aria-hidden="true" className="mr-2 size-5 shrink-0 text-fg-quaternary transition-inherit-all" />;
 
     const badgeElement =
@@ -51,7 +55,7 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
             className={cx(
                 "flex-1 text-md font-semibold text-secondary transition-inherit-all group-hover:text-secondary_hover",
                 truncate && "truncate",
-                current && "text-secondary_hover",
+                current && "text-brand-600",
             )}
         >
             {children}
@@ -63,7 +67,7 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
 
     if (type === "collapsible") {
         return (
-            <summary className={cx("px-3 py-2", styles.root, current && styles.rootSelected)} onClick={onClick}>
+            <summary className={cx("px-3 py-2", styles.root, current && styles.rootSelected, className)} onClick={onClick}>
                 {iconElement}
 
                 {labelElement}
@@ -81,7 +85,7 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
                 href={href!}
                 target={isExternal ? "_blank" : "_self"}
                 rel="noopener noreferrer"
-                className={cx("py-2 pr-3 pl-10", styles.root, current && styles.rootSelected)}
+                className={cx("py-2 pr-3 pl-10", styles.root, current && styles.rootSelected, className)}
                 onClick={onClick}
                 aria-current={current ? "page" : undefined}
             >
@@ -92,12 +96,22 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
         );
     }
 
+    const isHeaderVariant = variant === "header";
+
     return (
         <AriaLink
             href={href!}
             target={isExternal ? "_blank" : "_self"}
             rel="noopener noreferrer"
-            className={cx("px-3 py-2", styles.root, current && styles.rootSelected)}
+            className={cx(
+                "px-3 py-2 transition-all duration-200",
+                !isHeaderVariant && styles.root,
+                !isHeaderVariant && current && styles.rootSelected,
+                isHeaderVariant && "group relative flex cursor-pointer items-center transition duration-100 ease-linear select-none",
+                isHeaderVariant && "px-4 h-16 md:h-18 flex items-center border-b-2 border-transparent",
+                isHeaderVariant && current && "border-brand-500 text-brand-600 rounded-none bg-transparent",
+                className
+            )}
             onClick={onClick}
             aria-current={current ? "page" : undefined}
         >

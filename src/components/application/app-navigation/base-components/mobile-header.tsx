@@ -1,7 +1,8 @@
 "use client";
 
-import type { PropsWithChildren, ReactNode } from "react";
+import { useState, useEffect, type PropsWithChildren, type ReactNode } from "react";
 import { X as CloseIcon, Menu01 } from "@untitledui/icons";
+import { usePathname } from "next/navigation";
 import {
     Button as AriaButton,
     Dialog as AriaDialog,
@@ -17,9 +18,17 @@ interface MobileNavigationHeaderProps extends PropsWithChildren {
 }
 
 export const MobileNavigationHeader = ({ children, mobileContent }: MobileNavigationHeaderProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+
+    // Close sidebar when route changes
+    useEffect(() => {
+        setIsOpen(false);
+    }, [pathname]);
+
     return (
-        <AriaDialogTrigger>
-            <header className="flex h-16 items-center justify-between border-b border-secondary bg-primary pr-2 pl-4 lg:hidden">
+        <AriaDialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
+            <header className="flex h-16 items-center justify-between border-b border-secondary bg-primary pr-2 pl-4 lg:hidden sticky top-0 z-50">
                 <div className="flex items-center gap-2">
                     <UntitledLogo />
                 </div>

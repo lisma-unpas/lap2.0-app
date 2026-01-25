@@ -98,7 +98,7 @@ export default function DashboardClient({
                     />
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 gap-8">
                     {/* Recent Registrations Preview */}
                     <TableCard.Root>
                         <TableCard.Header

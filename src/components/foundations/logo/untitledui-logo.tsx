@@ -8,13 +8,13 @@ export const UntitledLogo = (props: HTMLAttributes<HTMLOrSVGElement>) => {
     return (
         <div {...props} className={cx("flex h-8 w-max items-center justify-start overflow-visible", props.className)}>
             {/* Minimal logo */}
-            <UntitledLogoMinimal className="aspect-square h-full w-auto shrink-0" />
+            <UntitledLogoMinimal />
 
             {/* Gap that adjusts to the height of the container */}
             <div className="aspect-[0.3] h-full" />
 
             {/* Logomark */}
-            <h1 className="text-lg font-bold dark:text-white:text-black">Demo LAP 2.0</h1>
+            <h1 className="text-xl font-bold dark:text-brand:text-brand">LAP 2.0</h1>
         </div>
     );
 };

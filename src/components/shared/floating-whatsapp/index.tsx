@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle02 } from "@untitledui/icons";
 import { Button as AriaButton } from "react-aria-components";
 import { Modal } from "@/components/shared/modals/modal";
 import { cx } from "@/utils/cx";
@@ -11,22 +10,22 @@ interface FloatingWhatsAppProps {
     cpWhatsapp: string;
     cpDescription: string;
     unitName: string;
+    className?: string;
 }
 
-export default function FloatingWhatsApp({ cpName, cpWhatsapp, cpDescription, unitName }: FloatingWhatsAppProps) {
+export default function FloatingWhatsApp({ cpName, cpWhatsapp, cpDescription, unitName, className }: FloatingWhatsAppProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className={cx("fixed bottom-6 right-2 z-50", className)}>
             <AriaButton
                 onPress={() => setIsOpen(true)}
-                className={({ isHovered, isPressed }) => cx(
-                    "flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl transition-all hover:scale-110 active:scale-95",
-                    isHovered && "bg-[#20ba5a]",
+                className={({ isPressed }) => cx(
+                    "flex h-16 w-16 items-center justify-center rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 p-0",
                     isPressed && "scale-90"
                 )}
             >
-                <MessageCircle02 className="size-8" />
+                <img src="/icon-wa.webp" alt="WhatsApp Icon" className="size-12 pointer-events-none" />
                 <span className="sr-only">Hubungi Panitia {unitName}</span>
             </AriaButton>
 
@@ -35,12 +34,12 @@ export default function FloatingWhatsApp({ cpName, cpWhatsapp, cpDescription, un
                 onOpenChange={setIsOpen}
                 title={`Hubungi Panitia ${unitName}`}
                 description="Ada pertanyaan atau kendala? Silakan hubungi penanggung jawab unit untuk bantuan lebih lanjut."
-                icon={MessageCircle02}
+                icon={() => <img src="/icon-wa.webp" alt="WhatsApp" className="size-full object-contain" />}
                 iconColor="success"
-                iconTheme="light"
+                iconTheme="outline"
                 maxWidth="sm"
                 primaryAction={{
-                    label: "Lanjut ke WhatsApp",
+                    label: "Hubungi panitia",
                     onClick: () => {
                         window.open(`https://wa.me/${cpWhatsapp}`, "_blank");
                         setIsOpen(false);

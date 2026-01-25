@@ -12,8 +12,12 @@ import { useCart } from "@/context/cart-context";
 import { PAYMENT_INFO } from "@/constants/units";
 import { uploadImage } from "@/actions/upload";
 import { submitBulkRegistration } from "@/actions/registration";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
+import { FileUpload } from "@/components/application/file-upload/file-upload-base";
+import { LogIn01 } from "@untitledui/icons";
 import { cx } from "@/utils/cx";
 import { useClipboard } from "@/hooks/use-clipboard";
+import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { DialogTrigger, Modal, ModalOverlay, Dialog } from "@/components/application/modals/modal";
 import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
@@ -77,7 +81,8 @@ const EmailConfirmationModal = ({
 export default function CheckoutPage() {
     const { items, removeFromCart, clearCart, userIdentity, updateUserIdentity } = useCart();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [file, setFile] = useState<File | null>(null);
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isMobileCollapsed, setIsMobileCollapsed] = useState(true);
@@ -128,34 +133,69 @@ export default function CheckoutPage() {
         }
     };
 
+    const { user, isConnected } = useGoogleAuth();
+
+    useEffect(() => {
+        if (user?.email && !confirmationEmail) {
+            setConfirmationEmail(user.email);
+        }
+    }, [user?.email, confirmationEmail]);
+
+    const handleFileDrop = async (files: FileList) => {
+        if (!isConnected) {
+            toastError("Akses Ditolak", "Silakan hubungkan Google Drive terlebih dahulu.");
+            window.location.href = "/auth/google/login";
+            return;
+        }
+
+        const file = files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toastError("Format File Tidak Valid", "Hanya diperbolehkan mengunggah file gambar (JPG, PNG, GIF).");
+            return;
+        }
+
+        const compressedFile = await compressImage(file);
+        setAttachment({ file: compressedFile, progress: 10, status: 'uploading' });
+
+        try {
+            const formData = new FormData();
+            formData.append("file", compressedFile);
+
+            const progressInterval = setInterval(() => {
+                setAttachment(prev => {
+                    if (!prev || prev.status !== 'uploading') {
+                        clearInterval(progressInterval);
+                        return prev;
+                    }
+                    return { ...prev, progress: Math.min(prev.progress + 15, 90) };
+                });
+            }, 300);
+
+            const uploadRes = await uploadImage(formData);
+            clearInterval(progressInterval);
+
+            if (uploadRes.success) {
+                setAttachment({ file: compressedFile, progress: 100, status: 'success' });
+                setUploadedUrl(uploadRes.url!);
+                toastSuccess("Berhasil", "File bukti pembayaran berhasil diunggah.");
+            } else {
+                setAttachment({ file: compressedFile, progress: 0, status: 'error', error: uploadRes.message || "Gagal upload" });
+                if (uploadRes.error === "AUTH_REQUIRED") {
+                    window.location.href = "/auth/google/login";
+                }
+            }
+        } catch (error) {
+            setAttachment({ file: compressedFile, progress: 0, status: 'error', error: "Kesalahan sistem" });
+        }
+    };
+
     const handleCheckout = async (userEmail?: string) => {
         setIsSubmitting(true);
 
         try {
-            // Validate file size (5MB limit) if proof is needed
-            if (selectedTotalPrice > 0 && file) {
-                const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-                if (file.size > MAX_SIZE) {
-                    toastError("Ukuran file terlalu besar", "Maksimal 5MB.");
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-
-            let proofUrl = "";
-            if (selectedTotalPrice > 0 && file) {
-                const fd = new FormData();
-                fd.append("file", file);
-                const uploadRes = await uploadImage(fd);
-                if (!uploadRes.success) {
-                    toastError("Gagal Mengunggah", uploadRes.error || "Gagal mengunggah bukti pembayaran.");
-                    setIsSubmitting(false);
-                    return;
-                }
-                proofUrl = uploadRes.url!;
-            }
-
-            const res = await submitBulkRegistration(selectedItems, proofUrl, userEmail);
+            const res = await submitBulkRegistration(selectedItems, uploadedUrl || "", userEmail);
             if (res.success) {
                 // Save code to local storage history
                 if (typeof window !== 'undefined' && (res as any).registrationCode) {
@@ -185,6 +225,8 @@ export default function CheckoutPage() {
             setIsSubmitting(false);
         }
     };
+
+    const isNotFreePayment = selectedTotalPrice;
 
     if (isSuccess) {
         return (
@@ -253,29 +295,30 @@ export default function CheckoutPage() {
                 </div>
                 <span className="text-xl font-bold text-brand-secondary font-mono tabular-nums">Rp {selectedTotalPrice.toLocaleString('id-ID')}</span>
             </div>
-
-            <div className="grid grid-cols-1 gap-3">
-                <div className="p-3.5 rounded-lg bg-primary border border-secondary shadow-xs flex items-center justify-between">
-                    <div>
-                        <Label className="text-[10px] uppercase tracking-widest mb-0.5 text-tertiary">Pembayaran via {PAYMENT_INFO.bank}</Label>
-                        <p className="text-lg font-bold text-primary font-mono tracking-tighter">{PAYMENT_INFO.accountNumber}</p>
-                        <p className="text-xs font-medium text-tertiary mt-0.5">a.n {PAYMENT_INFO.accountName}</p>
+            {isNotFreePayment ? (
+                <div className="grid grid-cols-1 gap-3">
+                    <div className="p-3.5 rounded-lg bg-primary border border-secondary shadow-xs flex items-center justify-between">
+                        <div>
+                            <Label className="text-[10px] uppercase tracking-widest mb-0.5 text-tertiary">Pembayaran via {PAYMENT_INFO.bank}</Label>
+                            <p className="text-lg font-bold text-primary font-mono tracking-tighter">{PAYMENT_INFO.accountNumber}</p>
+                            <p className="text-xs font-medium text-tertiary mt-0.5">a.n {PAYMENT_INFO.accountName}</p>
+                        </div>
+                        <Button
+                            size="sm"
+                            color="secondary"
+                            className="shrink-0 ml-2 h-9 w-9 p-0"
+                            onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                copy(PAYMENT_INFO.accountNumber);
+                            }}
+                        >
+                            {copied ? <CheckCircle className="size-4.5 text-success-600" /> : <Copy07 className="size-4.5" />}
+                        </Button>
                     </div>
-                    <Button
-                        size="sm"
-                        color="secondary"
-                        className="shrink-0 ml-2 h-9 w-9 p-0"
-                        onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            copy(PAYMENT_INFO.accountNumber);
-                        }}
-                    >
-                        {copied ? <CheckCircle className="size-4.5 text-success-600" /> : <Copy07 className="size-4.5" />}
-                    </Button>
                 </div>
-            </div>
+            ) : null}
 
-            {selectedTotalPrice > 0 && (
+            {isNotFreePayment ? (
                 <div className="p-3 rounded-lg bg-orange-50 border border-orange-100 flex gap-3">
                     <div className="shrink-0 text-orange-600">
                         <CreditCard01 className="size-5" />
@@ -287,47 +330,54 @@ export default function CheckoutPage() {
                         </p>
                     </div>
                 </div>
-            )}
-
-            <Button
-                color="secondary"
-                size="lg"
-                className="w-full gap-2 border-secondary"
-                iconLeading={QrCode01}
-                onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    setIsQrModalOpen(true);
-                }}
-            >
-                Scan QRIS
-            </Button>
+            ) : null}
+            {isNotFreePayment ? (
+                <Button
+                    color="secondary"
+                    size="lg"
+                    className="w-full gap-2 border-secondary"
+                    iconLeading={QrCode01}
+                    onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        setIsQrModalOpen(true);
+                    }}
+                >
+                    Scan QRIS
+                </Button>
+            ) : null}
 
             <div className="space-y-4 pt-4 border-t border-secondary">
-                {selectedTotalPrice > 0 && (
+                {isNotFreePayment ? (
                     <div className="space-y-1.5">
                         <Label isRequired className="text-[11px] uppercase tracking-wider font-bold">Upload Bukti Transfer</Label>
-                        <label
-                            className={cx(
-                                "flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-lg cursor-pointer transition-all",
-                                file ? "border-success-500 bg-success-50" : "border-secondary hover:bg-white bg-primary shadow-xs"
-                            )}
-                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        >
-                            <div className="flex flex-col items-center justify-center p-3">
-                                <Upload01 className={cx("size-6 mb-1.5", file ? "text-success-600" : "text-tertiary")} />
-                                <p className="text-xs font-medium text-secondary text-center truncate w-full px-2 max-w-[180px]">
-                                    {file ? file.name : "Pilih file bukti bayar (Gambar)"}
-                                </p>
-                            </div>
-                            <input
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            />
-                        </label>
+                        <FileUpload.DropZone
+                            isConnected={isConnected}
+                            accept="image/*"
+                            allowsMultiple={false}
+                            maxSize={5 * 1024 * 1024}
+                            hint="Maks. 5MB"
+                            onDropFiles={handleFileDrop}
+                            className="py-6"
+                        />
+
+                        {attachment && (
+                            <FileUpload.List className="mt-2">
+                                <FileUpload.ListItemProgressBar
+                                    name={attachment.file.name}
+                                    size={attachment.file.size}
+                                    progress={attachment.progress}
+                                    failed={attachment.status === 'error'}
+                                    error={attachment.error}
+                                    type="image"
+                                    onDelete={() => {
+                                        setAttachment(null);
+                                        setUploadedUrl(null);
+                                    }}
+                                />
+                            </FileUpload.List>
+                        )}
                     </div>
-                )}
+                ) : null}
 
                 <Button
                     size="lg"
@@ -338,9 +388,9 @@ export default function CheckoutPage() {
                         setIsEmailModalOpen(true);
                     }}
                     isLoading={isSubmitting}
-                    isDisabled={(selectedTotalPrice > 0 && !file) || selectedItems.length === 0}
+                    isDisabled={(isNotFreePayment && !uploadedUrl) || selectedItems.length === 0}
                 >
-                    {selectedTotalPrice > 0 ? "Konfirmasi Pembayaran" : "Daftar Sekarang"}
+                    {isNotFreePayment ? "Konfirmasi Pembayaran" : "Daftar Sekarang"}
                 </Button>
             </div>
         </div>

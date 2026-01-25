@@ -7,7 +7,8 @@ import {
     Ticket01,
     Settings02,
     LogOut01,
-    Home01
+    Home01,
+    InfoSquare
 } from "@untitledui/icons";
 import { SidebarNavigationSimple } from "@/components/application/app-navigation/sidebar-navigation/sidebar-simple";
 import { usePathname } from "next/navigation";
@@ -44,6 +45,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             label: "Tickets",
             icon: Ticket01,
             href: "/admin/tickets",
+        },
+        {
+            label: "Information",
+            icon: InfoSquare,
+            href: "/admin/info",
         },
         {
             label: "Settings",

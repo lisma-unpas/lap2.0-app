@@ -18,6 +18,10 @@ import { uploadImage } from "@/actions/upload";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
 import { useToast } from "@/context/toast-context";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
+import { FileUpload } from "@/components/application/file-upload/file-upload-base";
+import { compressImage } from "@/utils/image-converter";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 interface RegistrationFormProps {
     unit: string;
@@ -39,6 +43,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [isNavigating, setIsNavigating] = useState(false);
     const [showDraftModal, setShowDraftModal] = useState(false);
     const [pendingDraft, setPendingDraft] = useState<{ subEvent: string; data: any } | null>(null);
+    const { isConnected } = useGoogleAuth();
+    const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
 
     const hasCheckedDraft = useRef(false);
     const DRAFT_KEY = `lisma_draft_${unit.toLowerCase()}`;
@@ -90,22 +96,130 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         }
     }, [userIdentity, selectedSubEvent]);
 
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
     const handleInputChange = (id: string, value: any) => {
-        setFormData(prev => ({ ...prev, [id]: value }));
+        const field = fields.find((f: any) => f.id === id);
+        const isNumberType = field?.type === "number";
+        let finalValue = value;
+
+        if (id === "phoneNumber") {
+            finalValue = value.replace(/\D/g, "");
+        } else if (isNumberType) {
+            // Remove non-numeric characters (prevents - and .)
+            let numericValue = value.toString().replace(/\D/g, "");
+
+            // Strictly enforce that it cannot be empty for number inputs, default to "0"
+            if (numericValue === "") {
+                finalValue = "0";
+            } else {
+                // Handle leading zeros: replaces "0" with new digit if length > 1
+                if (numericValue.length > 1 && numericValue.startsWith("0")) {
+                    finalValue = numericValue.replace(/^0+/, "") || "0";
+                } else {
+                    finalValue = numericValue;
+                }
+            }
+        }
+
+        setFormData(prev => ({ ...prev, [id]: finalValue }));
+
+        if (formErrors[id]) {
+            setFormErrors(prev => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+        }
     };
 
-    const handleFileUpload = async (id: string, file: File) => {
+    const getFileType = (file: File) => {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return 'image';
+        if (ext === 'pdf') return 'pdf';
+        return 'empty';
+    };
+
+    const handleFileUpload = async (id: string, file: File, isMultiple: boolean = false) => {
+        if (!isConnected) {
+            toastError("Akses Ditolak", "Silakan hubungkan Google Drive terlebih dahulu.");
+            window.location.href = "/auth/google/login";
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            toastError("Format File Tidak Valid", "Hanya diperbolehkan mengunggah file gambar (JPG, PNG, GIF).");
+            return;
+        }
+
+        const compressedFile = await compressImage(file);
+        const newAttachment = { file: compressedFile, progress: 10, status: 'uploading' as const };
+
+        setFileAttachments(prev => ({
+            ...prev,
+            [id]: isMultiple ? [...(prev[id] || []), newAttachment] : [newAttachment]
+        }));
+
         setIsUploading(true);
+
         try {
             const fd = new FormData();
-            fd.append("file", file);
+            fd.append("file", compressedFile);
+
+            const progressInterval = setInterval(() => {
+                setFileAttachments(prev => {
+                    const list = prev[id] || [];
+                    const index = list.findIndex(att => att.file === compressedFile);
+                    if (index === -1 || list[index].status !== 'uploading') {
+                        clearInterval(progressInterval);
+                        return prev;
+                    }
+                    const newList = [...list];
+                    newList[index] = { ...newList[index], progress: Math.min(newList[index].progress + 15, 90) };
+                    return { ...prev, [id]: newList };
+                });
+            }, 300);
+
             const res = await uploadImage(fd);
+            clearInterval(progressInterval);
+
             if (res.success) {
-                handleInputChange(id, res.url);
+                setFileAttachments(prev => {
+                    const list = prev[id] || [];
+                    const index = list.findIndex(att => att.file === compressedFile);
+                    if (index === -1) return prev;
+                    const newList = [...list];
+                    newList[index] = { ...newList[index], progress: 100, status: 'success', url: res.url || undefined };
+
+                    // Update form data with all successful URLs
+                    const urls = newList.filter(a => a.status === 'success' && a.url).map(a => a.url);
+                    handleInputChange(id, isMultiple ? urls : urls[0]);
+
+                    return { ...prev, [id]: newList };
+                });
                 toastSuccess("Berhasil", "File berhasil diunggah.");
+            } else {
+                setFileAttachments(prev => {
+                    const list = prev[id] || [];
+                    const index = list.findIndex(att => att.file === file);
+                    if (index === -1) return prev;
+                    const newList = [...list];
+                    newList[index] = { ...newList[index], progress: 0, status: 'error', error: res.message || "Gagal upload" };
+                    return { ...prev, [id]: newList };
+                });
+                if (res.error === "AUTH_REQUIRED") {
+                    window.location.href = "/auth/google/login";
+                }
             }
         } catch (err) {
-            toastError("Gagal", "Gagal upload gambar.");
+            setFileAttachments(prev => {
+                const list = prev[id] || [];
+                const index = list.findIndex(att => att.file === file);
+                if (index === -1) return prev;
+                const newList = [...list];
+                newList[index] = { ...newList[index], progress: 0, status: 'error', error: "Kesalahan sistem" };
+                return { ...prev, [id]: newList };
+            });
         } finally {
             setIsUploading(false);
         }
@@ -128,6 +242,12 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     };
 
     const handleAddToCart = () => {
+        if (formData.quantity === "0" || formData.quantity === 0 || formData.quantity === "") {
+            setFormErrors(prev => ({ ...prev, quantity: "Jumlah tiket tidak boleh 0" }));
+            toastError("Input Tidak Valid", "Jumlah tiket tidak boleh 0.");
+            return;
+        }
+
         const item = {
             id: Math.random().toString(36).substr(2, 9),
             unitId: unit,
@@ -154,6 +274,30 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         router.push('/checkout');
     };
 
+
+    const isMd = useBreakpoint("md");
+    const [isMounted, setIsMounted] = useState(false);
+    const [isFloating, setIsFloating] = useState(true);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsFloating(!entry.isIntersecting);
+            },
+            { threshold: 0 }
+        );
+
+        if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <Section className="py-12 bg-primary">
@@ -234,7 +378,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
                             if (field.type === "radio") {
                                 return (
-                                    <div key={field.id} className="space-y-4">
+                                    <div key={field.id} className="space-y-1.5">
                                         <Label isRequired={field.required}>{field.label}</Label>
                                         <RadioGroup
                                             value={formData[field.id]}
@@ -286,24 +430,41 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             }
 
                             if (field.type === "file") {
+                                const attachments = fileAttachments[field.id] || [];
                                 return (
-                                    <div key={field.id} className="space-y-4">
+                                    <div key={field.id} className="space-y-1.5">
                                         <Label isRequired={field.required}>{field.label}</Label>
-                                        <div className="relative">
-                                            <label className={cx(
-                                                "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all",
-                                                formData[field.id] ? "border-brand-solid bg-brand-primary/5" : "border-secondary hover:bg-bg-secondary"
-                                            )}>
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <Upload01 className={cx("size-8 mb-2", formData[field.id] ? "text-brand-secondary" : "text-tertiary")} />
-                                                    <p className="text-sm font-medium text-secondary">
-                                                        {formData[field.id] ? "Dokumen Terunggah" : "Klik untuk Upload"}
-                                                    </p>
-                                                    <p className="text-xs text-tertiary mt-1">PNG, JPG atau PDF (Max. 5MB)</p>
-                                                </div>
-                                                <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(field.id, e.target.files[0])} />
-                                            </label>
-                                        </div>
+                                        <FileUpload.DropZone
+                                            isConnected={isConnected}
+                                            accept="image/*"
+                                            allowsMultiple={field.multiple}
+                                            maxSize={5 * 1024 * 1024}
+                                            hint={`File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`}
+                                            onDropFiles={(files) => Array.from(files).forEach(f => handleFileUpload(field.id, f, field.multiple))}
+                                            isDisabled={isUploading}
+                                        />
+                                        {attachments && attachments.length > 0 && (
+                                            <FileUpload.List className="mt-4">
+                                                {attachments.map((att, index) => (
+                                                    <FileUpload.ListItemProgressBar
+                                                        key={`${att.file.name}-${index}`}
+                                                        name={att.file.name}
+                                                        size={att.file.size}
+                                                        progress={att.progress}
+                                                        failed={att.status === 'error'}
+                                                        error={att.error}
+                                                        type={getFileType(att.file) as any}
+                                                        onDelete={() => {
+                                                            const newList = attachments.filter((_, i) => i !== index);
+                                                            setFileAttachments(prev => ({ ...prev, [field.id]: newList }));
+                                                            const urls = newList.filter(a => a.status === 'success' && a.url).map(a => a.url);
+                                                            handleInputChange(field.id, field.multiple ? urls : urls[0] || undefined);
+                                                        }}
+                                                        onRetry={() => handleFileUpload(field.id, att.file, field.multiple)}
+                                                    />
+                                                ))}
+                                            </FileUpload.List>
+                                        )}
                                     </div>
                                 );
                             }
@@ -311,33 +472,47 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             return (
                                 <Input
                                     key={field.id}
-                                    type={field.type === "url" ? "url" : field.type === "email" ? "email" : field.type === "number" ? "number" : "text"}
+                                    type={
+                                        (field.id === "phoneNumber" || field.type === "number") ? "text" :
+                                            field.type === "url" ? "url" :
+                                                field.type === "email" ? "email" :
+                                                    "text"
+                                    }
+                                    inputMode={
+                                        (field.id === "phoneNumber" || field.type === "number") ? "numeric" : undefined
+                                    }
                                     label={field.label}
                                     isRequired={field.required}
                                     placeholder={field.placeholder || `Masukkan ${field.label}...`}
-                                    value={formData[field.id] || (field.type === "number" ? (field.defaultValue?.toString() || "") : "")}
+                                    value={formData[field.id] ?? (field.type === "number" ? (field.defaultValue?.toString() || "0") : "")}
                                     onChange={(val) => handleInputChange(field.id, val)}
                                     size="md"
-                                    errorMessage={field.type === "email" ? "Format email tidak valid" : field.type === "url" ? "Format URL tidak valid" : undefined}
+                                    isInvalid={!!formErrors[field.id]}
+                                    errorMessage={
+                                        formErrors[field.id] ||
+                                        (field.type === "email" ? "Format email tidak valid" :
+                                            field.type === "url" ? "Format URL tidak valid" : undefined)
+                                    }
                                 />
                             );
                         })}
                     </div>
 
-                    <div className="mt-12 p-8 rounded-lg bg-secondary_alt border border-secondary flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div ref={sentinelRef} className="h-px w-full" />
+                    <div className="sticky bottom-0 left-0 right-0 md:static mt-12 px-2 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-white z-40">
                         <div>
                             <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
-                            <p className="text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
+                            <p className="text-xl md:text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
                         </div>
                         <Button
-                            size="xl"
+                            size={isMounted && isMd ? "xl" : "md"}
                             color="primary"
                             iconLeading={ShoppingCart01}
                             onClick={handleAddToCart}
                             isLoading={isUploading || isNavigating}
-                            className="w-full sm:w-auto px-10"
+                            className="w-fit sm:w-auto md:px-10"
                         >
-                            Daftar & Checkout
+                            Checkout
                         </Button>
                     </div>
                 </div>
@@ -349,6 +524,10 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     cpWhatsapp={config.cpWhatsapp}
                     cpDescription={config.cpDescription}
                     unitName={config.name}
+                    className={cx(
+                        "transition-all duration-300",
+                        isFloating ? "bottom-24 md:bottom-6" : "bottom-6"
+                    )}
                 />
             )}
         </Section>

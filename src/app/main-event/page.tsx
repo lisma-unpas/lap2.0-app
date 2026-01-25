@@ -94,7 +94,7 @@ export default function MainEventPage() {
                                     bertemunya kreativitas, ekspresi, dan apresiasi seni dari berbagai
                                     komunitas.
                                 </p>
-                                <Button size="xl" color="primary" iconLeading={Ticket01}>Dapatkan Tiket Sekarang</Button>
+                                <Button size="xl" color="primary" iconLeading={Ticket01} href="/register/main-event">Dapatkan Tiket Sekarang</Button>
                             </div>
                         </div>
                     </div>

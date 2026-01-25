@@ -30,7 +30,7 @@ export const TextEditorToolbar = ({ className, ref, type = "simple", floating = 
         return (
             <div
                 className={cx(
-                    "flex w-max flex-wrap gap-0.5 md:flex-nowrap",
+                    "flex flex-wrap gap-0.5",
                     floating && "rounded-lg bg-primary p-1 shadow-lg ring-1 ring-secondary_alt",
                     className,
                 )}
@@ -72,19 +72,19 @@ export const TextEditorToolbar = ({ className, ref, type = "simple", floating = 
         <div
             ref={ref}
             className={cx(
-                "flex w-max flex-col items-start justify-center gap-2 md:flex-row md:items-center md:justify-start md:gap-3",
-                floating && "rounded-lg bg-primary p-2 shadow-lg ring-1 ring-secondary_alt",
+                "flex flex-col items-start justify-center gap-3",
+                floating && "rounded-lg bg-primary p-3 shadow-lg ring-1 ring-secondary_alt",
                 className,
             )}
         >
             {!floating && (
-                <div className="flex gap-2">
-                    <TextEditorFontFamily />
-                    {!hideFontSize && <TextEditorFontSize />}
+                <div className="flex flex-wrap gap-2 w-full">
+                    <TextEditorFontFamily className="w-full md:w-auto flex-1 min-w-[140px]" />
+                    {!hideFontSize && <TextEditorFontSize className="w-full md:w-auto" />}
                 </div>
             )}
 
-            <div className="flex flex-wrap gap-0.5 md:flex-nowrap">
+            <div className="flex flex-wrap gap-0.5">
                 <Tooltip title="Bold ⌘B">
                     <TextEditorBold />
                 </Tooltip>
@@ -124,14 +124,6 @@ export const TextEditorToolbar = ({ className, ref, type = "simple", floating = 
                 </Tooltip>
                 <Tooltip title="Insert image">
                     <TextEditorImage />
-                </Tooltip>
-
-                <div className="p-1.5">
-                    <div className="h-full w-px rounded-full bg-border-primary" />
-                </div>
-
-                <Tooltip title="Generate">
-                    <TextEditorGenerate />
                 </Tooltip>
             </div>
         </div>

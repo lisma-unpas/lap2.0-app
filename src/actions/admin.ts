@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { generateTicketCode } from "@/actions/registration";
 import { sendEmail } from "@/lib/email";
+import { config } from "@/lib/config";
 
 export async function getRegistrations(params: { search?: string; status?: string; page?: number; limit?: number } = {}) {
     const { search = "", status = "ALL", page = 1, limit = 10 } = params;
@@ -246,6 +247,10 @@ export async function getUnitSettings() {
     }
 }
 
+export async function getSpreadsheetUrl() {
+    return config.spreadsheet.url;
+}
+
 export async function updateUnitSetting(unitId: string, limit: number) {
     try {
         await (prisma as any).unitSetting.upsert({
@@ -257,6 +262,89 @@ export async function updateUnitSetting(unitId: string, limit: number) {
         return { success: true };
     } catch (error) {
         return { success: false, message: "Gagal memperbarui pengaturan." };
+    }
+}
+
+export async function syncRegistrations() {
+    try {
+        const registrations = await prisma.registration.findMany({
+            orderBy: { createdAt: "desc" },
+            include: { tickets: true }
+        });
+
+        const syncUrl = config.spreadsheet.scriptUrlSync;
+        if (!syncUrl) throw new Error("GOOGLE_SCRIPT_URL_SPREADSHEET not configured");
+
+        // Format data for spreadsheet
+        const formattedData = registrations.map(reg => ({
+            id: reg.id,
+            fullName: reg.fullName,
+            email: reg.email,
+            phoneNumber: reg.phoneNumber,
+            unitId: reg.unitId,
+            subEventName: reg.subEventName,
+            status: reg.status,
+            totalPrice: reg.totalPrice,
+            registrationCode: reg.registrationCode,
+            createdAt: reg.createdAt.toISOString(),
+            tickets: reg.tickets.map((t: any) => t.ticketCode).join(", "),
+            ...(typeof reg.detailedData === 'object' ? (reg.detailedData as any) : {})
+        }));
+
+        const response = await fetch(`${syncUrl}?sheet=Registrations`, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "sync",
+                data: formattedData
+            })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Sync failed");
+
+        return { success: true, count: formattedData.length };
+    } catch (error) {
+        console.error("Sync Error:", error);
+        return { success: false, message: error instanceof Error ? error.message : "Gagal sinkronisasi." };
+    }
+}
+
+export async function syncTickets() {
+    try {
+        const tickets = await prisma.ticket.findMany({
+            orderBy: { issuedAt: "desc" },
+            include: { registration: true }
+        });
+
+        const syncUrl = config.spreadsheet.scriptUrlSync;
+        if (!syncUrl) throw new Error("GOOGLE_SCRIPT_URL_SPREADSHEET not configured");
+
+        const formattedData = tickets.map(t => ({
+            id: t.id,
+            ticketCode: t.ticketCode,
+            isUsed: t.isUsed ? "YES" : "NO",
+            issuedAt: t.issuedAt.toISOString(),
+            registrantName: t.registration.fullName,
+            registrantEmail: t.registration.email,
+            unit: t.registration.unitId,
+            event: t.registration.subEventName
+        }));
+
+        const response = await fetch(`${syncUrl}?sheet=Tickets`, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "sync",
+                data: formattedData
+            })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Sync failed");
+
+        return { success: true, count: formattedData.length };
+    } catch (error) {
+        console.error("Sync Error:", error);
+        return { success: false, message: error instanceof Error ? error.message : "Gagal sinkronisasi." };
     }
 }
 

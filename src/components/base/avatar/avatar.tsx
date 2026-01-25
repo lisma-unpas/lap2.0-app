@@ -81,7 +81,7 @@ export const Avatar = ({
 
     const renderMainContent = () => {
         if (src && !isFailed) {
-            return <img data-avatar-img className="size-full rounded-full object-cover" src={src} alt={alt} onError={() => setIsFailed(true)} />;
+            return <img data-avatar-img className="size-full rounded-full object-contain" src={src} alt={alt} onError={() => setIsFailed(true)} />;
         }
 
         if (initials) {

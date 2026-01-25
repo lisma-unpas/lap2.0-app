@@ -7,9 +7,16 @@ import {
     SearchRefraction,
     Ticket01 as TicketIcon,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    RefreshCw01,
+    File02
 } from "@untitledui/icons";
-import { getTickets, getDashboardStats } from "@/actions/admin";
+import {
+    getTickets,
+    getDashboardStats,
+    syncTickets,
+    getSpreadsheetUrl
+} from "@/actions/admin";
 import { markTicketAsUsed, revertTicketUsage } from "@/actions/check-in";
 import { Button } from "@/components/base/buttons/button";
 import { Badge } from "@/components/base/badges/badges";
@@ -37,6 +44,29 @@ export default function TicketsClient() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
 
     const { toastSuccess, toastError } = useToast();
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [spreadsheetUrl, setSpreadsheetUrl] = useState("");
+
+    useEffect(() => {
+        getSpreadsheetUrl().then(setSpreadsheetUrl);
+    }, []);
+
+    const handleSync = async () => {
+        setIsSyncing(true);
+        const res = await syncTickets();
+        if (res.success) {
+            toastSuccess("Berhasil", `${res.count} data tiket berhasil disinkronkan ke spreadsheet`);
+        } else {
+            toastError("Gagal", res.message || "Gagal sinkronisasi");
+        }
+        setIsSyncing(false);
+    };
+
+    const handleViewSpreadsheet = () => {
+        if (spreadsheetUrl) {
+            window.open(spreadsheetUrl, "_blank");
+        }
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -106,9 +136,30 @@ export default function TicketsClient() {
     return (
         <Section className="bg-secondary_alt min-h-screen py-10">
             <Container>
-                <div className="mb-10">
-                    <h1 className="text-display-sm font-bold text-primary">Ticket & Check-in</h1>
-                    <p className="text-md text-tertiary">Manage ticket verification and attendance</p>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                    <div>
+                        <h1 className="text-display-sm font-bold text-primary">Ticket & Check-in</h1>
+                        <p className="text-md text-tertiary">Manage ticket verification and attendance</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                            size="md"
+                            color="secondary"
+                            iconLeading={RefreshCw01}
+                            onClick={handleSync}
+                            isLoading={isSyncing}
+                        >
+                            Sync Spreadsheet
+                        </Button>
+                        <Button
+                            size="md"
+                            color="secondary"
+                            iconLeading={File02}
+                            onClick={handleViewSpreadsheet}
+                        >
+                            View Spreadsheet
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Ticket Stats */}

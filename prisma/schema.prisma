@@ -61,9 +61,10 @@ model Ticket {
   registration   Registration @relation(fields: [registrationId], references: [id])
 }
 
-model News {
+model Info {
   id        String   @id @default(cuid())
   title     String
+  slug      String   @unique
   body      String   @db.Text
   category  String
   imageUrl  String?

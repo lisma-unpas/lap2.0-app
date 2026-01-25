@@ -44,9 +44,12 @@ interface HeaderNavigationBaseProps {
     trailingContent?: ReactNode;
     /** Whether to show the avatar dropdown. */
     showAvatarDropdown?: boolean;
+    /** Custom avatar content. */
+    avatarContent?: ReactNode;
     /** Whether to hide the bottom border. */
     hideBorder?: boolean;
 }
+
 
 export const HeaderNavigationBase = ({
     activeUrl,
@@ -56,6 +59,7 @@ export const HeaderNavigationBase = ({
     mobileHeaderContent,
     mobileDrawerHeaderContent,
     showAvatarDropdown = true,
+    avatarContent,
     hideBorder = false,
 }: HeaderNavigationBaseProps) => {
     const activeSubNavItems = subItems || items.find((item) => item.current && item.items && item.items.length > 0)?.items;
@@ -81,7 +85,7 @@ export const HeaderNavigationBase = ({
                 </aside>
             </MobileNavigationHeader>
 
-            <header className="max-lg:hidden">
+            <header className="max-lg:hidden sticky top-0 z-50">
                 <section
                     className={cx(
                         "flex h-16 w-full items-center justify-center bg-primary md:h-18",
@@ -98,11 +102,11 @@ export const HeaderNavigationBase = ({
                                 <UntitledLogo className="h-8" />
                             </a>
 
-                            <nav>
-                                <ul className="flex items-center gap-0.5">
+                            <nav className="h-full">
+                                <ul className="flex items-center gap-0.5 h-full">
                                     {items.map((item) => (
-                                        <li key={item.label} className="py-0.5">
-                                            <NavItemBase icon={item.icon} href={item.href} current={item.current} badge={item.badge} type="link">
+                                        <li key={item.label} className="h-full">
+                                            <NavItemBase icon={item.icon} href={item.href} current={item.current} badge={item.badge} type="link" variant="header">
                                                 {item.label}
                                             </NavItemBase>
                                         </li>
@@ -117,33 +121,35 @@ export const HeaderNavigationBase = ({
                             {/* Removed Settings and Notifications for public view */}
 
                             {showAvatarDropdown && (
-                                <DialogTrigger>
-                                    <AriaButton
-                                        className={({ isPressed, isFocused }) =>
-                                            cx(
-                                                "group relative inline-flex cursor-pointer",
-                                                (isPressed || isFocused) && "rounded-full outline-2 outline-offset-2 outline-focus-ring",
-                                            )
-                                        }
-                                    >
-                                        <Avatar alt="Olivia Rhye" src="https://www.untitledui.com/images/avatars/olivia-rhye?bg=%23E0E0E0" size="md" />
-                                    </AriaButton>
-                                    <Popover
-                                        placement="bottom right"
-                                        offset={8}
-                                        className={({ isEntering, isExiting }) =>
-                                            cx(
-                                                "will-change-transform",
-                                                isEntering &&
-                                                "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
-                                                isExiting &&
-                                                "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
-                                            )
-                                        }
-                                    >
-                                        <NavAccountMenu />
-                                    </Popover>
-                                </DialogTrigger>
+                                avatarContent || (
+                                    <DialogTrigger>
+                                        <AriaButton
+                                            className={({ isPressed, isFocused }) =>
+                                                cx(
+                                                    "group relative inline-flex cursor-pointer",
+                                                    (isPressed || isFocused) && "rounded-full outline-2 outline-offset-2 outline-focus-ring",
+                                                )
+                                            }
+                                        >
+                                            <Avatar alt="Olivia Rhye" src="https://www.untitledui.com/images/avatars/olivia-rhye?bg=%23E0E0E0" size="md" />
+                                        </AriaButton>
+                                        <Popover
+                                            placement="bottom right"
+                                            offset={8}
+                                            className={({ isEntering, isExiting }) =>
+                                                cx(
+                                                    "will-change-transform",
+                                                    isEntering &&
+                                                    "duration-300 ease-out animate-in fade-in placement-right:slide-in-from-left-2 placement-top:slide-in-from-bottom-2 placement-bottom:slide-in-from-top-2",
+                                                    isExiting &&
+                                                    "duration-150 ease-in animate-out fade-out placement-right:slide-out-to-left-2 placement-top:slide-out-to-bottom-2 placement-bottom:slide-out-to-top-2",
+                                                )
+                                            }
+                                        >
+                                            <NavAccountMenu />
+                                        </Popover>
+                                    </DialogTrigger>
+                                )
                             )}
                         </div>
                     </div>
@@ -152,11 +158,11 @@ export const HeaderNavigationBase = ({
                 {showSecondaryNav && (
                     <section className={cx("flex h-16 w-full items-center justify-center bg-primary", !hideBorder && "border-b border-secondary")}>
                         <div className="flex w-full max-w-container items-center justify-between gap-8 px-8">
-                            <nav>
-                                <ul className="flex items-center gap-0.5">
+                            <nav className="h-full">
+                                <ul className="flex items-center gap-0.5 h-full">
                                     {activeSubNavItems.map((item) => (
-                                        <li key={item.label} className="py-0.5">
-                                            <NavItemBase icon={item.icon} href={item.href} current={item.current} badge={item.badge} type="link">
+                                        <li key={item.label} className="h-full">
+                                            <NavItemBase icon={item.icon} href={item.href} current={item.current} badge={item.badge} type="link" variant="header">
                                                 {item.label}
                                             </NavItemBase>
                                         </li>

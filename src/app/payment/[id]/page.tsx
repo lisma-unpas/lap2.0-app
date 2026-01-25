@@ -7,12 +7,19 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function PaymentPage({ params }: PageProps) {
     const { id } = await params;
 
-    const registration = await prisma.registration.findUnique({
-        where: { id }
-    });
+    let registration = null;
+    try {
+        registration = await prisma.registration.findUnique({
+            where: { id }
+        });
+    } catch (error) {
+        console.error("Database error during payment page fetch:", error);
+    }
 
     if (!registration) {
         notFound();

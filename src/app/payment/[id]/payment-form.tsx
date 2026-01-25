@@ -10,6 +10,10 @@ import { uploadPaymentProof } from "@/actions/payment";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { UNIT_CONFIG } from "@/constants/units";
 import { useToast } from "@/context/toast-context";
+import { useEffect } from "react";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
+import { FileUpload } from "@/components/application/file-upload/file-upload-base";
+import { LogIn01 } from "@untitledui/icons";
 
 interface PaymentFormProps {
     registrationId: string;
@@ -20,35 +24,73 @@ interface PaymentFormProps {
 }
 
 export default function PaymentForm({ registrationId, fullName, subEventName, eventName, price }: PaymentFormProps) {
-    const [file, setFile] = useState<File | null>(null);
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string } | null>(null);
+    const { isConnected } = useGoogleAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const { toastSuccess, toastError } = useToast();
     const config = UNIT_CONFIG[eventName.toLowerCase()];
 
-    const handleUpload = async () => {
+    const handleFileDrop = async (files: FileList) => {
+        if (!isConnected) {
+            toastError("Akses Ditolak", "Silakan hubungkan Google Drive terlebih dahulu.");
+            window.location.href = "/auth/google/login";
+            return;
+        }
+
+        const file = files[0];
         if (!file) return;
-        setIsSubmitting(true);
+
+        setAttachment({ file, progress: 10, status: 'uploading' });
 
         try {
             const formData = new FormData();
             formData.append("file", file);
+
+            // Simulate some progress since server actions are atomic
+            const progressInterval = setInterval(() => {
+                setAttachment(prev => {
+                    if (!prev || prev.status !== 'uploading') {
+                        clearInterval(progressInterval);
+                        return prev;
+                    }
+                    return { ...prev, progress: Math.min(prev.progress + 15, 90) };
+                });
+            }, 300);
+
             const uploadRes = await uploadImage(formData);
+            clearInterval(progressInterval);
 
             if (uploadRes.success) {
-                const saveRes = await uploadPaymentProof(registrationId, uploadRes.url!);
-                if (saveRes.success) {
-                    setIsSuccess(true);
-                    toastSuccess("Berhasil", "Bukti pembayaran berhasil diunggah.");
-                } else {
-                    toastError("Gagal", "Gagal menyimpan data pembayaran.");
-                }
+                setAttachment({ file, progress: 100, status: 'success' });
+                setUploadedUrl(uploadRes.url!);
+                toastSuccess("Berhasil", "File berhasil diunggah ke Google Drive.");
             } else {
-                toastError("Gagal", "Gagal mengupload gambar.");
+                setAttachment({ file, progress: 0, status: 'error', error: uploadRes.message || "Gagal upload" });
+                if (uploadRes.error === "AUTH_REQUIRED") {
+                    window.location.href = "/auth/google/login";
+                }
             }
         } catch (error) {
-            console.error(error);
-            toastError("Kesalahan", "Terjadi kesalahan sistem saat memproses.");
+            setAttachment({ file, progress: 0, status: 'error', error: "Kesalahan sistem" });
+        }
+    };
+
+    const handleFinalSubmit = async () => {
+        if (!uploadedUrl) return;
+        setIsSubmitting(true);
+
+        try {
+            const saveRes = await uploadPaymentProof(registrationId, uploadedUrl);
+            if (saveRes.success) {
+                setIsSuccess(true);
+                toastSuccess("Berhasil", "Bukti pembayaran berhasil disimpan.");
+            } else {
+                toastError("Gagal", "Gagal menyimpan data ke server.");
+            }
+        } catch (error) {
+            toastError("Kesalahan", "Terjadi kesalahan sistem.");
         } finally {
             setIsSubmitting(false);
         }
@@ -125,31 +167,42 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
 
                         <div className="mt-10 space-y-4">
                             <label className="block text-sm font-medium text-primary">Upload Bukti Transfer</label>
-                            <div className="flex items-center justify-center w-full">
-                                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-secondary rounded-lg cursor-pointer hover:bg-secondary/10 transition-colors">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                                        <Upload01 className="w-8 h-8 mb-3 text-tertiary" />
-                                        <p className="mb-2 text-sm text-tertiary font-semibold">
-                                            {file ? file.name : "Pilih file bukti pembayaran"}
-                                        </p>
-                                        <p className="text-xs text-tertiary">Format: JPG, PNG (Max 2MB)</p>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+
+                            <FileUpload.DropZone
+                                isConnected={isConnected}
+                                accept="image/*"
+                                allowsMultiple={false}
+                                maxSize={2 * 1024 * 1024}
+                                hint="JPG, PNG atau GIF (maks. 2MB)"
+                                onDropFiles={handleFileDrop}
+                                onSizeLimitExceed={() => toastError("File Terlalu Besar", "Maksimal ukuran file adalah 2MB.")}
+                            />
+
+                            {attachment && (
+                                <FileUpload.List className="mt-4">
+                                    <FileUpload.ListItemProgressBar
+                                        name={attachment.file.name}
+                                        size={attachment.file.size}
+                                        progress={attachment.progress}
+                                        failed={attachment.status === 'error'}
+                                        error={attachment.error}
+                                        type="image"
+                                        onDelete={() => {
+                                            setAttachment(null);
+                                            setUploadedUrl(null);
+                                        }}
                                     />
-                                </label>
-                            </div>
+                                </FileUpload.List>
+                            )}
+
                             <Button
-                                className="w-full"
+                                className="w-full mt-6"
                                 color="primary"
-                                disabled={!file}
+                                disabled={!uploadedUrl || isSubmitting}
                                 isLoading={isSubmitting}
-                                onClick={handleUpload}
+                                onClick={handleFinalSubmit}
                             >
-                                Kirim Bukti Pembayaran
+                                Konfirmasi Pembayaran
                             </Button>
                         </div>
                     </div>

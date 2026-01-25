@@ -1,15 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Poppins, EB_Garamond } from "next/font/google";
 import { RouteProvider } from "@/providers/router-provider";
 import { Theme } from "@/providers/theme";
 import "@/styles/globals.css";
 import { cx } from "@/utils/cx";
 import ConditionalLayout from "@/components/shared/conditional-layout";
+import { CartProvider } from "@/context/cart-context";
+import { ToastProvider } from "@/context/toast-context";
+import { GoogleAuthProvider } from "@/context/google-auth-context";
 
-const inter = Inter({
+const poppins = Poppins({
+    subsets: ["latin"],
+    weight: ["400", "500", "600", "700"],
+    display: "swap",
+    variable: "--font-poppins",
+});
+
+const ebGaramond = EB_Garamond({
     subsets: ["latin"],
     display: "swap",
-    variable: "--font-inter",
+    variable: "--font-eb-garamond",
 });
 
 export const metadata: Metadata = {
@@ -18,12 +28,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: "#7f56d9",
+    themeColor: "#FFA500",
     colorScheme: "light dark",
 };
-
-import { CartProvider } from "@/context/cart-context";
-import { ToastProvider } from "@/context/toast-context";
 
 export default function RootLayout({
     children,
@@ -32,17 +39,22 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={cx(inter.variable, "bg-primary antialiased")}>
+            <head>
+                <link rel="icon" href="/logo.png" />
+            </head>
+            <body className={cx(poppins.variable, ebGaramond.variable, "bg-primary antialiased")}>
                 <RouteProvider>
-                    <CartProvider>
-                        <ToastProvider>
-                            <Theme>
-                                <ConditionalLayout>
-                                    {children}
-                                </ConditionalLayout>
-                            </Theme>
-                        </ToastProvider>
-                    </CartProvider>
+                    <GoogleAuthProvider>
+                        <CartProvider>
+                            <ToastProvider>
+                                <Theme>
+                                    <ConditionalLayout>
+                                        {children}
+                                    </ConditionalLayout>
+                                </Theme>
+                            </ToastProvider>
+                        </CartProvider>
+                    </GoogleAuthProvider>
                 </RouteProvider>
             </body>
         </html>

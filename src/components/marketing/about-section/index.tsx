@@ -2,15 +2,16 @@
 
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
+import { cx } from "@/utils/cx";
 
-export default function AboutSection() {
+export default function AboutSection({ className }: { className?: string }) {
     return (
-        <Section className="bg-primary border-y border-secondary" id="about">
+        <Section className={cx("bg-primary", className)} id="about">
             <Container>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div className="flex flex-col gap-6">
                         <h2 className="text-display-xs font-semibold text-primary md:text-display-sm">
-                            Tentang <span className="text-purple-600">LAP 2.0</span>
+                            Tentang <span className="text-brand-500">LAP 2.0</span>
                         </h2>
                         <div className="flex flex-col gap-4 text-lg text-tertiary text-justify leading-relaxed">
                             <p>
@@ -32,20 +33,20 @@ export default function AboutSection() {
                                     href="https://www.lisma-unpas.com/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-sm font-semibold text-purple-600 hover:text-purple-800 underline decoration-purple-300 underline-offset-4"
+                                    className="text-sm font-semibold text-brand-500 hover:text-brand-600 underline decoration-brand-300 underline-offset-4"
                                 >
                                     Pelajari selengkapnya tentang LISMA UNPAS →
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-secondary">
+                    <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden">
                         <img
-                            src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?q=80&w=1935&auto=format&fit=crop"
+                            src="/logo.png"
                             alt="LISMA Culture"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                         />
-                        <div className="absolute inset-0 bg-purple-600/10 mix-blend-multiply"></div>
+                        <div className="absolute inset-0 mix-blend-multiply"></div>
                     </div>
                 </div>
             </Container>

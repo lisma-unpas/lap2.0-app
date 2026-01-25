@@ -4,7 +4,7 @@ import type { ComponentProps, ComponentPropsWithRef } from "react";
 import { useId, useRef, useState } from "react";
 import type { FileIcon } from "@untitledui/file-icons";
 import { FileIcon as FileTypeIcon } from "@untitledui/file-icons";
-import { CheckCircle, Trash01, UploadCloud02, XCircle } from "@untitledui/icons";
+import { CheckCircle, Trash01, UploadCloud02, XCircle, LogIn01 } from "@untitledui/icons";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/base/buttons/button";
 import { ButtonUtility } from "@/components/base/buttons/button-utility";
@@ -24,7 +24,7 @@ export const getReadableFileSize = (bytes: number) => {
 
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
-    return Math.floor(bytes / Math.pow(1024, i)) + " " + suffixes[i];
+    return Math.floor(bytes / Math.pow(1024, i)) + " " + (suffixes as string[])[i];
 };
 
 interface FileUploadDropZoneProps {
@@ -66,6 +66,10 @@ interface FileUploadDropZoneProps {
      * the size limit when files are dropped on the drop zone.
      */
     onSizeLimitExceed?: (files: FileList) => void;
+    /** Whether the user is connected to Google Drive */
+    isConnected?: boolean;
+    /** The URL to redirect to for connection */
+    connectUrl?: string;
 }
 
 export const FileUploadDropZone = ({
@@ -78,6 +82,8 @@ export const FileUploadDropZone = ({
     onDropFiles,
     onDropUnacceptedFiles,
     onSizeLimitExceed,
+    isConnected = true,
+    connectUrl = "/auth/google/login",
 }: FileUploadDropZoneProps) => {
     const id = useId();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -87,25 +93,30 @@ export const FileUploadDropZone = ({
     const isFileTypeAccepted = (file: File): boolean => {
         if (!accept) return true;
 
-        // Split the accept string into individual types
-        const acceptedTypes = accept.split(",").map((type) => type.trim());
+        const fileName = (file.name || '').toLowerCase();
+        const fileType = file.type || '';
 
-        return acceptedTypes.some((acceptedType) => {
+        // Split the accept string into individual types
+        const acceptedTypes = (accept.split(",") as string[]).map((type: string) => type.trim());
+
+        const isAccepted = acceptedTypes.some((acceptedType: string) => {
             // Handle file extensions (e.g., .pdf, .doc)
             if (acceptedType.startsWith(".")) {
-                const extension = `.${file.name.split(".").pop()?.toLowerCase()}`;
+                const extension = `.${fileName.split(".").pop()}`;
                 return extension === acceptedType.toLowerCase();
             }
 
             // Handle wildcards (e.g., image/*)
             if (acceptedType.endsWith("/*")) {
                 const typePrefix = acceptedType.split("/")[0];
-                return file.type.startsWith(`${typePrefix}/`);
+                return fileType.startsWith(`${typePrefix}/`);
             }
 
             // Handle exact MIME types (e.g., application/pdf)
-            return file.type === acceptedType;
+            return fileType === acceptedType;
         });
+
+        return isAccepted;
     };
 
     const handleDragIn = (event: React.DragEvent<HTMLDivElement>) => {
@@ -133,9 +144,9 @@ export const FileUploadDropZone = ({
         const oversizedFiles: File[] = [];
 
         // If multiple files are not allowed, only process the first file
-        const filesToProcess = allowsMultiple ? files : files.slice(0, 1);
+        const filesToProcess = allowsMultiple ? files : (files as any).slice(0, 1);
 
-        filesToProcess.forEach((file) => {
+        (filesToProcess as any[]).forEach((file: any) => {
             // Check file size first
             if (maxSize && file.size > maxSize) {
                 oversizedFiles.push(file);
@@ -153,7 +164,7 @@ export const FileUploadDropZone = ({
         // Handle oversized files
         if (oversizedFiles.length > 0 && typeof onSizeLimitExceed === "function") {
             const dataTransfer = new DataTransfer();
-            oversizedFiles.forEach((file) => dataTransfer.items.add(file));
+            (oversizedFiles as any[]).forEach((file: any) => dataTransfer.items.add(file));
 
             setIsInvalid(true);
             onSizeLimitExceed(dataTransfer.files);
@@ -162,14 +173,14 @@ export const FileUploadDropZone = ({
         // Handle accepted files
         if (acceptedFiles.length > 0 && typeof onDropFiles === "function") {
             const dataTransfer = new DataTransfer();
-            acceptedFiles.forEach((file) => dataTransfer.items.add(file));
+            (acceptedFiles as any[]).forEach((file: any) => dataTransfer.items.add(file));
             onDropFiles(dataTransfer.files);
         }
 
         // Handle unaccepted files
         if (unacceptedFiles.length > 0 && typeof onDropUnacceptedFiles === "function") {
             const unacceptedDataTransfer = new DataTransfer();
-            unacceptedFiles.forEach((file) => unacceptedDataTransfer.items.add(file));
+            (unacceptedFiles as any[]).forEach((file: any) => unacceptedDataTransfer.items.add(file));
 
             setIsInvalid(true);
             onDropUnacceptedFiles(unacceptedDataTransfer.files);
@@ -192,6 +203,31 @@ export const FileUploadDropZone = ({
         processFiles(Array.from(event.target.files || []));
     };
 
+    if (!isConnected) {
+        return (
+            <div
+                className={cx(
+                    "relative flex flex-col items-center gap-4 rounded-xl bg-secondary_alt px-6 py-8 text-center ring-1 ring-secondary ring-inset",
+                    className
+                )}
+            >
+                <div className="max-w-xs">
+                    <p className="text-sm font-semibold text-primary">Google Drive Tidak Terhubung</p>
+                    <p className="text-xs text-tertiary mt-1">Anda harus menghubungkan Google Drive untuk dapat mengunggah file.</p>
+                </div>
+                <Button
+                    color="primary"
+                    size="md"
+                    href={connectUrl}
+                    target="_blank"
+                    iconLeading={LogIn01}
+                >
+                    Hubungkan Sekarang
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <div
             data-dropzone
@@ -200,8 +236,10 @@ export const FileUploadDropZone = ({
             onDragLeave={handleDragOut}
             onDragEnd={handleDragOut}
             onDrop={handleDrop}
+            onClick={() => !isDisabled && inputRef.current?.click()}
             className={cx(
-                "relative flex flex-col items-center gap-3 rounded-lg bg-primary px-6 py-4 text-tertiary ring-1 ring-secondary transition duration-100 ease-linear ring-inset",
+                "relative flex flex-col items-center gap-3 rounded-xl bg-primary px-6 py-4 text-tertiary ring-1 ring-secondary transition duration-100 ease-linear ring-inset",
+                !isDisabled && "cursor-pointer",
                 isDraggingOver && "ring-2 ring-brand",
                 isDisabled && "cursor-not-allowed bg-disabled_subtle ring-disabled_subtle",
                 className,
@@ -211,8 +249,8 @@ export const FileUploadDropZone = ({
                 <UploadCloud02 className="size-5" />
             </FeaturedIcon>
 
-            <div className="flex flex-col gap-1 text-center">
-                <div className="flex justify-center gap-1 text-center">
+            <div className="flex flex-col gap-1 text-center max-w-full">
+                <div className="flex flex-wrap justify-center gap-1 text-center">
                     <input
                         ref={inputRef}
                         id={id}
@@ -224,14 +262,20 @@ export const FileUploadDropZone = ({
                         onChange={handleInputFileChange}
                     />
                     <label htmlFor={id} className="flex cursor-pointer">
-                        <Button color="link-color" size="md" isDisabled={isDisabled} onClick={() => inputRef.current?.click()}>
-                            Click to upload <span className="md:hidden">and attach files</span>
+                        <Button
+                            color="link-color"
+                            size="md"
+                            isDisabled={isDisabled}
+                            onClick={() => inputRef.current?.click()}
+                            className="h-auto whitespace-normal text-center"
+                        >
+                            Klik untuk unggah <span className="block md:inline">dan lampirkan berkas</span>
                         </Button>
                     </label>
-                    <span className="text-sm max-md:hidden">or drag and drop</span>
+                    <span className="text-sm max-md:hidden">atau seret dan lepas</span>
                 </div>
                 <p className={cx("text-xs transition duration-100 ease-linear", isInvalid && "text-error-primary")}>
-                    {hint || "SVG, PNG, JPG or GIF (max. 800x400px)"}
+                    {hint || "SVG, PNG, JPG atau GIF (maks. 800x400px)"}
                 </p>
             </div>
         </div>
@@ -247,6 +291,8 @@ export interface FileListItemProps {
     progress: number;
     /** Whether the file failed to upload. */
     failed?: boolean;
+    /** The error message if failed. */
+    error?: string;
     /** The type of the file. */
     type?: ComponentProps<typeof FileIcon>["type"];
     /** The class name of the file list item. */
@@ -259,14 +305,14 @@ export interface FileListItemProps {
     onRetry?: () => void;
 }
 
-export const FileListItemProgressBar = ({ name, size, progress, failed, type, fileIconVariant, onDelete, onRetry, className }: FileListItemProps) => {
+export const FileListItemProgressBar = ({ name, size, progress, failed, error, type, fileIconVariant, onDelete, onRetry, className }: FileListItemProps) => {
     const isComplete = progress === 100;
 
     return (
         <motion.li
             layout="position"
             className={cx(
-                "relative flex gap-3 rounded-lg bg-primary p-4 ring-1 ring-secondary transition-shadow duration-100 ease-linear ring-inset",
+                "relative flex gap-3 rounded-xl bg-primary p-4 ring-1 ring-secondary transition-shadow duration-100 ease-linear ring-inset",
                 failed && "ring-2 ring-error",
                 className,
             )}
@@ -286,18 +332,18 @@ export const FileListItemProgressBar = ({ name, size, progress, failed, type, fi
 
                             <div className="flex items-center gap-1">
                                 {isComplete && <CheckCircle className="size-4 stroke-[2.5px] text-fg-success-primary" />}
-                                {isComplete && <p className="text-sm font-medium text-success-primary">Complete</p>}
+                                {isComplete && <p className="text-sm font-medium text-success-primary">Selesai</p>}
 
                                 {!isComplete && !failed && <UploadCloud02 className="stroke-[2.5px size-4 text-fg-quaternary" />}
-                                {!isComplete && !failed && <p className="text-sm font-medium text-quaternary">Uploading...</p>}
+                                {!isComplete && !failed && <p className="text-sm font-medium text-quaternary">Mengunggah...</p>}
 
                                 {failed && <XCircle className="size-4 text-fg-error-primary" />}
-                                {failed && <p className="text-sm font-medium text-error-primary">Failed</p>}
+                                {failed && <p className="text-sm font-medium text-error-primary">{error || "Gagal"}</p>}
                             </div>
                         </div>
                     </div>
 
-                    <ButtonUtility color="tertiary" tooltip="Delete" icon={Trash01} size="xs" className="-mt-2 -mr-2 self-start" onClick={onDelete} />
+                    <ButtonUtility color="tertiary" tooltip="Hapus" icon={Trash01} size="xs" className="-mt-2 -mr-2 self-start" onClick={onDelete} />
                 </div>
 
                 {!failed && (
@@ -308,7 +354,7 @@ export const FileListItemProgressBar = ({ name, size, progress, failed, type, fi
 
                 {failed && (
                     <Button color="link-destructive" size="sm" onClick={onRetry} className="mt-1.5">
-                        Try again
+                        Coba lagi
                     </Button>
                 )}
             </div>
@@ -320,7 +366,7 @@ export const FileListItemProgressFill = ({ name, size, progress, failed, type, f
     const isComplete = progress === 100;
 
     return (
-        <motion.li layout="position" className={cx("relative flex gap-3 overflow-hidden rounded-lg bg-primary p-4", className)}>
+        <motion.li layout="position" className={cx("relative flex gap-3 overflow-hidden rounded-xl bg-primary p-4", className)}>
             {/* Progress fill. */}
             <div
                 style={{ transform: `translateX(-${100 - progress}%)` }}
@@ -346,7 +392,7 @@ export const FileListItemProgressFill = ({ name, size, progress, failed, type, f
                         <p className="truncate text-sm font-medium text-secondary">{name}</p>
 
                         <div className="mt-0.5 flex items-center gap-2">
-                            <p className="text-sm text-tertiary">{failed ? "Upload failed, please try again" : getReadableFileSize(size)}</p>
+                            <p className="text-sm text-tertiary">{failed ? "Unggahan gagal, silakan coba lagi" : getReadableFileSize(size)}</p>
 
                             {!failed && (
                                 <>
@@ -364,12 +410,12 @@ export const FileListItemProgressFill = ({ name, size, progress, failed, type, f
 
                     {failed && (
                         <Button color="link-destructive" size="sm" onClick={onRetry} className="mt-1.5">
-                            Try again
+                            Coba lagi
                         </Button>
                     )}
                 </div>
 
-                <ButtonUtility color="tertiary" tooltip="Delete" icon={Trash01} size="xs" className="-mt-2 -mr-2 self-start" onClick={onDelete} />
+                <ButtonUtility color="tertiary" tooltip="Hapus" icon={Trash01} size="xs" className="-mt-2 -mr-2 self-start" onClick={onDelete} />
             </div>
         </motion.li>
     );

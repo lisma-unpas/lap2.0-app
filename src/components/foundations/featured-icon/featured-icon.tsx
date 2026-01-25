@@ -48,10 +48,10 @@ const styles = sortCx({
     dark: {
         base: "text-fg-white shadow-xs-skeumorphic before:absolute before:inset-px before:border before:border-white/12 before:mask-b-from-0%",
         sizes: {
-            sm: "size-8 rounded-lg before:rounded-[5px]",
+            sm: "size-8 rounded-md before:rounded-[5px]",
             md: "size-10 rounded-lg before:rounded-[7px]",
             lg: "size-12 rounded-[10px] before:rounded-[9px]",
-            xl: "size-14 rounded-lg before:rounded-[11px]",
+            xl: "size-14 rounded-xl before:rounded-[11px]",
         },
         colors: {
             brand: "bg-brand-solid before:border-utility-brand-200/12",
@@ -65,17 +65,17 @@ const styles = sortCx({
     modern: {
         base: "bg-primary shadow-xs-skeumorphic ring-1 ring-inset",
         sizes: {
-            sm: "size-8 rounded-lg",
+            sm: "size-8 rounded-md",
             md: "size-10 rounded-lg",
             lg: "size-12 rounded-[10px]",
-            xl: "size-14 rounded-lg",
+            xl: "size-14 rounded-xl",
         },
         colors: {
-            brand: "",
+            brand: "text-fg-brand-primary ring-brand-secondary",
             gray: "text-fg-secondary ring-primary",
-            error: "",
-            warning: "",
-            success: "",
+            error: "text-fg-error-primary ring-error-secondary",
+            warning: "text-fg-warning-primary ring-warning-secondary",
+            success: "text-fg-success-primary ring-success-secondary",
         },
     },
     "modern-neue": {
@@ -91,21 +91,21 @@ const styles = sortCx({
             xl: "size-14 rounded-[14px] before:rounded-[10px]",
         },
         colors: {
-            brand: "",
+            brand: "text-fg-brand-primary ring-brand-secondary",
             gray: "text-fg-secondary ring-primary",
-            error: "",
-            warning: "",
-            success: "",
+            error: "text-fg-error-primary ring-error-secondary",
+            warning: "text-fg-warning-primary ring-warning-secondary",
+            success: "text-fg-success-primary ring-success-secondary",
         },
     },
 
     outline: {
         base: "before:absolute before:rounded-full before:border-2 after:absolute after:rounded-full after:border-2",
         sizes: {
-            sm: "size-4 before:size-6 after:size-8.5",
-            md: "size-5 before:size-7 after:size-9.5",
-            lg: "size-6 before:size-8 after:size-10.5",
-            xl: "size-7 before:size-9 after:size-11.5",
+            sm: "size-8 rounded-[8px] before:rounded-[4px]",
+            md: "size-10 rounded-[10px] before:rounded-[6px]",
+            lg: "size-12 rounded-[12px] before:rounded-[8px]",
+            xl: "size-14 rounded-[14px] before:rounded-[10px]",
         },
         colors: {
             brand: "text-fg-brand-primary before:border-fg-brand-primary/30 after:border-fg-brand-primary/10",
@@ -130,6 +130,11 @@ interface FeaturedIconProps {
 export const FeaturedIcon = (props: FeaturedIconProps) => {
     const { size = "sm", theme: variant = "light", color = "brand", icon: Icon, ...otherProps } = props;
 
+    // Ensure variant is valid, fallback to 'light' if not
+    const validVariant: keyof typeof styles = (variant && styles[variant]) ? variant : 'light';
+    const validSize: keyof typeof styles[typeof validVariant]['sizes'] = (size && styles[validVariant].sizes[size]) ? size : 'sm';
+    const validColor: keyof typeof styles[typeof validVariant]['colors'] = (color && styles[validVariant].colors[color]) ? color : 'brand';
+
     return (
         <div
             {...otherProps}
@@ -137,18 +142,20 @@ export const FeaturedIcon = (props: FeaturedIconProps) => {
             className={cx(
                 "relative flex shrink-0 items-center justify-center",
 
-                iconsSizes[size],
-                styles[variant].base,
-                styles[variant].sizes[size],
-                styles[variant].colors[color],
+                iconsSizes[validSize],
+                styles[validVariant].base,
+                styles[validVariant].sizes[validSize],
+                styles[validVariant].colors[validColor],
 
                 props.className,
             )}
         >
-            {isReactComponent(Icon) && <Icon data-icon className="z-1" />}
-            {isValidElement(Icon) && <div className="z-1">{Icon}</div>}
+            {/* Render icon from prop if provided */}
+            {Icon && typeof Icon === 'function' && <Icon data-icon className="z-1" />}
+            {Icon && isValidElement(Icon) && <div className="z-1">{Icon}</div>}
 
-            {props.children}
+            {/* If no icon prop but has children, render children as icon */}
+            {!Icon && props.children && <div className="z-1">{props.children}</div>}
         </div>
     );
 };

@@ -100,7 +100,7 @@ export const SidebarNavigationSlim = ({ activeUrl, items, footerItems = [], hide
                                 cx("group relative inline-flex rounded-full", (isPressed || isFocused) && "outline-2 outline-offset-2 outline-focus-ring")
                             }
                         >
-                            <Avatar status="online" src="https://www.untitledui.com/images/avatars/olivia-rhye?fm=webp&q=80" size="md" alt="Olivia Rhye" />
+                            <Avatar status="online" src="/avatar-default.webp" size="md" alt="Admin" />
                         </AriaButton>
                         <AriaPopover
                             placement="right bottom"
@@ -206,9 +206,9 @@ export const SidebarNavigationSlim = ({ activeUrl, items, footerItems = [], hide
                             <AvatarLabelGroup
                                 status="online"
                                 size="md"
-                                src="https://www.untitledui.com/images/avatars/olivia-rhye?fm=webp&q=80"
-                                title="Olivia Rhye"
-                                subtitle="olivia@untitledui.com"
+                                src="/avatar-default.webp"
+                                title="Admin"
+                                subtitle="admin@lisma-unpas.com"
                             />
 
                             <div className="absolute top-1/2 right-0 -translate-y-1/2">

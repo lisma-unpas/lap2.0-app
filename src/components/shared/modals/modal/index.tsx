@@ -59,6 +59,7 @@ interface ModalProps {
     variant?: "modal" | "drawer";
     isStickyHeader?: boolean;
     isStickyFooter?: boolean;
+    bodyClassName?: string;
 }
 
 const maxWidthClasses = {
@@ -74,7 +75,7 @@ export const Modal = ({
     isOpen,
     onOpenChange,
     isDismissable = true,
-    maxWidth = "md",
+    maxWidth = "lg",
     title,
     description,
     icon: Icon,
@@ -93,6 +94,7 @@ export const Modal = ({
     variant = "modal",
     isStickyHeader = false,
     isStickyFooter = false,
+    bodyClassName,
 }: ModalProps) => {
     const hasActions = primaryAction || secondaryAction;
     const hasHeader = showHeader && (title || description || Icon);
@@ -194,20 +196,18 @@ export const Modal = ({
                 isOpen={isOpen}
                 onOpenChange={handleOpenChange}
                 className={(state) => cx(
-                    "fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 outline-hidden backdrop-blur-xs p-4",
+                    "bg-overlay/60", // Base overlay color
                     isDrawer && "items-end md:items-center !p-0 md:!p-8",
-                    state.isEntering ? "fade-in" : (state.isExiting ? "fade-out" : ""),
                     typeof className === 'function' ? className(state) : ''
                 )}
             >
                 <BaseModal
                     className={(state) => cx(
                         maxWidthClasses[maxWidth],
-                        isDrawer && "max-h-[100vh] sm:max-h-[90vh] !rounded-t-3xl md:!rounded-lg",
-                        isDrawer ? (state.isEntering ? 'slide-in-from-bottom' : (state.isExiting ? 'slide-out-to-bottom' : '')) : (state.isEntering ? 'zoom-in-95' : (state.isExiting ? 'zoom-out-95' : ''))
+                        isDrawer && "max-h-[100vh] sm:max-h-[90vh] !rounded-t-3xl md:!rounded-3xl",
                     )}
                 >
-                    <Dialog className="outline-hidden flex flex-col max-h-[90vh] overflow-hidden">
+                    <Dialog className="outline-none flex flex-col max-h-[85vh] md:max-h-[90vh] overflow-hidden">
                         {() => {
                             const content = (
                                 <div className={cx(
@@ -223,7 +223,7 @@ export const Modal = ({
                                     )}
 
                                     {/* Scrollable Container */}
-                                    <div className="flex-1 overflow-y-auto min-h-0 relative">
+                                    <div className={cx("flex-1 overflow-y-auto min-h-0 relative overscroll-contain", bodyClassName)}>
                                         {/* Close Button */}
                                         {effectiveShowClose && (
                                             <CloseButton

@@ -12,15 +12,18 @@ export const config = {
         directUrl: process.env.DIRECT_URL,
     },
 
-    imagekit: {
-        publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "",
-        privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
-        urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || "",
-    },
-
     email: {
         scriptUrl: process.env.GOOGLE_SCRIPT_URL || "",
         scriptToken: process.env.GOOGLE_SCRIPT_TOKEN || "",
         adminEmail: process.env.ADMIN_EMAIL || process.env.NOTIFICATION_ADMIN_EMAIL || "muhhjam@gmail.com",
+    },
+    googleDrive: {
+        clientId: process.env.GOOGLE_CLIENT_ID || "",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+        redirectUri: process.env.OAUTH_REDIRECT_URL || "",
+    },
+    spreadsheet: {
+        scriptUrlSync: process.env.GOOGLE_SCRIPT_URL_SPREADSHEET || "",
+        url: process.env.GOOGLE_URL_SPREADSHEET || "https://docs.google.com/spreadsheets",
     },
 };

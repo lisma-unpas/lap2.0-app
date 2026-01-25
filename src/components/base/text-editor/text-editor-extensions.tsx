@@ -22,8 +22,10 @@ import { InputBase } from "@/components/base/input/input";
 import { Select } from "@/components/base/select/select";
 import { Tooltip } from "@/components/base/tooltip/tooltip";
 import { cx } from "@/utils/cx";
-import { useEditorContext } from "./text-editor";
+import { useEditorContext } from "./text-editor-context";
 import { EditorButton } from "./text-editor-button";
+import { uploadImage } from "@/actions/info";
+import { toast } from "sonner";
 
 const fonts = [
     { id: "Inter", label: "Inter" },
@@ -372,6 +374,7 @@ export const TextEditorLink = ({ className }: { className?: string }) => {
  */
 export const TextEditorImage = ({ className }: { className?: string }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const { editor, isDisabled } = useEditorContext();
 
     const { isImage } = useEditorState({
@@ -388,20 +391,42 @@ export const TextEditorImage = ({ className }: { className?: string }) => {
     };
 
     const handleFileChange = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
+        async (event: React.ChangeEvent<HTMLInputElement>) => {
             const file = event.target.files?.[0];
             if (!file) return;
 
-            const blobUrl = URL.createObjectURL(file);
-            editor.chain().focus().setImage({ src: blobUrl }).run();
+            setIsUploading(true);
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                const res = await uploadImage(base64, file.name);
+
+                if (res.success && res.url) {
+                    editor.chain().focus().setImage({ src: res.url }).run();
+                } else {
+                    toast.error("Gagal mengunggah gambar: " + res.message);
+                }
+                setIsUploading(false);
+            };
+            reader.readAsDataURL(file);
+
+            // Reset input
+            event.target.value = "";
         },
         [editor],
     );
 
     return (
         <>
-            <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-            <EditorButton aria-label="Insert image" isDisabled={isDisabled} isActive={isImage} onClick={triggerFileUpload} className={className}>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+            <EditorButton
+                aria-label="Insert image"
+                isDisabled={isDisabled || isUploading}
+                isActive={isImage}
+                onClick={triggerFileUpload}
+                className={className}
+                isLoading={isUploading}
+            >
                 <Image01 className="size-5" />
             </EditorButton>
         </>

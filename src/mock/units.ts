@@ -165,7 +165,6 @@ export const UNITS_MOCK = [
             },
             "Lomba foto": {
                 fields: [
-                    { id: "rules", label: "Tata Cara Pengumpulan", type: "info", text: "1. Upload karya ke GDrive.\n2. Ubah akses ke 'Anyone with the link'.\n3. Kirimkan link ke form di bawah ini." },
                     { id: "fullName", label: "Nama Fotografer", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
@@ -177,14 +176,13 @@ export const UNITS_MOCK = [
                             { label: "Umum & SMA/SMK (Rp25.000)", value: "default", price: 25000 }
                         ], required: true
                     },
-                    { id: "driveLink", label: "Link Google Drive Karya", type: "url", required: true },
+                    { id: "karya", label: "Pengumpulan foto", type: "file", multiple: true, required: true },
                     { id: "photoName", label: "Nama Foto", type: "text", required: true },
                     { id: "description", label: "Deskripsi Foto", type: "textarea", required: true }
                 ]
             },
             "Lomba short film": {
                 fields: [
-                    { id: "rules", label: "Tata Cara Pengumpulan", type: "info", text: "1. Upload karya ke GDrive.\n2. Ubah akses ke 'Anyone with the link'.\n3. Kirimkan link ke form di bawah ini." },
                     { id: "producer", label: "Nama Producer", type: "text", required: true },
                     { id: "director", label: "Nama Director", type: "text", required: true },
                     { id: "script", label: "Nama Script", type: "text", required: true },
@@ -199,7 +197,7 @@ export const UNITS_MOCK = [
                             { label: "Umum (Rp50.000)", value: "umum", price: 50000 }
                         ], required: true
                     },
-                    { id: "driveLink", label: "Link Google Drive Karya", type: "url", required: true },
+                    { id: "karya", label: "Pengumpulan file", type: "file", multiple: true, required: true },
                     { id: "synopsis", label: "Sinopsis", type: "textarea", required: true }
                 ]
             }
@@ -210,6 +208,7 @@ export const UNITS_MOCK = [
         name: "Main Event",
         description: "Puncak acara Lisma Art Parade 2.0. Menghadirkan bintang tamu spesial dan penampilan terbaik dari seluruh unit kesenian.",
         badgeText: "🌟 Puncak Acara",
+        imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop",
         cpName: "Humas LISMA",
         cpWhatsapp: "628123456784",
         cpDescription: "Hubungi untuk informasi tiket dan acara puncak.",

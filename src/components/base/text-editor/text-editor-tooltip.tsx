@@ -2,7 +2,7 @@
 
 import { BubbleMenu } from "@tiptap/react/menus";
 import { cx } from "@/utils/cx";
-import { useEditorContext } from "./text-editor";
+import { useEditorContext } from "./text-editor-context";
 import { TextEditorAlignCenter, TextEditorAlignLeft, TextEditorBold, TextEditorItalic, TextEditorLink, TextEditorUnderline } from "./text-editor-extensions";
 
 interface TextEditorTooltipProps {

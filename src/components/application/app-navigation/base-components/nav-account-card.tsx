@@ -23,7 +23,7 @@ export const NavAccountCard = ({
         <div className="relative flex items-center gap-3 rounded-lg p-3 ring-1 ring-secondary ring-inset">
             <AvatarLabelGroup
                 size="md"
-                initials={initials}
+                src="/avatar-default.webp"
                 title={<span className="truncate block max-w-[160px] font-semibold text-sm">{email}</span>}
                 subtitle={<span className="text-xs text-tertiary">Admin</span>}
                 status="online"
