@@ -5,6 +5,7 @@ import { Button } from "@/components/base/buttons/button";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { motion } from "motion/react";
+import { BadgeWithIcon } from "@/components/base/badges/badges";
 
 export default function MainEventHighlight() {
     return (
@@ -28,10 +29,15 @@ export default function MainEventHighlight() {
                             <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
                             <div className="absolute top-6 left-6">
-                                <div className="inline-flex items-center gap-2 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-4 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 shadow-lg border border-white/20 dark:border-white/10">
-                                    <Star01 className="size-4 animate-pulse" />
+                                <BadgeWithIcon 
+                                    type="pill-color" 
+                                    color="brand" 
+                                    size="md" 
+                                    iconLeading={Star01}
+                                    className="backdrop-blur-sm shadow-lg border border-white/20 dark:border-white/10"
+                                >
                                     MAIN EVENT
-                                </div>
+                                </BadgeWithIcon>
                             </div>
                         </div>
 

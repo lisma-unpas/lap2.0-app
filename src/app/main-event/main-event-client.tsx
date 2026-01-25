@@ -6,6 +6,7 @@ import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { UNIT_CONFIG } from "@/constants/units";
+import { BadgeWithIcon } from "@/components/base/badges/badges";
 
 export default function MainEventClient() {
     const activities = [
@@ -25,10 +26,9 @@ export default function MainEventClient() {
             <Section className="bg-primary">
                 <Container>
                     <div className="flex flex-col items-center text-center">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-3 py-1 text-sm font-medium text-brand-secondary">
-                            <Star01 className="size-4" />
+                        <BadgeWithIcon type="pill-color" color="brand" size="md" iconLeading={Star01}>
                             Puncak Rangkaian LAP 2.0
-                        </div>
+                        </BadgeWithIcon>
                         <h1 className="mt-6 text-display-md font-semibold text-primary md:text-display-lg uppercase tracking-tight">Main Event</h1>
                         <p className="mt-6 max-w-3xl text-lg text-tertiary leading-relaxed">
                             Inilah puncak dari seluruh rangkaian LISMA Art Parade 2.0!
@@ -61,14 +61,14 @@ export default function MainEventClient() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-6 rounded-2xl bg-secondary/30 border border-secondary flex flex-col gap-2">
-                                    <div className="flex items-center gap-2 text-purple-600">
+                                    <div className="flex items-center gap-2 text-brand-600">
                                         <Calendar className="size-5" />
                                         <span className="font-bold">Kapan?</span>
                                     </div>
                                     <p className="text-primary font-medium">24 Mei 2026</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-secondary/30 border border-secondary flex flex-col gap-2">
-                                    <div className="flex items-center gap-2 text-purple-600">
+                                    <div className="flex items-center gap-2 text-brand-600">
                                         <MarkerPin01 className="size-5" />
                                         <span className="font-bold">Dimana?</span>
                                     </div>
@@ -81,7 +81,7 @@ export default function MainEventClient() {
                                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                                     {activities.map((activity, i) => (
                                         <li key={i} className="flex items-start gap-2 text-tertiary text-md">
-                                            <div className="mt-1.5 size-1.5 rounded-full bg-purple-500 shrink-0" />
+                                            <div className="mt-1.5 size-1.5 rounded-full bg-brand-500 shrink-0" />
                                             {activity}
                                         </li>
                                     ))}

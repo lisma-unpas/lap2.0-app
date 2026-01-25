@@ -4,16 +4,16 @@ import { ArrowRight, InfoCircle } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
+import { BadgeWithDot } from "@/components/base/badges/badges";
 
 export default function LandingHero() {
     return (
         <Section className="bg-primary overflow-hidden">
             <Container>
                 <div className="flex flex-col items-center text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-secondary bg-brand-primary px-3 py-1 text-sm font-medium text-brand-secondary">
-                        <span className="flex h-2 w-2 rounded-full bg-brand-solid animate-pulse" />
+                    <BadgeWithDot type="pill-color" color="brand" size="md">
                         LISMA ART PARADE 2.0 is Coming
-                    </div>
+                    </BadgeWithDot>
 
                     <h1 className="mt-6 max-w-4xl text-display-md font-semibold tracking-tight text-primary md:text-display-lg lg:text-display-xl">
                         Selamat Datang di <br />
