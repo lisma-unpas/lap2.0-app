@@ -1,6 +1,6 @@
-import { Metadata } from "next";
-import { openSharedMetadata } from "@/utils/metadata";
-import { getAdminSession } from "@/actions/auth";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { getTicketDetails, markTicketAsUsed } from "@/actions/check-in";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
@@ -10,27 +10,73 @@ import { CheckCircle, AlertTriangle, User01, Calendar, Ticket01, XCircle, LogIn0
 import { Badge } from "@/components/base/badges/badges";
 import { UNIT_CONFIG } from "@/constants/units";
 import { formatDateTime } from "@/utils/date";
+import { useParams, useRouter } from "next/navigation";
 
-export const metadata: Metadata = {
-    ...openSharedMetadata("Check-In Tiket"),
-};
+export default function CheckInPage() {
+    const params = useParams();
+    const router = useRouter();
+    const code = params?.code as string;
 
-interface CheckInPageProps {
-    params: Promise<{ code: string }>;
-}
+    const [admin, setAdmin] = useState<any>(null);
+    const [ticket, setTicket] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [wasAlreadyUsed, setWasAlreadyUsed] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-export default async function CheckInPage({ params }: CheckInPageProps) {
-    const { code } = await params;
-    const admin = await getAdminSession();
-    let ticketRes = await getTicketDetails(code);
+    useEffect(() => {
+        const checkAuthAndFetch = async () => {
+            if (!code) return;
 
-    // Auto check-in if valid and not used
-    const wasAlreadyUsed = ticketRes.success && ticketRes.data?.isUsed;
+            // Check admin session from localStorage
+            const userStr = localStorage.getItem("admin_user");
+            const expiryStr = localStorage.getItem("admin_expiry");
 
-    if (admin && ticketRes.success && ticketRes.data && !ticketRes.data.isUsed) {
-        await markTicketAsUsed(code);
-        // Refresh ticket data locally to show used state
-        ticketRes = await getTicketDetails(code);
+            if (!userStr || !expiryStr || Date.now() > parseInt(expiryStr)) {
+                setLoading(false);
+                return;
+            }
+
+            const adminUser = JSON.parse(userStr);
+            setAdmin(adminUser);
+
+            try {
+                // Fetch ticket details
+                let res = await getTicketDetails(code);
+
+                if (res.success && res.data) {
+                    const alreadyUsed = res.data.isUsed;
+                    setWasAlreadyUsed(alreadyUsed);
+                    setTicket(res.data);
+
+                    // Auto check-in if valid and not used
+                    if (!alreadyUsed && !isProcessing) {
+                        setIsProcessing(true);
+                        await markTicketAsUsed(code);
+                        // Refresh data
+                        const refreshRes = await getTicketDetails(code);
+                        if (refreshRes.success) setTicket(refreshRes.data);
+                        setIsProcessing(false);
+                    }
+                } else {
+                    setError(res.error || "Tiket tidak ditemukan");
+                }
+            } catch (err) {
+                setError("Terjadi kesalahan sistem");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuthAndFetch();
+    }, [code]);
+
+    if (loading) {
+        return (
+            <Section className="min-h-screen flex items-center justify-center">
+                <div className="animate-pulse text-tertiary">Memverifikasi tiket...</div>
+            </Section>
+        );
     }
 
     if (!admin) {
@@ -59,7 +105,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
         );
     }
 
-    if (!ticketRes.success || !ticketRes.data) {
+    if (error || !ticket) {
         return (
             <Section className="min-h-screen flex items-center justify-center bg-secondary_alt/30">
                 <Container>
@@ -80,7 +126,6 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
         );
     }
 
-    const ticket = ticketRes.data;
     const reg = ticket.registration;
     const config = UNIT_CONFIG[reg.unitId.toLowerCase()] || { name: reg.unitId };
 
@@ -136,8 +181,8 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-quaternary tracking-widest">Waktu Pendaftaran</p>
-                                        <p className="text-sm font-bold text-primary">Reg: {formatDateTime(reg.createdAt)}</p>
-                                        <p className="text-xs text-tertiary italic">Tiket Dibuat: {formatDateTime(ticket.issuedAt)}</p>
+                                        <p className="text-sm font-bold text-primary">Reg: {formatDateTime(new Date(reg.createdAt))}</p>
+                                        <p className="text-xs text-tertiary italic">Tiket Dibuat: {formatDateTime(new Date(ticket.issuedAt))}</p>
                                     </div>
                                 </div>
                             </div>
