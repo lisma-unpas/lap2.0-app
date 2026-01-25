@@ -1,6 +1,10 @@
-"use client";
-
+import { Metadata } from "next";
+import { openSharedMetadata } from "@/utils/metadata";
 import { UnitGallery } from "@/components/marketing/unit-gallery";
+
+export const metadata: Metadata = {
+    ...openSharedMetadata("Pilih Unit"),
+};
 
 export default function RegistrationsPage() {
     return (

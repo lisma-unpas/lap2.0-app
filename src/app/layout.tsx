@@ -9,6 +9,8 @@ import { CartProvider } from "@/context/cart-context";
 import { ToastProvider } from "@/context/toast-context";
 import { GoogleAuthProvider } from "@/context/google-auth-context";
 
+import { openSharedMetadata } from "@/utils/metadata";
+
 const poppins = Poppins({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
@@ -23,8 +25,7 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-    title: "Web LAP — LISMA",
-    description: "Platform Terintegrasi LISMA dan LAP untuk Pendaftaran dan Materi.",
+    ...openSharedMetadata(),
 };
 
 export const viewport: Viewport = {

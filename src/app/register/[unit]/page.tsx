@@ -6,9 +6,17 @@ import { AlertCircle } from "@untitledui/icons";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { Button } from "@/components/base/buttons/button";
+import { Metadata } from "next";
+import { openSharedMetadata } from "@/utils/metadata";
 
 interface PageProps {
     params: Promise<{ unit: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { unit } = await params;
+    const config = UNIT_CONFIG[unit.toLowerCase()];
+    return openSharedMetadata(`Daftar ${config?.name || "Unit"}`);
 }
 
 export default async function Page({ params }: PageProps) {

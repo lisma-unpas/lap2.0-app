@@ -1,8 +1,9 @@
+import { openSharedMetadata } from "@/utils/metadata";
 import InfoClient from "./info-client";
 import { getInfoList } from "@/actions/info";
 
 export const metadata = {
-    title: "Manajemen Informasi | Admin",
+    ...openSharedMetadata("Manajemen Informasi"),
 };
 
 export default async function InfoPage() {

@@ -1,4 +1,10 @@
+import { Metadata } from "next";
+import { openSharedMetadata } from "@/utils/metadata";
 import prisma from "@/lib/prisma";
+
+export const metadata: Metadata = {
+    ...openSharedMetadata("Informasi & Update"),
+};
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { Badge } from "@/components/base/badges/badges";

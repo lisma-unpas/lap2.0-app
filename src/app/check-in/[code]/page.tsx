@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+import { openSharedMetadata } from "@/utils/metadata";
 import { getAdminSession } from "@/actions/auth";
 import { getTicketDetails, markTicketAsUsed } from "@/actions/check-in";
 import Container from "@/components/shared/container";
@@ -7,6 +9,10 @@ import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-ic
 import { CheckCircle, AlertTriangle, User01, Calendar, Ticket01, XCircle, LogIn01 } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
 import { UNIT_CONFIG } from "@/constants/units";
+
+export const metadata: Metadata = {
+    ...openSharedMetadata("Check-In Tiket"),
+};
 
 interface CheckInPageProps {
     params: Promise<{ code: string }>;

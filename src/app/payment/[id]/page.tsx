@@ -1,7 +1,13 @@
+import { Metadata } from "next";
+import { openSharedMetadata } from "@/utils/metadata";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import PaymentForm from "./payment-form";
 import { UNIT_CONFIG } from "@/constants/units";
+
+export async function generateMetadata(): Promise<Metadata> {
+    return openSharedMetadata("Konfirmasi Pembayaran");
+}
 
 interface PageProps {
     params: Promise<{ id: string }>;

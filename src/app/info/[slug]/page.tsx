@@ -9,18 +9,17 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/base/buttons/button";
 import { BackButton } from "@/components/shared/info/back-button";
 
+import { openSharedMetadata } from "@/utils/metadata";
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const info = await prisma.info.findUnique({
         where: { slug }
     });
 
-    if (!info) return { title: "Not Found" };
+    if (!info) return openSharedMetadata("Info Tidak Ditemukan");
 
-    return {
-        title: `${info.title} | Informasi Lisma`,
-        description: info.body.substring(0, 160),
-    };
+    return openSharedMetadata(info.title, info.body.substring(0, 160));
 }
 
 export const dynamic = "force-dynamic";
