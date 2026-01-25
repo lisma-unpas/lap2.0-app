@@ -59,7 +59,8 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                 });
             }, 300);
 
-            const uploadRes = await uploadImage(formData);
+            const tokensRaw = typeof window !== "undefined" ? localStorage.getItem("gdrive_tokens") : null;
+            const uploadRes = await uploadImage(formData, tokensRaw);
             clearInterval(progressInterval);
 
             if (uploadRes.success) {
