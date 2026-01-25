@@ -85,7 +85,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
     const config = UNIT_CONFIG[reg.unitId.toLowerCase()] || { name: reg.unitId };
 
     return (
-        <Section className="min-h-screen bg-secondary_alt/30 py-6 md:py-20">
+        <Section className="min-h-screen bg-secondary_alt/30">
             <Container>
                 <div className="max-w-2xl mx-auto">
                     <div className="bg-primary rounded-lg shadow-md border border-secondary overflow-hidden">
