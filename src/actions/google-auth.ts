@@ -2,24 +2,12 @@
 
 import { cookies } from "next/headers";
 
-export async function getGoogleUser() {
-    const cookieStore = await cookies();
-    const userCookie = cookieStore.get("google_user")?.value;
+// Since we moved to localStorage, we no longer set cookies on the server.
+// These actions are kept for backward compatibility if needed, but 
+// they will no longer return session data from the client's localStorage.
 
-    if (!userCookie) return null;
-
-    try {
-        return JSON.parse(userCookie);
-    } catch {
-        return null;
-    }
-}
-
-export async function hasGoogleTokens() {
-    const cookieStore = await cookies();
-    return cookieStore.has("gdrive_tokens");
-}
 export async function signOut() {
+    // Clear cookies just in case any old ones exist
     const cookieStore = await cookies();
     cookieStore.delete("gdrive_tokens");
     cookieStore.delete("google_user");

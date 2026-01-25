@@ -12,41 +12,39 @@ export async function GET(request: NextRequest) {
 
     try {
         const tokens = await getTokens(code);
-        const cookieStore = await cookies();
-
-        // Storing tokens in cookies (you might want to encrypt this in production)
-        cookieStore.set("gdrive_tokens", JSON.stringify(tokens), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-            path: "/",
-        });
-
-        // Fetch user info to store in cookie for navbar
+        let userData = null;
         if (tokens.access_token) {
             const oauth2 = getUserInfoClient(tokens.access_token);
             const { data } = await oauth2.userinfo.get();
-
-            cookieStore.set("google_user", JSON.stringify({
+            userData = {
                 name: data.name,
                 email: data.email,
                 picture: data.picture,
-            }), {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 60 * 60 * 24 * 7,
-                path: "/",
-            });
+            };
         }
 
         const html = `
             <html>
                 <body>
                     <script>
-                        if (window.opener) {
-                            window.opener.location.reload();
+                        try {
+                            const user = ${JSON.stringify(userData)};
+                            const tokens = ${JSON.stringify(tokens)};
+                            const expiryDate = new Date();
+                            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+                            
+                            localStorage.setItem("google_user", JSON.stringify(user));
+                            localStorage.setItem("gdrive_tokens", JSON.stringify(tokens));
+                            localStorage.setItem("google_auth_expiry", expiryDate.getTime().toString());
+                            
+                            if (window.opener) {
+                                window.opener.location.reload();
+                            }
+                            window.close();
+                        } catch (e) {
+                            console.error("Auth persistence failed", e);
+                            alert("Gagal menyimpan sesi. Silakan coba lagi.");
                         }
-                        window.close();
                     </script>
                     <p>Autentikasi berhasil. Menutup jendela...</p>
                 </body>

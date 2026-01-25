@@ -12,9 +12,10 @@ export const Toast = () => {
             <AnimatePresence>
                 {toast.show && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                        initial={{ opacity: 0, x: 100 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 100, transition: { duration: 0.2 } }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="pointer-events-auto w-full"
                     >
                         <AlertFloating

@@ -23,9 +23,26 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
     try {
         // Check availability for all items first
         for (const item of items) {
-            const availability = await checkUnitAvailability(item.unitId.toLowerCase());
-            if (availability.success && !availability.available) {
-                return { success: false, error: `Maaf, kuota untuk unit ${item.unitName} sudah penuh.` };
+            const sesiValue = item.formData.sesi;
+            const categoryValue = item.formData.category;
+
+            let currentCategory = "";
+            if (sesiValue && categoryValue) {
+                currentCategory = `${sesiValue} - ${categoryValue}`;
+            } else {
+                currentCategory = categoryValue || sesiValue || item.subEventName || "TOTAL";
+            }
+
+            const availability = await checkUnitAvailability(item.unitId.toLowerCase(), currentCategory);
+            const requestedQuantity = parseInt(item.formData.quantity) || 1;
+
+            if (availability.success && availability.remaining! < requestedQuantity) {
+                return {
+                    success: false,
+                    error: availability.remaining! > 0
+                        ? `Maaf, sisa kuota untuk kategori ${currentCategory} hanya tinggal ${availability.remaining} tiket.`
+                        : `Maaf, kuota untuk kategori ${currentCategory} sudah penuh.`
+                };
             }
         }
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
     Settings02,
     Save01,
+    ChevronDown,
 } from "@untitledui/icons";
 import { getUnitSettings, updateUnitSetting } from "@/actions/admin";
 import { Button } from "@/components/base/buttons/button";
@@ -12,11 +13,12 @@ import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { UNIT_CONFIG } from "@/constants/units";
 import { useToast } from "@/context/toast-context";
+import { cx } from "@/utils/cx";
 
 export default function SettingsClient() {
-    const [settings, setSettings] = useState<Record<string, number>>({});
+    // unitId -> categoryName -> limit
+    const [settings, setSettings] = useState<Record<string, Record<string, number>>>({});
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
     const { toastSuccess, toastError } = useToast();
@@ -27,29 +29,25 @@ export default function SettingsClient() {
 
     async function fetchInitialData() {
         setIsInitialLoading(true);
-        await fetchData(true);
+        const res = await getUnitSettings();
+        if (res.success && res.data) {
+            const mapped: Record<string, Record<string, number>> = {};
+            res.data.forEach((curr: any) => {
+                if (!mapped[curr.unitId]) mapped[curr.unitId] = {};
+                mapped[curr.unitId][curr.categoryName] = curr.limit;
+            });
+            setSettings(mapped);
+        }
         setIsInitialLoading(false);
     }
 
-    async function fetchData(isInitial = false) {
-        if (!isInitial) setIsLoading(true);
-        const res = await getUnitSettings();
-        if (res.success && res.data) {
-            const mapped = res.data.reduce((acc: any, curr: any) => {
-                acc[curr.unitId] = curr.limit;
-                return acc;
-            }, {});
-            setSettings(mapped);
-        }
-        if (!isInitial) setIsLoading(false);
-    }
-
-    async function handleSave(unitId: string) {
-        setIsSaving(unitId);
-        const limit = settings[unitId] || 100;
-        const res = await updateUnitSetting(unitId, limit);
+    async function handleSave(unitId: string, categoryName: string) {
+        const key = `${unitId}-${categoryName}`;
+        setIsSaving(key);
+        const limit = settings[unitId]?.[categoryName] ?? 100;
+        const res = await updateUnitSetting(unitId, limit, categoryName);
         if (res.success) {
-            toastSuccess("Berhasil", `Limit untuk ${unitId} diperbarui.`);
+            toastSuccess("Berhasil", `Limit untuk ${unitId} (${categoryName}) diperbarui.`);
         } else {
             toastError("Gagal", res.message || "Gagal memperbarui limit.");
         }
@@ -57,6 +55,66 @@ export default function SettingsClient() {
     }
 
     const units = Object.keys(UNIT_CONFIG);
+
+    function getUnitCategories(unitId: string) {
+        const unit = UNIT_CONFIG[unitId];
+        const categories = new Set<string>();
+
+        const getFieldOptions = (fields: any[]) => {
+            const sesiField = fields.find((f: any) => f.id === "sesi");
+            const categoryField = fields.find((f: any) => f.id === "category");
+
+            const sesiOptions = sesiField?.options || [];
+            const categoryOptions = categoryField?.options ? categoryField.options.map((o: any) => o.value || o) : [];
+
+            return { sesiOptions, categoryOptions };
+        };
+
+        // 1. Check root level formFields
+        const rootOptions = getFieldOptions(unit.formFields || []);
+
+        // 2. Add combinations from root fields
+        if (rootOptions.sesiOptions.length > 0 && rootOptions.categoryOptions.length > 0) {
+            rootOptions.sesiOptions.forEach((s: string) => {
+                rootOptions.categoryOptions.forEach((c: string) => {
+                    categories.add(`${s} - ${c}`);
+                });
+            });
+        } else {
+            // Add individual if no combinations
+            rootOptions.sesiOptions.forEach((s: string) => categories.add(s));
+            rootOptions.categoryOptions.forEach((c: string) => categories.add(c));
+        }
+
+        // 3. Check subEventConfigs
+        if (unit.subEventConfigs) {
+            Object.keys(unit.subEventConfigs).forEach(subEventName => {
+                const config = unit.subEventConfigs[subEventName];
+                const cfgOptions = getFieldOptions(config.fields || []);
+
+                if (cfgOptions.sesiOptions.length > 0 && cfgOptions.categoryOptions.length > 0) {
+                    cfgOptions.sesiOptions.forEach((s: string) => {
+                        cfgOptions.categoryOptions.forEach((c: string) => {
+                            categories.add(`${subEventName} - ${s} - ${c}`);
+                        });
+                    });
+                } else if (cfgOptions.sesiOptions.length > 0) {
+                    cfgOptions.sesiOptions.forEach((s: string) => categories.add(`${subEventName} - ${s}`));
+                } else if (cfgOptions.categoryOptions.length > 0) {
+                    cfgOptions.categoryOptions.forEach((c: string) => categories.add(`${subEventName} - ${c}`));
+                } else {
+                    categories.add(subEventName);
+                }
+            });
+        }
+
+        // 4. Add subEvents if not covered
+        if (unit.subEvents && !unit.subEventConfigs) {
+            unit.subEvents.forEach((se: string) => categories.add(se));
+        }
+
+        return Array.from(categories);
+    }
 
     return (
         <Section className="bg-secondary_alt min-h-screen py-10">
@@ -66,59 +124,75 @@ export default function SettingsClient() {
                     <p className="text-md text-tertiary">Configure registration limits and system parameters</p>
                 </div>
 
-                <div className="max-w-3xl">
+                <div className="max-w-4xl">
                     <div className="flex items-center gap-3 mb-6">
                         <Settings02 className="size-6 text-brand-500" />
                         <h2 className="text-xl font-bold text-primary">Registration Capacity Limits</h2>
                     </div>
 
                     <p className="bg-utility-blue-50 border border-utility-blue-100 p-4 rounded-lg text-sm text-utility-blue-700 mb-8">
-                        The registration form for a unit will automatically close if the number of <strong>Verified</strong> or <strong>Pending</strong> registrations reaches the limit. Rejected registrations are not counted.
+                        The registration form will automatically close if the number of <strong>Verified</strong> or <strong>Pending</strong> registrations reaches the limit for a specific category or the unit's total capacity.
                     </p>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {isInitialLoading ? (
-                            [1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="bg-primary p-4 rounded-2xl border border-secondary flex justify-between items-center gap-4">
-                                    <div className="flex-1">
-                                        <div className="h-5 w-40 bg-secondary animate-pulse rounded-lg mb-2" />
-                                        <div className="h-3 w-20 bg-secondary animate-pulse rounded-lg" />
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="h-9 w-32 bg-secondary animate-pulse rounded-lg" />
-                                        <div className="h-9 w-24 bg-secondary animate-pulse rounded-lg" />
-                                    </div>
-                                </div>
+                            [1, 2, 3].map((i) => (
+                                <div key={i} className="bg-primary p-6 rounded-2xl border border-secondary animate-pulse h-48" />
                             ))
                         ) : (
                             units.map((unitId) => {
                                 const unit = UNIT_CONFIG[unitId];
+                                const categories = getUnitCategories(unitId);
+
                                 return (
-                                    <div key={unitId} className="bg-primary p-4 rounded-2xl border border-secondary shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-                                        <div className="flex-1">
-                                            <h3 className="font-bold text-primary">{unit.name}</h3>
-                                            <p className="text-xs text-tertiary">Unit ID: {unitId}</p>
-                                        </div>
-                                        <div className="flex items-center gap-4 w-full sm:w-auto">
-                                            <div className="w-32">
-                                                <Input
-                                                    type="number"
-                                                    min={0}
-                                                    value={settings[unitId]?.toString() || "100"}
-                                                    onChange={(val) => setSettings(prev => ({ ...prev, [unitId]: parseInt(val) || 0 }))}
-                                                    size="sm"
-                                                    aria-label={`Limit for ${unit.name}`}
-                                                />
+                                    <div key={unitId} className="bg-primary rounded-2xl border border-secondary shadow-sm overflow-hidden">
+                                        <div className="p-4 border-b border-secondary flex items-center justify-between">
+                                            <div>
+                                                <h3 className="font-bold text-lg text-primary">{unit.name}</h3>
+                                                <p className="text-xs text-tertiary">Unit ID: {unitId} • {categories.length - 1} Special Categories</p>
                                             </div>
-                                            <Button
-                                                size="sm"
-                                                color="secondary"
-                                                iconLeading={Save01}
-                                                onClick={() => handleSave(unitId)}
-                                                isLoading={isSaving === unitId}
-                                            >
-                                                Save
-                                            </Button>
+                                        </div>
+
+                                        <div className="divide-y divide-secondary">
+                                            {categories.map((cat) => (
+                                                <div key={cat} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-secondary/20">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="size-2 rounded-full bg-secondary" />
+                                                        <span className="text-sm font-medium text-primary">
+                                                            {cat}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                        <div className="w-28">
+                                                            <Input
+                                                                type="number"
+                                                                min={0}
+                                                                value={settings[unitId]?.[cat]?.toString() || "100"}
+                                                                onChange={(val) => setSettings(prev => ({
+                                                                    ...prev,
+                                                                    [unitId]: {
+                                                                        ...(prev[unitId] || {}),
+                                                                        [cat]: parseInt(val) || 0
+                                                                    }
+                                                                }))}
+                                                                size="sm"
+                                                                aria-label={`Limit for ${cat}`}
+                                                            />
+                                                        </div>
+                                                        <Button
+                                                            size="sm"
+                                                            color="secondary"
+                                                            iconLeading={Save01}
+                                                            onClick={() => handleSave(unitId, cat)}
+                                                            isLoading={isSaving === `${unitId}-${cat}`}
+                                                            className="min-w-[80px]"
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 );

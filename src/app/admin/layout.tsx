@@ -7,15 +7,11 @@ import {
     Ticket01,
     Settings02,
     LogOut01,
-    Home01,
     InfoSquare
 } from "@untitledui/icons";
 import { SidebarNavigationSimple } from "@/components/application/app-navigation/sidebar-navigation/sidebar-simple";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { adminLogout } from "@/actions/auth";
-import { useRouter } from "next/navigation";
-
-import { getAdminSession } from "@/actions/auth";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -23,12 +19,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [adminUser, setAdminUser] = React.useState<any>(null);
 
     React.useEffect(() => {
-        const fetchSession = async () => {
-            const user = await getAdminSession();
-            if (user) setAdminUser(user);
+        const checkSession = () => {
+            const userStr = localStorage.getItem("admin_user");
+            const expiryStr = localStorage.getItem("admin_expiry");
+
+            if (!userStr || !expiryStr) {
+                if (pathname !== "/admin/login") {
+                    router.push("/admin/login");
+                }
+                return;
+            }
+
+            const expiry = parseInt(expiryStr);
+            if (Date.now() > expiry) {
+                localStorage.removeItem("admin_user");
+                localStorage.removeItem("admin_expiry");
+                router.push("/admin/login");
+                return;
+            }
+
+            try {
+                setAdminUser(JSON.parse(userStr));
+            } catch (e) {
+                router.push("/admin/login");
+            }
         };
-        fetchSession();
-    }, []);
+
+        checkSession();
+    }, [pathname, router]);
 
     const menuItems = [
         {
@@ -65,6 +83,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href: "#",
             onClick: async () => {
                 await adminLogout();
+                localStorage.removeItem("admin_user");
+                localStorage.removeItem("admin_expiry");
                 router.push("/admin/login");
             }
         }

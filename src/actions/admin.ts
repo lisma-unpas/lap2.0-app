@@ -251,16 +251,22 @@ export async function getSpreadsheetUrl() {
     return config.spreadsheet.url;
 }
 
-export async function updateUnitSetting(unitId: string, limit: number) {
+export async function updateUnitSetting(unitId: string, limit: number, categoryName: string = "TOTAL") {
     try {
         await (prisma as any).unitSetting.upsert({
-            where: { unitId },
+            where: {
+                unitId_categoryName: {
+                    unitId,
+                    categoryName
+                }
+            },
             update: { limit },
-            create: { unitId, limit }
+            create: { unitId, categoryName, limit }
         });
         revalidatePath("/admin/settings");
         return { success: true };
     } catch (error) {
+        console.error("[updateUnitSetting] Error:", error);
         return { success: false, message: "Gagal memperbarui pengaturan." };
     }
 }
@@ -348,30 +354,57 @@ export async function syncTickets() {
     }
 }
 
-export async function checkUnitAvailability(unitId: string) {
+export async function checkUnitAvailability(unitId: string, categoryName: string) {
     try {
-        const setting = await (prisma as any).unitSetting.findUnique({
-            where: { unitId }
+        const settings = await (prisma as any).unitSetting.findMany({
+            where: { unitId: unitId.toLowerCase() }
         });
 
-        if (!setting) return { success: true, available: true };
+        const specificLimit = settings.find((s: any) => s.categoryName === categoryName)?.limit;
 
-        const count = await prisma.registration.count({
+        const registrations = await prisma.registration.findMany({
             where: {
-                unitId,
-                status: {
-                    in: ["VERIFIED", "PENDING"]
-                }
+                unitId: unitId.toLowerCase(),
+                status: { in: ["VERIFIED", "PENDING"] }
+            },
+            select: {
+                detailedData: true,
+                subEventName: true
             }
         });
 
+        let categorySold = 0;
+
+        registrations.forEach(reg => {
+            const data = (reg.detailedData as any) || {};
+            const quantity = parseInt(data.quantity) || 1;
+
+            const categoryValue = data.category;
+            const sesiValue = data.sesi;
+
+            let regCategory = "";
+            if (sesiValue && categoryValue) {
+                regCategory = `${sesiValue} - ${categoryValue}`;
+            } else {
+                regCategory = categoryValue || sesiValue || reg.subEventName;
+            }
+
+            if (regCategory === categoryName) {
+                categorySold += quantity;
+            }
+        });
+
+        const available = specificLimit !== undefined ? categorySold < specificLimit : true;
+
         return {
             success: true,
-            available: count < setting.limit,
-            count,
-            limit: setting.limit
+            available,
+            sold: categorySold,
+            limit: specificLimit ?? 0,
+            remaining: specificLimit !== undefined ? Math.max(0, specificLimit - categorySold) : 9999
         };
     } catch (error) {
-        return { success: false, available: true };
+        console.error("[checkUnitAvailability] Error:", error);
+        return { success: false, available: true, remaining: 100, sold: 0, limit: 100 };
     }
 }

@@ -8,6 +8,7 @@ import ConditionalLayout from "@/components/shared/conditional-layout";
 import { CartProvider } from "@/context/cart-context";
 import { ToastProvider } from "@/context/toast-context";
 import { GoogleAuthProvider } from "@/context/google-auth-context";
+import { Toast } from "@/components/application/notifications/toast";
 
 import { openSharedMetadata } from "@/utils/metadata";
 
@@ -49,6 +50,7 @@ export default function RootLayout({
                         <CartProvider>
                             <ToastProvider>
                                 <Theme>
+                                    <Toast />
                                     <ConditionalLayout>
                                         {children}
                                     </ConditionalLayout>

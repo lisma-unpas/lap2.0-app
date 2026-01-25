@@ -4,12 +4,9 @@ import { getDriveClient } from "@/lib/google-drive";
 import { cookies } from "next/headers";
 import { Readable } from "stream";
 
-export async function uploadImage(formData: FormData) {
+export async function uploadImage(formData: FormData, tokensRaw: string | null) {
     const file = formData.get("file") as File;
     if (!file) throw new Error("No file provided");
-
-    const cookieStore = await cookies();
-    const tokensRaw = cookieStore.get("gdrive_tokens")?.value;
 
     if (!tokensRaw) {
         return { success: false, error: "AUTH_REQUIRED", message: "Silakan hubungkan Google Drive terlebih dahulu." };
@@ -57,10 +54,7 @@ export async function uploadImage(formData: FormData) {
     }
 }
 
-export async function deleteImage(fileId: string) {
-    const cookieStore = await cookies();
-    const tokensRaw = cookieStore.get("gdrive_tokens")?.value;
-
+export async function deleteImage(fileId: string, tokensRaw: string | null) {
     if (!tokensRaw) {
         return { success: false, error: "AUTH_REQUIRED" };
     }

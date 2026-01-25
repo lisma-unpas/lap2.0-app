@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { getGoogleUser, signOut as signOutAction } from "@/actions/google-auth";
+import { signOut as signOutAction } from "@/actions/google-auth";
 
 interface GoogleUser {
     name: string;
@@ -13,7 +13,7 @@ interface GoogleAuthContextType {
     user: GoogleUser | null;
     isConnected: boolean;
     loading: boolean;
-    refresh: () => Promise<void>;
+    refresh: () => void; // Changed to void as it's no longer async
     signOut: () => Promise<void>;
 }
 
@@ -23,10 +23,25 @@ export function GoogleAuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<GoogleUser | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const checkAuth = useCallback(async () => {
+    const checkAuth = useCallback(() => {
+        if (typeof window === "undefined") return;
+
         try {
-            const googleUser = await getGoogleUser();
-            setUser(googleUser);
+            const cachedUser = localStorage.getItem("google_user");
+            const expiry = localStorage.getItem("google_auth_expiry");
+
+            if (cachedUser && expiry) {
+                if (Date.now() < parseInt(expiry)) {
+                    setUser(JSON.parse(cachedUser));
+                } else {
+                    localStorage.removeItem("google_user");
+                    localStorage.removeItem("google_auth_expiry");
+                    localStorage.removeItem("gdrive_tokens");
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
         } catch (error) {
             console.error("Failed to check google auth:", error);
         } finally {
@@ -36,14 +51,16 @@ export function GoogleAuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = useCallback(async () => {
         try {
-            await signOutAction();
+            await signOutAction(); // Call server action to be safe, though it might not do much now
+            localStorage.removeItem("google_user");
+            localStorage.removeItem("google_auth_expiry");
+            localStorage.removeItem("gdrive_tokens"); // Clear gdrive tokens on sign out
             setUser(null);
-            // Re-verify auth status from server
-            await checkAuth();
+            // Removed checkAuth() call after signOutAction() as local state is updated directly
         } catch (error) {
             console.error("Failed to sign out:", error);
         }
-    }, [checkAuth]);
+    }, []); // Dependency array is empty as it no longer depends on checkAuth
 
     useEffect(() => {
         checkAuth();

@@ -22,6 +22,7 @@ import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
 import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
+import { checkUnitAvailability } from "@/actions/admin";
 
 interface RegistrationFormProps {
     unit: string;
@@ -43,6 +44,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [isNavigating, setIsNavigating] = useState(false);
     const [showDraftModal, setShowDraftModal] = useState(false);
     const [pendingDraft, setPendingDraft] = useState<{ subEvent: string; data: any } | null>(null);
+    const [availability, setAvailability] = useState<{ sold: number, limit: number, remaining: number } | null>(null);
     const { isConnected } = useGoogleAuth();
     const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
 
@@ -68,6 +70,51 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         hasCheckedDraft.current = true;
     }, [unit, DRAFT_KEY]);
 
+    const subEventConfig = config?.subEventConfigs?.[selectedSubEvent];
+    const fields = subEventConfig?.fields || config?.formFields || [];
+
+    useEffect(() => {
+        async function fetchAvailability() {
+            // Determine if we need a specific selection before checking
+            const hasCategoryField = fields.some((f: any) => f.id === "category");
+            const hasSesiField = fields.some((f: any) => f.id === "sesi");
+
+            const categoryValue = formData.category;
+            const sesiValue = formData.sesi;
+
+            // If category or sesi is required but not selected, don't show availability
+            if ((hasCategoryField && !categoryValue) || (hasSesiField && !sesiValue)) {
+                setAvailability(null);
+                return;
+            }
+
+            // Construct combined category key consistently with Admin Settings
+            const parts = [];
+            if (selectedSubEvent && selectedSubEvent !== config.name) {
+                parts.push(selectedSubEvent);
+            }
+            if (sesiValue) parts.push(sesiValue);
+            if (categoryValue) parts.push(categoryValue);
+
+            const currentCategory = parts.join(" - ") || "TOTAL";
+
+            if (!currentCategory) {
+                setAvailability(null);
+                return;
+            }
+
+            const res = await checkUnitAvailability(unit.toLowerCase(), currentCategory);
+            if (res.success) {
+                setAvailability({
+                    sold: res.sold!,
+                    limit: res.limit!,
+                    remaining: res.remaining!
+                });
+            }
+        }
+        fetchAvailability();
+    }, [unit, selectedSubEvent, formData.category, formData.sesi, fields]);
+
     // 2. Persist Data as User Types - Debounced manually or just guarded
     useEffect(() => {
         // Skip saving if we are currently showing the modal or if data is empty
@@ -83,8 +130,6 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         return () => clearTimeout(timeout);
     }, [formData, selectedSubEvent, unit, DRAFT_KEY, showDraftModal]);
 
-    const subEventConfig = config?.subEventConfigs?.[selectedSubEvent];
-    const fields = subEventConfig?.fields || config?.formFields || [];
 
     useEffect(() => {
         if (userIdentity) {
@@ -119,6 +164,14 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                 } else {
                     finalValue = numericValue;
                 }
+            }
+        }
+
+        if (id === "quantity" && availability) {
+            const numVal = parseInt(finalValue) || 0;
+            if (numVal > availability.remaining) {
+                finalValue = availability.remaining.toString();
+                toastError("Melebihi Kuota", `Maaf, sisa kuota tiket hanya tinggal ${availability.remaining}.`);
             }
         }
 
@@ -180,7 +233,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                 });
             }, 300);
 
-            const res = await uploadImage(fd);
+            const tokens = localStorage.getItem("gdrive_tokens");
+            const res = await uploadImage(fd, tokens);
             clearInterval(progressInterval);
 
             if (res.success) {
@@ -277,7 +331,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
     const isMd = useBreakpoint("md");
     const [isMounted, setIsMounted] = useState(false);
-    const [isFloating, setIsFloating] = useState(true);
+    const [isPinned, setIsPinned] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -287,7 +341,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                setIsFloating(!entry.isIntersecting);
+                setIsPinned(!entry.isIntersecting);
             },
             { threshold: 0 }
         );
@@ -469,6 +523,9 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                 );
                             }
 
+                            const isQuantity = field.id === "quantity";
+                            const isQuantityDisabled = isQuantity && !availability;
+
                             return (
                                 <Input
                                     key={field.id}
@@ -483,10 +540,12 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                     }
                                     label={field.label}
                                     isRequired={field.required}
-                                    placeholder={field.placeholder || `Masukkan ${field.label}...`}
+                                    hint={isQuantity && availability ? `Sisa kuota: ${availability.remaining} tiket` : undefined}
+                                    placeholder={isQuantityDisabled ? "Pilih kategori terlebih dahulu..." : (field.placeholder || `Masukkan ${field.label}...`)}
                                     value={formData[field.id] ?? (field.type === "number" ? (field.defaultValue?.toString() || "0") : "")}
                                     onChange={(val) => handleInputChange(field.id, val)}
                                     size="md"
+                                    isDisabled={isQuantityDisabled}
                                     isInvalid={!!formErrors[field.id]}
                                     errorMessage={
                                         formErrors[field.id] ||
@@ -498,22 +557,25 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                         })}
                     </div>
 
-                    <div ref={sentinelRef} className="h-px w-full" />
-                    <div className="sticky bottom-0 left-0 right-0 md:static mt-12 px-2 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-white z-40">
-                        <div>
-                            <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
-                            <p className="text-xl md:text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
+                    <div className="relative mt-12">
+                        <div className="sticky bottom-0 left-0 right-0 md:static px-2 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-primary z-40 dark:bg-gray-900">
+                            <div>
+                                <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
+                                <p className="text-xl md:text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
+                            </div>
+                            <Button
+                                size={isMounted && isMd ? "xl" : "md"}
+                                color="primary"
+                                iconLeading={ShoppingCart01}
+                                onClick={handleAddToCart}
+                                isLoading={isUploading || isNavigating}
+                                className="w-fit sm:w-auto md:px-10"
+                            >
+                                Checkout
+                            </Button>
                         </div>
-                        <Button
-                            size={isMounted && isMd ? "xl" : "md"}
-                            color="primary"
-                            iconLeading={ShoppingCart01}
-                            onClick={handleAddToCart}
-                            isLoading={isUploading || isNavigating}
-                            className="w-fit sm:w-auto md:px-10"
-                        >
-                            Checkout
-                        </Button>
+                        {/* Sentinel placed at the very bottom of the relative container to detect when the sticky bar 'lands' */}
+                        <div ref={sentinelRef} className="absolute bottom-0 h-px w-full pointer-events-none" />
                     </div>
                 </div>
             </Container>
@@ -526,7 +588,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     unitName={config.name}
                     className={cx(
                         "transition-all duration-300",
-                        isFloating ? "bottom-24 md:bottom-6" : "bottom-6"
+                        isPinned ? "bottom-24 md:bottom-6" : "bottom-6"
                     )}
                 />
             )}

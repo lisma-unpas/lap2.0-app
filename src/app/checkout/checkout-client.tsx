@@ -173,7 +173,8 @@ export default function CheckoutClient() {
                 });
             }, 300);
 
-            const uploadRes = await uploadImage(formData);
+            const tokens = localStorage.getItem("gdrive_tokens");
+            const uploadRes = await uploadImage(formData, tokens);
             clearInterval(progressInterval);
 
             if (uploadRes.success) {

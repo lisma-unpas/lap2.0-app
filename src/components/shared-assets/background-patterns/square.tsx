@@ -3,7 +3,7 @@
 import type { SVGProps } from "react";
 import { cx } from "@/utils/cx";
 
-export const Square = (props: Omit<SVGProps<SVGSVGElement>, "size"> & { size?: "sm" | "md" | "lg" }) => {
+export const Square = (props: Omit<SVGProps<SVGSVGElement>, "size"> & { size?: "xs" | "sm" | "md" | "lg" }) => {
     const { size = "lg", className } = props;
     const Pattern = sizes[size];
 
@@ -176,6 +176,7 @@ const sm = (props: SVGProps<SVGSVGElement>) => {
 };
 
 const sizes = {
+    xs: sm,
     sm,
     md,
     lg,

@@ -72,8 +72,11 @@ model Info {
 }
 
 model UnitSetting {
-  id          String   @id @default(cuid())
-  unitId      String   @unique // Reference to UNIT_CONFIG key (e.g. "tesas", "kds")
-  limit       Int      @default(100)
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  unitId       String   // Reference to UNIT_CONFIG key (e.g. "tesas", "kds")
+  categoryName String   @default("TOTAL") // Specific category name or "TOTAL"
+  limit        Int      @default(100)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([unitId, categoryName])
 }

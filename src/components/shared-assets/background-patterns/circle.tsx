@@ -3,7 +3,7 @@
 import type { SVGProps } from "react";
 import { cx } from "@/utils/cx";
 
-export const Circle = (props: Omit<SVGProps<SVGSVGElement>, "size"> & { size?: "sm" | "md" | "lg" }) => {
+export const Circle = (props: Omit<SVGProps<SVGSVGElement>, "size"> & { size?: "xs" | "sm" | "md" | "lg" }) => {
     const { size = "lg", className } = props;
     const Pattern = sizes[size];
 
@@ -108,7 +108,37 @@ const sm = (props: SVGProps<SVGSVGElement>) => {
     );
 };
 
+const xs = (props: SVGProps<SVGSVGElement>) => {
+    return (
+        <svg width="160" height="160" viewBox="0 0 160 160" fill="none" {...props} className={cx("text-border-secondary", props.className)}>
+            <mask id="mask0_xs" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="160" height="160">
+                <rect width="160" height="160" fill="url(#paint0_radial_xs)" />
+            </mask>
+            <g mask="url(#mask0_xs)">
+                <circle cx="80" cy="80" r="24.5" stroke="currentColor" />
+                <circle cx="80" cy="80" r="40.5" stroke="currentColor" />
+                <circle cx="80" cy="80" r="56.5" stroke="currentColor" />
+                <circle cx="80" cy="80" r="72.5" stroke="currentColor" />
+            </g>
+            <defs>
+                <radialGradient
+                    id="paint0_radial_xs"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(80 80) rotate(90) scale(80 80)"
+                >
+                    <stop />
+                    <stop offset="1" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+        </svg>
+    );
+};
+
 const sizes = {
+    xs,
     sm,
     md,
     lg,

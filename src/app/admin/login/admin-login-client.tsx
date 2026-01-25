@@ -55,6 +55,13 @@ export default function AdminLoginClient() {
             const result = await adminLogin(formData);
 
             if (result.success) {
+                // Save to local storage for 1 year
+                const expiryDate = new Date();
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+                localStorage.setItem("admin_user", JSON.stringify(result.user));
+                localStorage.setItem("admin_expiry", expiryDate.getTime().toString());
+
                 toastSuccess("Berhasil", "Login berhasil! Mengalihkan ke dashboard...");
                 router.push('/admin/dashboard');
             } else {

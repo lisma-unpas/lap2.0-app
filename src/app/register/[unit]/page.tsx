@@ -28,7 +28,7 @@ export default async function Page({ params }: PageProps) {
         notFound();
     }
 
-    const availability = await checkUnitAvailability(unitKey);
+    const availability = await checkUnitAvailability(unitKey, "TOTAL");
 
     if (availability.success && !availability.available) {
         return (

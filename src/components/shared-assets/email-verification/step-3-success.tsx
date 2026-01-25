@@ -11,9 +11,7 @@ export const Step3Success = () => {
             <div className="mx-auto flex w-full max-w-90 flex-col gap-8">
                 <div className="flex flex-col items-center gap-6 text-center">
                     <div className="relative">
-                        <FeaturedIcon color="gray" theme="modern" size="xl" className="relative z-10">
-                            <CheckCircle className="size-7" />
-                        </FeaturedIcon>
+                        <FeaturedIcon color="gray" theme="modern" size="xl" className="relative z-10" icon={CheckCircle} />
                         <BackgroundPattern pattern="grid" size="lg" className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block" />
                         <BackgroundPattern pattern="grid" size="md" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden" />
                     </div>

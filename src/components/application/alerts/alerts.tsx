@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle, InfoCircle } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { CloseButton } from "@/components/base/buttons/close-button";
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
+import { BackgroundPattern } from "@/components/shared-assets/background-patterns";
 import { cx } from "@/utils/cx";
 
 const iconMap = {
@@ -50,9 +51,19 @@ interface AlertFloatingProps {
 }
 
 export const AlertFloating = ({ title, description, confirmLabel, onClose, onConfirm, color = "default", dismissLabel = "Dismiss" }: AlertFloatingProps) => {
+    const IconComponent = iconMap[color];
     return (
-        <div className="relative flex flex-col gap-4 rounded-lg border border-primary bg-primary_alt p-4 shadow-xs md:flex-row">
-            <FeaturedIcon icon={iconMap[color]} color={color === "default" ? "gray" : color} theme={color === "default" ? "modern" : "outline"} size="md" />
+        <div className="relative flex flex-col gap-4 rounded-lg border border-tertiary bg-primary_alt p-4 shadow-xs md:flex-row overflow-hidden">
+            <div className="relative shrink-0 z-1 flex items-start justify-start">
+                <div className="relative shrink-0 z-1 -mt-3.5 -ml-4">
+                    <FeaturedIcon color={color === "default" ? "gray" : color} theme={color === "default" ? "modern" : "outline"} size="lg" icon={IconComponent} />
+                </div>
+                <BackgroundPattern
+                    pattern="circle"
+                    size="xs"
+                    className="absolute top-1/6 left-1/4 -translate-x-1/2 -translate-y-1/2 z-0 opacity-20 text-secondary"
+                />
+            </div>
 
             <div className="flex flex-1 flex-col gap-3 md:w-0">
                 <div className="flex flex-col gap-1 overflow-auto">
@@ -62,11 +73,11 @@ export const AlertFloating = ({ title, description, confirmLabel, onClose, onCon
 
                 {(onConfirm || onClose) && (
                     <div className="flex gap-3">
-                        {onClose && (
+                        {/* {onClose && (
                             <Button onClick={onClose} size="sm" color="link-gray">
                                 {dismissLabel}
                             </Button>
-                        )}
+                        )} */}
                         {onConfirm && (
                             <Button onClick={onConfirm} size="sm" color="link-color">
                                 {confirmLabel}
