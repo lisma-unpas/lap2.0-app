@@ -21,13 +21,22 @@ interface CheckInPageProps {
 export default async function CheckInPage({ params }: CheckInPageProps) {
     const { code } = await params;
     const admin = await getAdminSession();
-    const ticketRes = await getTicketDetails(code);
+    let ticketRes = await getTicketDetails(code);
+
+    // Auto check-in if valid and not used
+    const wasAlreadyUsed = ticketRes.success && ticketRes.data?.isUsed;
+
+    if (admin && ticketRes.success && ticketRes.data && !ticketRes.data.isUsed) {
+        await markTicketAsUsed(code);
+        // Refresh ticket data locally to show used state
+        ticketRes = await getTicketDetails(code);
+    }
 
     if (!admin) {
         return (
             <Section className="min-h-screen flex items-center justify-center bg-secondary_alt/30">
                 <Container>
-                    <div className="max-w-md mx-auto text-center p-12 rounded-[40px] bg-primary shadow-2xl border border-secondary">
+                    <div className="max-w-md mx-auto text-center p-12 rounded-lg bg-primary shadow-md border border-secondary">
                         <FeaturedIcon color="error" theme="modern" size="xl" className="mx-auto mb-6">
                             <AlertTriangle className="size-8" />
                         </FeaturedIcon>
@@ -53,7 +62,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
         return (
             <Section className="min-h-screen flex items-center justify-center bg-secondary_alt/30">
                 <Container>
-                    <div className="max-w-md mx-auto text-center p-12 rounded-[40px] bg-primary shadow-2xl border border-secondary">
+                    <div className="max-w-md mx-auto text-center p-12 rounded-lg bg-primary shadow-md border border-secondary">
                         <FeaturedIcon color="gray" theme="modern" size="xl" className="mx-auto mb-6">
                             <XCircle className="size-8" />
                         </FeaturedIcon>
@@ -74,23 +83,18 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
     const reg = ticket.registration;
     const config = UNIT_CONFIG[reg.unitId.toLowerCase()] || { name: reg.unitId };
 
-    const handleCheckIn = async () => {
-        "use server";
-        await markTicketAsUsed(code);
-    };
-
     return (
-        <Section className="min-h-screen bg-secondary_alt/30 py-20">
+        <Section className="min-h-screen bg-secondary_alt/30">
             <Container>
                 <div className="max-w-2xl mx-auto">
-                    <div className="bg-primary rounded-[48px] shadow-2xl border border-secondary overflow-hidden">
+                    <div className="bg-primary rounded-lg shadow-md border border-secondary overflow-hidden">
                         {/* Header Status */}
-                        <div className={`p-8 text-white ${ticket.isUsed ? 'bg-error-solid' : 'bg-success-solid'} text-center`}>
+                        <div className={`p-8 text-white ${wasAlreadyUsed ? 'bg-error-solid' : 'bg-success-solid'} text-center`}>
                             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/20 mb-4 backdrop-blur-md">
-                                {ticket.isUsed ? <XCircle className="size-10" /> : <CheckCircle className="size-10" />}
+                                {wasAlreadyUsed ? <XCircle className="size-10" /> : <CheckCircle className="size-10" />}
                             </div>
                             <h2 className="text-3xl font-black uppercase tracking-tight">
-                                {ticket.isUsed ? 'TIKET SUDAH DIGUNAKAN' : 'TIKET VALID'}
+                                {wasAlreadyUsed ? 'TIKET SUDAH DIGUNAKAN' : 'CHECK-IN BERHASIL'}
                             </h2>
                             <p className="mt-2 text-white/80 font-mono tracking-widest">{ticket.ticketCode}</p>
                         </div>
@@ -99,7 +103,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
                         <div className="p-10 space-y-10">
                             {/* User details */}
                             <div className="flex gap-6 items-start">
-                                <div className="h-14 w-14 rounded-2xl bg-brand-primary/10 text-brand-secondary flex items-center justify-center shrink-0">
+                                <div className="h-14 w-14 rounded-lg bg-brand-primary/10 text-brand-secondary flex items-center justify-center shrink-0">
                                     <User01 className="size-7" />
                                 </div>
                                 <div className="space-y-1">
@@ -139,23 +143,18 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
 
                             {/* Actions */}
                             <div className="pt-6">
-                                {!ticket.isUsed ? (
-                                    <form action={handleCheckIn}>
-                                        <Button
-                                            type="submit"
-                                            color="primary"
-                                            size="lg"
-                                            className="w-full h-16 text-xl rounded-2xl shadow-xl shadow-success-solid/20"
-                                        >
-                                            Konfirmasi Check-In
-                                        </Button>
-                                    </form>
-                                ) : (
-                                    <div className="p-4 rounded-2xl bg-error-50 border border-error-100 text-center">
+                                {wasAlreadyUsed ? (
+                                    <div className="p-4 rounded-lg bg-error-50 border border-error-100 text-center">
                                         <p className="text-error-700 font-bold">
                                             ⚠️ Peringatan: Tiket ini telah discan sebelumnya.
                                             <br />
                                             Hubungi panitia jika ada duplikasi.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 rounded-lg bg-success-50 border border-success-100 text-center">
+                                        <p className="text-success-700 font-bold">
+                                            Tiket berhasil diverifikasi dan ditandai sebagai hadir.
                                         </p>
                                     </div>
                                 )}
