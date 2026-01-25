@@ -84,40 +84,40 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
     const config = UNIT_CONFIG[reg.unitId.toLowerCase()] || { name: reg.unitId };
 
     return (
-        <Section className="min-h-screen bg-secondary_alt/30">
+        <Section className="min-h-screen bg-secondary_alt/30 py-6 md:py-20">
             <Container>
                 <div className="max-w-2xl mx-auto">
                     <div className="bg-primary rounded-lg shadow-md border border-secondary overflow-hidden">
                         {/* Header Status */}
-                        <div className={`p-8 text-white ${wasAlreadyUsed ? 'bg-error-solid' : 'bg-success-solid'} text-center`}>
+                        <div className={`p-4 md:p-6 text-white ${wasAlreadyUsed ? 'bg-error-solid' : 'bg-success-solid'} text-center`}>
                             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/20 mb-4 backdrop-blur-md">
                                 {wasAlreadyUsed ? <XCircle className="size-10" /> : <CheckCircle className="size-10" />}
                             </div>
-                            <h2 className="text-3xl font-black uppercase tracking-tight">
+                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
                                 {wasAlreadyUsed ? 'TIKET SUDAH DIGUNAKAN' : 'CHECK-IN BERHASIL'}
                             </h2>
-                            <p className="mt-2 text-white/80 font-mono tracking-widest">{ticket.ticketCode}</p>
+                            <p className="mt-2 text-white/80 font-mono tracking-widest text-sm md:text-base">{ticket.ticketCode}</p>
                         </div>
 
                         {/* Ticket Info */}
-                        <div className="p-10 space-y-10">
+                        <div className="p-2 md:p-6 space-y-4 md:space-y-10">
                             {/* User details */}
-                            <div className="flex gap-6 items-start">
-                                <div className="h-14 w-14 rounded-lg bg-brand-primary/10 text-brand-secondary flex items-center justify-center shrink-0">
-                                    <User01 className="size-7" />
+                            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start p-2">
+                                <div className="h-12 w-12 md:h-14 md:w-14 rounded-lg bg-brand-primary/10 text-brand-secondary flex items-center justify-center shrink-0">
+                                    <User01 className="size-6 md:size-7" />
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-[10px] uppercase font-bold text-quaternary tracking-widest">Detail Peserta</p>
-                                    <h3 className="text-2xl font-bold text-primary">{reg.fullName}</h3>
-                                    <p className="text-md text-tertiary">Email: {reg.email}</p>
-                                    <p className="text-md text-tertiary">WhatsApp: {reg.phoneNumber}</p>
+                                    <h3 className="text-xl md:text-2xl font-bold text-primary">{reg.fullName}</h3>
+                                    <p className="text-sm md:text-md text-tertiary">Email: {reg.email}</p>
+                                    <p className="text-sm md:text-md text-tertiary">WhatsApp: {reg.phoneNumber}</p>
                                 </div>
                             </div>
 
-                            <hr className="border-secondary" />
+                            <hr className="border-secondary mx-2" />
 
                             {/* Event details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 p-2">
                                 <div className="flex gap-4 items-start">
                                     <div className="h-10 w-10 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center shrink-0">
                                         <Ticket01 className="size-5" />
@@ -142,7 +142,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
                             </div>
 
                             {/* Actions */}
-                            <div className="pt-6">
+                            <div className="pt-2 md:pt-6 p-2">
                                 {wasAlreadyUsed ? (
                                     <div className="p-4 rounded-lg bg-error-50 border border-error-100 text-center">
                                         <p className="text-error-700 font-bold">
