@@ -1,17 +1,13 @@
 "use client";
 
 import type { FC, ReactNode } from "react";
-import { Bell01, LifeBuoy01, SearchLg, Settings01 } from "@untitledui/icons";
 import { Button as AriaButton, DialogTrigger, Popover } from "react-aria-components";
 import { Avatar } from "@/components/base/avatar/avatar";
-import { BadgeWithDot } from "@/components/base/badges/badges";
-import { Input } from "@/components/base/input/input";
 import { UntitledLogo } from "@/components/foundations/logo/untitledui-logo";
 import { cx } from "@/utils/cx";
 import { MobileNavigationHeader } from "./base-components/mobile-header";
-import { NavAccountCard, NavAccountMenu } from "./base-components/nav-account-card";
+import { NavAccountMenu } from "./base-components/nav-account-card";
 import { NavItemBase } from "./base-components/nav-item";
-import { NavItemButton } from "./base-components/nav-item-button";
 import { NavList } from "./base-components/nav-list";
 
 type NavItem = {
@@ -154,26 +150,6 @@ export const HeaderNavigationBase = ({
                         </div>
                     </div>
                 </section>
-
-                {showSecondaryNav && (
-                    <section className={cx("flex h-16 w-full items-center justify-center bg-primary", !hideBorder && "border-b border-secondary")}>
-                        <div className="flex w-full max-w-container items-center justify-between gap-8 px-8">
-                            <nav className="h-full">
-                                <ul className="flex items-center gap-0.5 h-full">
-                                    {activeSubNavItems.map((item) => (
-                                        <li key={item.label} className="h-full">
-                                            <NavItemBase icon={item.icon} href={item.href} current={item.current} badge={item.badge} type="link" variant="header">
-                                                {item.label}
-                                            </NavItemBase>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
-
-                            <Input shortcut aria-label="Search" placeholder="Search" icon={SearchLg} size="sm" className="max-w-xs" />
-                        </div>
-                    </section>
-                )}
             </header>
         </>
     );
