@@ -28,6 +28,7 @@ import Section from "@/components/shared/section";
 import { TableBody } from "react-aria-components";
 import { useToast } from "@/context/toast-context";
 import { cx } from "@/utils/cx";
+import { formatDateTime } from "@/utils/date";
 
 export default function TicketsClient() {
     const [tickets, setTickets] = useState<any[]>([]);
@@ -271,7 +272,7 @@ export default function TicketsClient() {
                                                     </div>
                                                 </Table.Cell>
                                                 <Table.Cell className="hidden md:table-cell">
-                                                    <span className="text-xs text-tertiary">{new Date(ticket.issuedAt).toLocaleDateString()}</span>
+                                                    <span className="text-xs text-tertiary">{formatDateTime(ticket.issuedAt)}</span>
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <Badge color={ticket.isUsed ? "success" : "gray"}>
@@ -302,7 +303,7 @@ export default function TicketsClient() {
                                                             </div>
                                                             <div>
                                                                 <p className="text-[10px] font-bold text-quaternary uppercase tracking-wider mb-1.5">Issued At</p>
-                                                                <p className="text-sm text-primary">{new Date(ticket.issuedAt).toLocaleString()}</p>
+                                                                <p className="text-sm text-primary">{formatDateTime(ticket.issuedAt)}</p>
                                                             </div>
                                                             <div className="pt-2 border-t border-secondary">
                                                                 <p className="text-[10px] font-bold text-quaternary uppercase tracking-wider mb-3">Attendance Action</p>

@@ -37,6 +37,7 @@ import type { Selection } from "react-aria-components";
 import { TableBody } from "react-aria-components";
 import { useToast } from "@/context/toast-context";
 import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
+import { formatDateTime } from "@/utils/date";
 
 export default function RegistrationsClient() {
     const [registrations, setRegistrations] = useState<any[]>([]);
@@ -390,7 +391,7 @@ const RegistrationRow = memo(({
                                 <div>
                                     <p className="text-[10px] font-bold text-quaternary uppercase tracking-wider mb-1.5">Phone & Applied</p>
                                     <p className="text-sm text-primary">{reg.phoneNumber}</p>
-                                    <p className="text-sm text-primary">{new Date(reg.createdAt).toLocaleString()}</p>
+                                    <p className="text-sm text-primary">{formatDateTime(reg.createdAt)}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-quaternary uppercase tracking-wider mb-1.5">Unit & Event</p>
@@ -426,7 +427,7 @@ const RegistrationRow = memo(({
                                 <div className="bg-primary p-4 rounded-lg border border-secondary">
                                     <p className="text-xs text-tertiary">Phone: <span className="text-primary font-medium">{reg.phoneNumber}</span></p>
                                     <p className="text-xs text-tertiary mt-1">Code: <span className="text-primary font-mono">{reg.registrationCode}</span></p>
-                                    <p className="text-xs text-tertiary mt-1">Applied: <span className="text-primary">{new Date(reg.createdAt).toLocaleString()}</span></p>
+                                    <p className="text-xs text-tertiary mt-1">Applied: <span className="text-primary">{formatDateTime(reg.createdAt)}</span></p>
                                 </div>
 
                                 {reg.tickets && reg.tickets.length > 0 && (

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const openSharedMetadata = (title?: string, description?: string): Metadata => {
-    const prefix = 'LAP 2.0"';
+    const prefix = 'LAP 2.0';
     const fullTitle = `${prefix} | ${title || 'Beranda'}`;
     const defaultDesc = 'Platform Terintegrasi LISMA dan LAP untuk Pendaftaran dan Materi.';
 

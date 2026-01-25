@@ -12,6 +12,7 @@ import { Modal, ModalOverlay, Dialog } from "@/components/application/modals/mod
 import { useClipboard } from "@/hooks/use-clipboard";
 import { UNIT_CONFIG } from "@/constants/units";
 import { cx } from "@/utils/cx";
+import { formatDateTime } from "@/utils/date";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -191,7 +192,7 @@ export default function CheckStatusClient() {
                                             <div className="flex items-center gap-6">
                                                 <div>
                                                     <p className="text-[10px] uppercase font-bold text-quaternary tracking-wider">Tanggal Daftar</p>
-                                                    <p className="text-sm font-medium text-tertiary">{new Date(reg.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                                    <p className="text-sm font-medium text-tertiary">{formatDateTime(reg.createdAt)}</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] uppercase font-bold text-quaternary tracking-wider">Jenis Pendaftaran</p>
@@ -236,7 +237,7 @@ export default function CheckStatusClient() {
                                     >
                                         <div className="space-y-1">
                                             <p className="text-[10px] font-bold text-quaternary uppercase tracking-widest">{reg.unit || "Unit Lisma"}</p>
-                                            <p className="font-bold text-primary line-clamp-1">{reg.date ? new Date(reg.date).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }) : "Pendaftaran Terbaru"}</p>
+                                            <p className="font-bold text-primary line-clamp-1">{reg.date ? formatDateTime(reg.date) : "Pendaftaran Terbaru"}</p>
                                             <p className="text-xs font-mono font-bold text-brand-secondary bg-brand-primary/5 px-2 py-0.5 rounded-lg inline-block mt-1">{reg.code}</p>
                                         </div>
                                         <ArrowRight className="size-5 text-tertiary group-hover:text-brand-solid group-hover:translate-x-1 transition-all" />
@@ -291,7 +292,7 @@ export default function CheckStatusClient() {
                                                         </div>
                                                         <div className="space-y-1 text-left">
                                                             <p className="text-[10px] text-quaternary uppercase font-bold tracking-widest">Tanggal Daftar</p>
-                                                            <p className="font-bold text-primary">{new Date(selectedRegistration.createdAt).toLocaleDateString('id-ID')}</p>
+                                                            <p className="font-bold text-primary">{formatDateTime(selectedRegistration.createdAt)}</p>
                                                         </div>
                                                         <div className="space-y-1 text-left">
                                                             <p className="text-[10px] text-quaternary uppercase font-bold tracking-widest">Status Tiket</p>

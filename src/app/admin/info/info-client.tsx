@@ -29,6 +29,7 @@ import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { Modal } from "@/components/shared/modals/modal/index";
 import { cx } from "@/utils/cx";
+import { formatDateTime } from "@/utils/date";
 import { TableBody } from "react-aria-components";
 import { useToast } from "@/context/toast-context";
 
@@ -178,7 +179,7 @@ export default function InfoClient({ initialInfo = [] }: { initialInfo: any[] })
                                         </Table.Cell>
                                         <Table.Cell className="hidden md:table-cell">
                                             <span className="text-xs text-tertiary">
-                                                {new Date(item.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                {formatDateTime(item.createdAt)}
                                             </span>
                                         </Table.Cell>
                                         <Table.Cell className="text-right">

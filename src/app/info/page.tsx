@@ -11,6 +11,7 @@ import { Badge } from "@/components/base/badges/badges";
 import { Calendar, Image01 as ImageIcon } from "@untitledui/icons";
 import Link from "next/link";
 import Image from "next/image";
+import { formatDateTime } from "@/utils/date";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export default async function NewsPage() {
                             <div className="flex flex-col flex-1 p-6">
                                 <div className="flex items-center gap-1.5 text-xs text-quaternary mb-3">
                                     <Calendar className="size-3.5" />
-                                    {n.createdAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    {formatDateTime(n.createdAt)}
                                 </div>
 
                                 <h3 className="text-xl font-bold text-primary group-hover:text-brand-tertiary transition-colors line-clamp-2">

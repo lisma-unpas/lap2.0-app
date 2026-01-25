@@ -8,6 +8,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/base/buttons/button";
 import { BackButton } from "@/components/shared/info/back-button";
+import { formatDateTime } from "@/utils/date";
 
 import { openSharedMetadata } from "@/utils/metadata";
 
@@ -51,12 +52,10 @@ export default async function InfoDetailPage({ params }: { params: Promise<{ slu
                         <div className="flex flex-wrap items-center gap-3">
                             <Badge color="brand" size="md">{info.category}</Badge>
                             <div className="flex items-center gap-1.5 text-sm text-tertiary">
-                                <Calendar className="size-4" />
-                                {info.createdAt.toLocaleDateString('id-ID', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                })}
+                                <span className="flex items-center gap-1.5">
+                                    <Calendar className="size-4" />
+                                    {formatDateTime(info.createdAt)}
+                                </span>
                             </div>
                         </div>
 

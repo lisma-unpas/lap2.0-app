@@ -9,6 +9,7 @@ import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-ic
 import { CheckCircle, AlertTriangle, User01, Calendar, Ticket01, XCircle, LogIn01 } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
 import { UNIT_CONFIG } from "@/constants/units";
+import { formatDateTime } from "@/utils/date";
 
 export const metadata: Metadata = {
     ...openSharedMetadata("Check-In Tiket"),
@@ -103,7 +104,7 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
                         <div className="p-2 md:p-6 space-y-4 md:space-y-10">
                             {/* User details */}
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start p-2">
-                                <div className="h-12 w-12 md:h-14 md:w-14 rounded-lg bg-brand-primary/10 text-brand-secondary flex items-center justify-center shrink-0">
+                                <div className="h-12 w-12 md:h-14 md:w-14 rounded-lg bg-brand-500/10 text-brand-600 hidden md:flex items-center justify-center shrink-0">
                                     <User01 className="size-6 md:size-7" />
                                 </div>
                                 <div className="space-y-1">
@@ -135,8 +136,8 @@ export default async function CheckInPage({ params }: CheckInPageProps) {
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-quaternary tracking-widest">Waktu Pendaftaran</p>
-                                        <p className="text-sm font-bold text-primary">Reg: {new Date(reg.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })}</p>
-                                        <p className="text-xs text-tertiary italic">Tiket Dibuat: {new Date(ticket.issuedAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })}</p>
+                                        <p className="text-sm font-bold text-primary">Reg: {formatDateTime(reg.createdAt)}</p>
+                                        <p className="text-xs text-tertiary italic">Tiket Dibuat: {formatDateTime(ticket.issuedAt)}</p>
                                     </div>
                                 </div>
                             </div>
