@@ -91,6 +91,7 @@ export default function CheckoutClient() {
     const [confirmationEmail, setConfirmationEmail] = useState("");
     const [successfullyGeneratedCode, setSuccessfullyGeneratedCode] = useState<string | null>(null);
     const [isMounted, setIsMounted] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const { toastSuccess, toastError } = useToast();
 
     useEffect(() => {
@@ -380,16 +381,39 @@ export default function CheckoutClient() {
                     </div>
                 ) : null}
 
+                <div className="space-y-1.5 pt-2">
+                    <Checkbox
+                        size="md"
+                        isSelected={agreedToTerms}
+                        onChange={setAgreedToTerms}
+                    >
+                        <span className="text-xs text-tertiary">
+                            Saya setuju dengan{" "}
+                            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                Kebijakan Privasi
+                            </a>
+                            {" "}dan{" "}
+                            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                Syarat & Ketentuan
+                            </a>
+                        </span>
+                    </Checkbox>
+                </div>
+
                 <Button
                     size="lg"
                     color="primary"
                     className="w-full shadow-lg h-12"
                     onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
+                        if (!agreedToTerms) {
+                            toastError("Persetujuan Diperlukan", "Anda harus menyetujui Kebijakan Privasi dan Syarat & Ketentuan terlebih dahulu.");
+                            return;
+                        }
                         setIsEmailModalOpen(true);
                     }}
                     isLoading={isSubmitting}
-                    isDisabled={(isNotFreePayment && !uploadedUrl) || selectedItems.length === 0}
+                    isDisabled={(isNotFreePayment && !uploadedUrl) || selectedItems.length === 0 || !agreedToTerms}
                 >
                     {isNotFreePayment ? "Konfirmasi Pembayaran" : "Daftar Sekarang"}
                 </Button>
@@ -518,7 +542,7 @@ export default function CheckoutClient() {
 
                     {/* Collapsible Content */}
                     <div className={cx(
-                        "mt-4 pb-8 h-full overflow-y-auto overscroll-contain pb-32 transition-opacity duration-300",
+                        "mt-4 pb-32 h-full overflow-y-auto overscroll-contain transition-opacity duration-300",
                         isMobileCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
                     )}>
                         <div className="flex items-center gap-3 mb-6 bg-secondary_alt p-4 rounded-2xl">

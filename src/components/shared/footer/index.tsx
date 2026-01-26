@@ -25,11 +25,11 @@ export default function Footer() {
 
                 <div className="mt-12 border-t border-secondary pt-8 flex flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
                     <p className="text-sm text-tertiary">
-                        © {new Date().getFullYear()} LISMA UNPAS. Seluruh hak cipta dilindungi.
+                        © {new Date().getFullYear()} LISMA UNPAS. Seluruh hak cipta dilindungi. Powered by <a href="https://kodingkeliling.com/" className="hover:text-primary transition-colors">Koding Keliling</a>.
                     </p>
                     <div className="flex gap-6 text-sm text-tertiary">
-                        <a href="#" className="hover:text-primary transition-colors">Kebijakan Privasi</a>
-                        <a href="#" className="hover:text-primary transition-colors">Syarat & Ketentuan</a>
+                        <a href="/privacy-policy" className="hover:text-primary transition-colors">Kebijakan Privasi</a>
+                        <a href="/terms" className="hover:text-primary transition-colors">Syarat & Ketentuan</a>
                     </div>
                 </div>
             </Container>
