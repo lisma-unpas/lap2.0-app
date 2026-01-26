@@ -43,8 +43,10 @@ const EmailConfirmationModal = ({
     currentEmail,
     onEmailChange,
     onConfirm,
-    isSubmitting
-}: EmailModalProps) => {
+    isSubmitting,
+    agreedToTerms,
+    onAgreedToTermsChange
+}: EmailModalProps & { agreedToTerms: boolean; onAgreedToTermsChange: (value: boolean) => void }) => {
     return (
         <SharedModal
             isOpen={isOpen}
@@ -56,21 +58,42 @@ const EmailConfirmationModal = ({
             primaryAction={{
                 label: "Konfirmasi & Bayar",
                 onClick: () => onConfirm(currentEmail),
-                isLoading: isSubmitting
+                isLoading: isSubmitting,
+                isDisabled: !agreedToTerms
             }}
             secondaryAction={{
                 label: "Batal",
                 onClick: () => onOpenChange(false)
             }}
         >
-            <div className="py-2">
-                <Label isRequired className="mb-1.5">Email Notifikasi</Label>
-                <Input
-                    type="email"
-                    placeholder="contoh@email.com"
-                    value={currentEmail}
-                    onChange={(val) => onEmailChange(val)}
-                    autoFocus
+            <div className="space-y-3">
+                <div>
+                    <Label isRequired className="mb-1.5">Email Notifikasi</Label>
+                    <Input
+                        type="email"
+                        placeholder="contoh@email.com"
+                        value={currentEmail}
+                        onChange={(val) => onEmailChange(val)}
+                        autoFocus
+                    />
+                </div>
+                
+                <Checkbox
+                    size="md"
+                    isSelected={agreedToTerms}
+                    onChange={onAgreedToTermsChange}
+                    label={
+                        <span className="text-xs text-tertiary">
+                            Saya setuju dengan{" "}
+                            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                Kebijakan Privasi
+                            </a>
+                            {" "}dan{" "}
+                            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                Syarat & Ketentuan
+                            </a>
+                        </span>
+                    }
                 />
             </div>
         </SharedModal>
@@ -381,39 +404,16 @@ export default function CheckoutClient() {
                     </div>
                 ) : null}
 
-                <div className="space-y-1.5 pt-2">
-                    <Checkbox
-                        size="md"
-                        isSelected={agreedToTerms}
-                        onChange={setAgreedToTerms}
-                    >
-                        <span className="text-xs text-tertiary">
-                            Saya setuju dengan{" "}
-                            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
-                                Kebijakan Privasi
-                            </a>
-                            {" "}dan{" "}
-                            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 underline font-medium" onClick={(e) => e.stopPropagation()}>
-                                Syarat & Ketentuan
-                            </a>
-                        </span>
-                    </Checkbox>
-                </div>
-
                 <Button
                     size="lg"
                     color="primary"
                     className="w-full shadow-lg h-12"
                     onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
-                        if (!agreedToTerms) {
-                            toastError("Persetujuan Diperlukan", "Anda harus menyetujui Kebijakan Privasi dan Syarat & Ketentuan terlebih dahulu.");
-                            return;
-                        }
                         setIsEmailModalOpen(true);
                     }}
                     isLoading={isSubmitting}
-                    isDisabled={(isNotFreePayment && !uploadedUrl) || selectedItems.length === 0 || !agreedToTerms}
+                    isDisabled={(isNotFreePayment && !uploadedUrl) || selectedItems.length === 0}
                 >
                     {isNotFreePayment ? "Konfirmasi Pembayaran" : "Daftar Sekarang"}
                 </Button>
@@ -566,6 +566,10 @@ export default function CheckoutClient() {
                         toastError("Input Tidak Valid", "Masukkan email yang valid");
                         return;
                     }
+                    if (!agreedToTerms) {
+                        toastError("Persetujuan Diperlukan", "Anda harus menyetujui Kebijakan Privasi dan Syarat & Ketentuan terlebih dahulu.");
+                        return;
+                    }
                     updateUserIdentity({
                         ...userIdentity!,
                         email: email
@@ -575,6 +579,8 @@ export default function CheckoutClient() {
                 }}
                 isSubmitting={isSubmitting}
                 userIdentity={userIdentity}
+                agreedToTerms={agreedToTerms}
+                onAgreedToTermsChange={setAgreedToTerms}
             />
 
             <ModalOverlay isDismissable isOpen={isQrModalOpen} onOpenChange={setIsQrModalOpen}>
