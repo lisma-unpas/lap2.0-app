@@ -354,7 +354,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     }, []);
 
     return (
-        <Section className="py-12 bg-primary">
+        <Section className="py-12 pb-32 md:pb-12 bg-primary min-h-screen">
             <Container>
                 {/* Modal Pemulihan Draft */}
                 <SharedModal
@@ -556,9 +556,14 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             );
                         })}
                     </div>
+                </div>
+            </Container>
 
-                    <div className="relative mt-12">
-                        <div className="sticky bottom-0 left-0 right-0 md:static px-2 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-primary z-40 dark:bg-gray-900">
+            {/* Checkout card - fixed untuk mobile, static untuk desktop */}
+            <div className="fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto z-50 md:z-auto pb-safe md:pb-0 md:mt-4">
+                <Container>
+                    <div className="max-w-2xl mx-auto">
+                        <div className="px-4 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-primary dark:bg-gray-900 shadow-lg md:shadow-none">
                             <div>
                                 <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
                                 <p className="text-xl md:text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
@@ -574,11 +579,9 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                 Checkout
                             </Button>
                         </div>
-                        {/* Sentinel placed at the very bottom of the relative container to detect when the sticky bar 'lands' */}
-                        <div ref={sentinelRef} className="absolute bottom-0 h-px w-full pointer-events-none" />
                     </div>
-                </div>
-            </Container>
+                </Container>
+            </div>
 
             {config && (
                 <FloatingWhatsApp
@@ -588,7 +591,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     unitName={config.name}
                     className={cx(
                         "transition-all duration-300",
-                        isPinned ? "bottom-24 md:bottom-6" : "bottom-6"
+                        isPinned ? "bottom-18 md:bottom-6" : "bottom-6"
                     )}
                 />
             )}

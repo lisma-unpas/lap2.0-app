@@ -74,7 +74,7 @@ function UnitCard({ unit, index }: { unit: any; index: number }) {
 
                 <div className="mt-10 w-full">
                     <a
-                        href={`/register/${unit.id}`}
+                        href={`/${unit.id}`}
                         className="text-sm font-bold text-brand-600 hover:text-brand-700 inline-flex items-center gap-2 transition-colors transition-transform group-hover:translate-x-1"
                     >
                         Lihat Detail & Daftar <ArrowRight className="size-4" />
