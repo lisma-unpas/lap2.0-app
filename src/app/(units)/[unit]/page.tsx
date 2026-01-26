@@ -36,6 +36,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
 
     return (
         <UnitContent
+            unitId={unitKey}
             unitName={config.name}
             description={config.description || "Unit kesenian LISMA yang mewadahi bakat dan minat mahasiswa."}
             subEvents={subEvents}

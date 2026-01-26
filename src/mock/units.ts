@@ -37,7 +37,7 @@ export const UNITS_MOCK = [
         subEvents: ['Tari Badaya', 'Tari Sulanjana', 'Tari Subali Sugriwa', 'Tari Gaplek', 'Tari Yudharini', 'Tari Jaya Perbangsa', 'Wayang Golek'],
         startDate: '2026-05-02',
         price: 35000,
-        badgeText: "🎻 Kategori Seni Tradisional",
+        badgeText: "🪭 Kategori Seni Tradisional",
         colorClass: "rose",
         iconId: "music",
         highlightTitle: "2 Mei 2026",

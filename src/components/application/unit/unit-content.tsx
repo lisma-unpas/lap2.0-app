@@ -5,9 +5,12 @@ import { Button } from "@/components/base/buttons/button";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
+import { UnitImage } from "./unit-image";
+import { Badge } from "@/components/base/badges/badges";
 import { cx } from "@/utils/cx";
 
 interface UnitContentProps {
+    unitId: string;
     badgeText: string;
     unitName: string;
     description: string;
@@ -23,6 +26,7 @@ interface UnitContentProps {
 }
 
 export default function UnitContent({
+    unitId,
     badgeText,
     unitName,
     description,
@@ -43,12 +47,12 @@ export default function UnitContent({
         camera: Camera01,
     };
 
-    const colorMap: Record<string, { bg: string; text: string; lightBg: string; border: string }> = {
-        purple: { bg: "bg-purple-600", text: "text-purple-700", lightBg: "bg-purple-50", border: "border-purple-200" },
-        indigo: { bg: "bg-indigo-600", text: "text-indigo-700", lightBg: "bg-indigo-50", border: "border-indigo-200" },
-        rose: { bg: "bg-rose-600", text: "text-rose-700", lightBg: "bg-rose-50", border: "border-rose-200" },
-        cyan: { bg: "bg-cyan-600", text: "text-cyan-700", lightBg: "bg-cyan-50", border: "border-cyan-200" },
-        orange: { bg: "bg-orange-600", text: "text-orange-700", lightBg: "bg-orange-50", border: "border-orange-200" },
+    const colorMap: Record<string, { bg: string; text: string; lightBg: string; border: string; badge: any }> = {
+        purple: { bg: "bg-purple-600", text: "text-purple-700", lightBg: "bg-purple-50", border: "border-purple-200", badge: "purple" },
+        indigo: { bg: "bg-indigo-600", text: "text-indigo-700", lightBg: "bg-indigo-50", border: "border-indigo-200", badge: "indigo" },
+        rose: { bg: "bg-rose-600", text: "text-rose-700", lightBg: "bg-rose-50", border: "border-rose-200", badge: "pink" },
+        cyan: { bg: "bg-cyan-600", text: "text-cyan-700", lightBg: "bg-cyan-50", border: "border-cyan-200", badge: "blue-light" },
+        orange: { bg: "bg-orange-600", text: "text-orange-700", lightBg: "bg-orange-50", border: "border-orange-200", badge: "orange" },
     };
 
     const colors = colorMap[colorClass] || colorMap.purple;
@@ -62,9 +66,9 @@ export default function UnitContent({
 
                     <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         <div>
-                            <div className={`inline-flex items-center gap-2 rounded-full ${colors.lightBg} px-3 py-1 text-sm font-medium ${colors.text}`}>
+                            <Badge color={colors.badge} size="lg" type="pill-color" className="uppercase">
                                 {badgeText}
-                            </div>
+                            </Badge>
                             <h1 className="mt-4 text-display-md font-semibold text-primary">{unitName}</h1>
                             <p className="mt-6 text-lg text-tertiary leading-relaxed whitespace-pre-wrap">
                                 {description}
@@ -110,11 +114,12 @@ export default function UnitContent({
                         </div>
 
                         <div className="flex flex-col gap-8">
-                            <div className="rounded-2xl overflow-hidden border border-secondary shadow-2xl aspect-[4/3]">
-                                <img
-                                    src={imageUrl}
+                            <div className="rounded-2xl overflow-hidden border border-secondary shadow-2xl">
+                                <UnitImage
+                                    unitId={unitId}
+                                    fallbackUrl={imageUrl}
                                     alt={`${unitName} showcase`}
-                                    className="w-full h-full object-cover"
+                                    className="group-hover:scale-110 transition-transform duration-700"
                                 />
                             </div>
 
