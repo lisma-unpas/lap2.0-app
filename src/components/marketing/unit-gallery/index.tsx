@@ -6,11 +6,15 @@ import Section from "@/components/shared/section";
 import { UNITS_MOCK } from "@/mock/units";
 import { cx } from "@/utils/cx";
 import { UnitImage } from "@/components/application/unit/unit-image";
-
+import { motion } from "motion/react";
 
 function UnitCard({ unit, index }: { unit: any; index: number }) {
     return (
-        <div
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
             className="group relative flex flex-col items-start rounded-2xl border border-secondary bg-primary overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]"
         >
             <div className="relative w-full overflow-hidden bg-bg-secondary">
@@ -39,7 +43,7 @@ function UnitCard({ unit, index }: { unit: any; index: number }) {
                     </a>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 
