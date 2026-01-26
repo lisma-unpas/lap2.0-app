@@ -9,6 +9,9 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/base/buttons/button";
 import { BackButton } from "@/components/shared/info/back-button";
 import { formatDateTime } from "@/utils/date";
+import { Markdown } from "@/components/shared/markdown";
+
+
 
 import { openSharedMetadata } from "@/utils/metadata";
 
@@ -75,11 +78,10 @@ export default async function InfoDetailPage({ params }: { params: Promise<{ slu
                             </div>
                         )}
 
-                        <div className="prose prose-lg max-w-none mt-4">
-                            <div className="text-lg text-primary leading-relaxed whitespace-pre-wrap">
-                                {info.body}
-                            </div>
+                        <div className="mt-4">
+                            <Markdown content={info.body} />
                         </div>
+
                     </div>
 
                     {/* Footer Info */}

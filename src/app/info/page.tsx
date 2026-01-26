@@ -12,6 +12,9 @@ import { Calendar, Image01 as ImageIcon } from "@untitledui/icons";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDateTime } from "@/utils/date";
+import { Markdown } from "@/components/shared/markdown";
+
+
 
 export const dynamic = "force-dynamic";
 
@@ -71,9 +74,11 @@ export default async function NewsPage() {
                                     {n.title}
                                 </h3>
 
-                                <p className="mt-3 text-sm text-tertiary line-clamp-3 leading-relaxed flex-1">
-                                    {n.body}
-                                </p>
+                                <Markdown
+                                    content={n.body}
+                                    className="mt-3 line-clamp-3 flex-1 prose-sm"
+                                />
+
 
                                 <div className="mt-6 flex items-center text-sm font-semibold text-brand-secondary group-hover:gap-2 transition-all">
                                     Baca Selengkapnya <span>→</span>
