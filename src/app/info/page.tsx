@@ -76,8 +76,12 @@ export default async function NewsPage() {
 
                                 <Markdown
                                     content={n.body}
-                                    className="mt-3 line-clamp-3 flex-1 prose-sm"
+                                    isTruncated={true}
+                                    lineClamp={3}
+                                    maxLength={200}
+                                    className="mt-3 flex-1 prose-sm"
                                 />
+
 
 
                                 <div className="mt-6 flex items-center text-sm font-semibold text-brand-secondary group-hover:gap-2 transition-all">
