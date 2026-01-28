@@ -3,13 +3,13 @@ export const UNITS_MOCK = [
         id: 'tesas',
         name: 'TESAS',
         description: `LISMA ART PARADE 2.0 (LAP 2.0): Pagelaran Teater Drama Musikal \n\nTahta bisa direbut. Wajah bisa diubah. Tapi ketulusan selalu menemukan jalannya.\n\nSaat Purbasari diusir ke hutan, takdir justru mempertemukannya dengan Lutung Kasarung—Pangeran yang terkutuk. Saat semua topeng runtuh, siapakah yang berkuasa?\n\nTemukan jawabannya dan saksikan legenda hidup LUTUNG KASARUNG 🎭`,
-        subEvents: ['Teater Drama Musikal', 'Baca Puisi', 'Cipta Prosa'],
+        subEvents: ['Teater Drama Musikal'],
         startDate: '2026-04-26',
         price: 25000,
         badgeText: "🎭 Teater dan Sastra",
         colorClass: "purple",
         iconId: "ticket",
-        highlightTitle: "26 April 2026",
+        highlightTitle: "17 Mei 2026",
         highlightSubtitle: "📍 Mayang Sunda",
         imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=2069&auto=format&fit=crop",
         cpName: "Panitia TESAS",
@@ -53,17 +53,25 @@ export const UNITS_MOCK = [
                 id: "category", label: "Kategori", type: "radio",
                 options: [
                     { label: "Umum (Rp100.000)", value: "umum", price: 100000 },
-                    { label: "SMA (Rp100.000)", value: "sma", price: 100000 }
+                    { label: "SMA (Free)", value: "sma", price: 0 }
                 ], required: true
             },
-            { id: "note", label: "Info PENTING", type: "info", text: "Harga tiket sudah termasuk bundling minuman, sehingga audiens tidak hanya menikmati pertunjukan seni, tetapi juga pengalaman bersantap yang menyatu dengan atmosfer acara." }
+            {
+                id: "ticketType", label: "Kategori tiket", type: "radio",
+                options: [
+                    { label: "Tiket + eskosu 2 kaum", value: "eskosu" },
+                    { label: "Tiket + hazelnut choco", value: "hazelnut" }
+                ], required: true
+            },
+            { id: "note", label: "Info PENTING", type: "info", text: "Harga tiket sudah termasuk bundling minuman, sehingga audiens tidak hanya menikmati pertunjukan seni, tetapi juga pengalaman bersantap yang menyatu with atmosfer acara." },
+            { id: "note", label: "Info PENTING", type: "info", text: "Penonton diwajibkan membawa jas hujan atau ponco dikarenakan cuaca yang tidak menentu and venue outdoor." }
         ]
     },
     {
         id: 'psm',
         name: 'PSM',
         description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n🔥 BENEFIT EKSKLUSIF: Juara 1, 2, dan 3 akan mendapatkan kesempatan emas untuk tampil di Main Event dan berbagi panggung langsung dengan Guest Star kami!`,
-        subEvents: ['Band Competition', 'Solo Vocal', 'Harmoni Nada'],
+        subEvents: ['Band Competition'],
         startDate: '2026-05-10',
         price: 150000,
         badgeText: "🎼 Paduan Suara dan Musik",
@@ -78,7 +86,6 @@ export const UNITS_MOCK = [
         formFields: [
             { id: "bandName", label: "Nama Band", type: "text", required: true },
             { id: "members", label: "Nama Anggota", type: "textarea", placeholder: "Sebutkan nama anggota satu per satu...", required: true },
-            { id: "identityCards", label: "Kartu Identitas (KTP/Pelajar)", type: "file", required: true },
             { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
             { id: "instagram", label: "Instagram", type: "text", required: true },
             { id: "domisili", label: "Domisili", type: "text", required: true },
@@ -98,7 +105,7 @@ export const UNITS_MOCK = [
         badgeText: "💃 Tari Kreatif & Dance",
         colorClass: "orange",
         iconId: "play",
-        highlightTitle: "17 Mei 2026",
+        highlightTitle: "26 April 2026",
         highlightSubtitle: "📍 Bandung Indah Plaza",
         imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2069&auto=format&fit=crop",
         cpName: "Panitia TAKRE",
@@ -158,6 +165,7 @@ export const UNITS_MOCK = [
             "Audiens short film": {
                 fields: [
                     { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
+                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true }
                 ],
@@ -166,6 +174,7 @@ export const UNITS_MOCK = [
             "Lomba foto": {
                 fields: [
                     { id: "fullName", label: "Nama Fotografer", type: "text", required: true, persistent: true },
+                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
                     { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
@@ -189,6 +198,7 @@ export const UNITS_MOCK = [
                     { id: "institution", label: "Nama PH/Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
                     { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
+                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
                     { id: "instagram", label: "Instagram", type: "text", required: true },
                     {
                         id: "category", label: "Kategori Peserta", type: "radio",
