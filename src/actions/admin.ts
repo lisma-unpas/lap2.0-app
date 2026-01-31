@@ -113,32 +113,68 @@ export async function updateRegistrationStatus(id: string, status: RegStatus) {
 
                     await sendEmail({
                         email: updatedRegistration.email,
-                        subject: `[Verified] Tiket Anda - ${updatedRegistration.fullName}`,
+                        subject: `[Verified] Tiket & Konfirmasi Pembayaran - ${updatedRegistration.fullName}`,
                         name: updatedRegistration.fullName,
-                        title: "Pendaftaran Diverifikasi",
-                        message: `Selamat! Pendaftaran Anda untuk ${updatedRegistration.subEventName || updatedRegistration.unitId} telah diverifikasi. Berikut adalah tiket Anda.`,
+                        title: "Pembayaran Telah Diverifikasi",
+                        message: `Selamat! Pembayaran Anda untuk ${updatedRegistration.subEventName || updatedRegistration.unitId} telah diverifikasi. Berikut adalah invoice dan tiket elektronik Anda.`,
                         htmlBody: `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                                <h1 style="color: #4f46e5; text-align: center;">Pendaftaran Diverifikasi</h1>
-                                <p>Halo ${updatedRegistration.fullName},</p>
-                                <p>Selamat! Pembayaran Anda telah kami terima dan verifikasi. Silakan simpan tiket di bawah ini untuk digunakan saat check-in di lokasi acara.</p>
+                            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
+                                <div style="background-color: #4f46e5; padding: 40px 20px; text-align: center; color: white;">
+                                    <h1 style="margin: 0; font-size: 24px; font-weight: 800;">E-TICKET & INVOICE</h1>
+                                    <p style="margin: 10px 0 0; opacity: 0.9;">Lisma Art Parade 2.0</p>
+                                </div>
                                 
-                                <div style="margin: 40px 0;">
-                                    ${ticketItemsHtml}
-                                </div>
+                                <div style="padding: 30px;">
+                                    <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px;">
+                                        <h2 style="font-size: 16px; color: #64748b; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em;">Informasi Pembayaran</h2>
+                                        <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b;">Nama Pemesan</td>
+                                                <td style="padding: 8px 0; font-weight: 600; text-align: right;">${updatedRegistration.fullName}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b;">Email</td>
+                                                <td style="padding: 8px 0; font-weight: 600; text-align: right;">${updatedRegistration.email}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b;">Unit / Kategori</td>
+                                                <td style="padding: 8px 0; font-weight: 600; text-align: right;">${updatedRegistration.subEventName || updatedRegistration.unitId}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b;">Tanggal Verifikasi</td>
+                                                <td style="padding: 8px 0; font-weight: 600; text-align: right;">${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b;">Status</td>
+                                                <td style="padding: 8px 0; text-align: right;"><span style="background-color: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 99px; font-weight: bold; font-size: 12px;">VERIFIED</span></td>
+                                            </tr>
+                                        </table>
+                                    </div>
 
-                                <div style="background-color: #eff6ff; padding: 20px; border-radius: 12px; font-size: 14px; color: #1e40af;">
-                                    <strong>Instruksi Penting:</strong>
-                                    <ul style="margin-top: 10px; padding-left: 20px;">
-                                        <li>Tunjukkan QR Code di atas kepada petugas check-in.</li>
-                                        <li>Satu kode tiket hanya berlaku untuk satu kali masuk.</li>
-                                        <li>Jangan membagikan kode tiket atau QR Code ini kepada orang lain.</li>
-                                    </ul>
-                                </div>
+                                    <div style="text-align: center; margin: 40px 0;">
+                                        <h2 style="font-size: 16px; color: #64748b; margin-bottom: 10px; text-transform: uppercase;">QR Check-In (Absensi)</h2>
+                                        <p style="font-size: 13px; color: #64748b; margin-bottom: 25px;">Tunjukkan QR Code di bawah ini kepada petugas saat memasuki lokasi acara untuk proses absensi.</p>
+                                        ${ticketItemsHtml}
+                                    </div>
 
-                                <p style="margin-top: 30px; text-align: center;">
-                                    <a href="${baseUrl}/check-status?code=${updatedRegistration.registrationCode}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Cek Status & Download PDF</a>
-                                </p>
+                                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 12px; font-size: 13px; color: #475569; border: 1px solid #e2e8f0;">
+                                        <strong style="color: #0f172a; display: block; margin-bottom: 8px;">Informasi Penting:</strong>
+                                        <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                            <li>E-ticket ini adalah bukti sah pembayaran Anda.</li>
+                                            <li>Satu QR Code hanya dapat digunakan untuk satu kali absensi/check-in.</li>
+                                            <li>Dilarang menggandakan atau membagikan tiket ini kepada pihak lain.</li>
+                                        </ul>
+                                    </div>
+
+                                    <div style="margin-top: 30px; text-align: center;">
+                                        <a href="${baseUrl}/check-status?code=${updatedRegistration.registrationCode}" style="background-color: #4f46e5; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);">Download PDF Ticket</a>
+                                    </div>
+                                </div>
+                                
+                                <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b;">
+                                    <p style="margin: 0;">&copy; 2026 Lisma Art Parade 2.0. All rights reserved.</p>
+                                    <p style="margin: 5px 0 0;">Jika ada pertanyaan, silakan hubungi CP unit terkait melalui WhatsApp.</p>
+                                </div>
                             </div>
                         `
                     });

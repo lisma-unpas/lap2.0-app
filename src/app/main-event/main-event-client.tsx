@@ -72,7 +72,7 @@ export default function MainEventClient() {
                                         <MarkerPin01 className="size-5" />
                                         <span className="font-bold">Dimana?</span>
                                     </div>
-                                    <p className="text-primary font-medium text-sm">Segera Diumumkan!</p>
+                                    <p className="text-primary font-medium text-sm">UNPAS Setiabudi</p>
                                 </div>
                             </div>
 

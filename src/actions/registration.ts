@@ -100,7 +100,7 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
                     email: targetEmail,
                     subject: `Konfirmasi Pendaftaran: Lisma Art Parade 2.0`,
                     name: firstReg.fullName,
-                    message: `Halo ${firstReg.fullName},\n\nPendaftaran Anda untuk event berikut telah kami terima:\n\n${itemsSummary}\n\n**Kode Pendaftaran (Gunakan untuk Cek Status)**: ${sessionRegistrationCode}\n**Total Pembayaran**: Rp ${totalSessionPrice.toLocaleString('id-ID')}\n\nStatus pendaftaran Anda saat ini adalah **PENDING**. Tim kami akan memverifikasi bukti pembayaran Anda dalam waktu maksimal 24 jam.\n\nSimpan kode di atas untuk melihat status verifikasi dan mengunduh tiket di halaman Cek Status.\n\nTerima kasih atas partisipasi Anda!`,
+                    message: `Halo ${firstReg.fullName},\n\nPendaftaran Anda untuk event berikut telah kami terima:\n\n${itemsSummary}\n\n**Kode Pendaftaran (Gunakan untuk Cek Status)**: ${sessionRegistrationCode}\n**Total Pembayaran**: Rp ${totalSessionPrice.toLocaleString('id-ID')}\n\nStatus pendaftaran Anda saat ini adalah **PENDING**. Pembayaran Anda sedang dalam proses verifikasi oleh tim kami, mohon tunggu sebentar. Tim kami akan memverifikasi bukti pembayaran Anda dalam waktu maksimal 24 jam.\n\nSimpan kode di atas untuk melihat status verifikasi dan mengunduh tiket di halaman Cek Status.\n\nTerima kasih atas partisipasi Anda!`,
                     title: "Konfirmasi Pendaftaran"
                 }).catch(err => console.error("[Registration] Error user email:", err));
 

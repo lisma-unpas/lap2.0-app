@@ -4,12 +4,12 @@ export const UNITS_MOCK = [
         name: 'TESAS',
         description: `LISMA ART PARADE 2.0 (LAP 2.0): Pagelaran Teater Drama Musikal \n\nTahta bisa direbut. Wajah bisa diubah. Tapi ketulusan selalu menemukan jalannya.\n\nSaat Purbasari diusir ke hutan, takdir justru mempertemukannya dengan Lutung Kasarung—Pangeran yang terkutuk. Saat semua topeng runtuh, siapakah yang berkuasa?\n\nTemukan jawabannya dan saksikan legenda hidup LUTUNG KASARUNG 🎭`,
         subEvents: ['Teater Drama Musikal'],
-        startDate: '2026-04-26',
+        startDate: '2026-05-16',
         price: 25000,
         badgeText: "🎭 Teater dan Sastra",
         colorClass: "purple",
         iconId: "ticket",
-        highlightTitle: "17 Mei 2026",
+        highlightTitle: "16 Mei 2026",
         highlightSubtitle: "📍 Mayang Sunda",
         imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=2069&auto=format&fit=crop",
         cpName: "Panitia TESAS",
@@ -59,8 +59,8 @@ export const UNITS_MOCK = [
             {
                 id: "ticketType", label: "Kategori tiket", type: "radio",
                 options: [
-                    { label: "Tiket + eskosu 2 kaum", value: "eskosu" },
-                    { label: "Tiket + hazelnut choco", value: "hazelnut" }
+                    { label: "Tiket + eskosu 2 kaum", value: "eskosu", image: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=2000&auto=format&fit=crop" },
+                    { label: "Tiket + hazelnut choco", value: "hazelnut", image: "https://images.unsplash.com/photo-1650793456548-733c7c656da2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
                 ], required: true
             },
             { id: "note", label: "Info PENTING", type: "info", text: "Harga tiket sudah termasuk bundling minuman, sehingga audiens tidak hanya menikmati pertunjukan seni, tetapi juga pengalaman bersantap yang menyatu with atmosfer acara." },
@@ -91,6 +91,8 @@ export const UNITS_MOCK = [
             { id: "domisili", label: "Domisili", type: "text", required: true },
             { id: "bandPhoto", label: "Foto Band", type: "file", required: true },
             { id: "priceInfo", label: "Biaya Registrasi", type: "info", text: "Biaya: Rp300.000 / Tim" },
+            { id: "note_psm_1", label: "Info PENTING", type: "info", text: "Peserta wajib membawakan satu lagu bebas berbahasa inggris atau indonesia dan membawakan 1 dari 20 lagu yang telah ditentukan panitia bergenre non pop punk yang akan di aransemen menjadi pop punk (penentuan lagu akan diumumkan saat technical meeting)" },
+            { id: "note_psm_2", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" },
             { id: "catatan", label: "🔌 CATATAN PESERTA", type: "info", text: "Bagi peserta yang memiliki gearband atau kabel jack sendiri, dipersilakan untuk membawanya masing-masing demi kenyamanan performa." }
         ],
         fixedPrice: 300000
@@ -115,7 +117,8 @@ export const UNITS_MOCK = [
             "SOLO": {
                 fields: [
                     { id: "fullName", label: "Nama Lengkap atau Nama Panggung", type: "text", required: true, persistent: true },
-                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true }
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "note_takre", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" }
                 ],
                 price: 125000
             },
@@ -133,13 +136,15 @@ export const UNITS_MOCK = [
                     { id: "groupPhoto", label: "Foto Grup", type: "file", required: true },
                     { id: "members", label: "Nama Anggota", type: "textarea", required: true },
                     { id: "count", label: "Jumlah Anggota", type: "number", min: 2, required: true },
-                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true }
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "note_takre", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" }
                 ]
             },
             "RPD": {
                 fields: [
                     { id: "fullName", label: "Nama Lengkap atau Nama Panggilan", type: "text", required: true, persistent: true },
-                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true }
+                    { id: "phoneNumber", label: "Nomor yang dapat dihubungi", type: "text", required: true, persistent: true },
+                    { id: "note_takre", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" }
                 ],
                 price: 10000
             }
@@ -148,7 +153,7 @@ export const UNITS_MOCK = [
     {
         id: 'fg',
         name: 'FG',
-        description: `✨LISMA ART PARADE 2.0 (LAP 2.0)✨\n\nWaktunya Cerita Kamu Jadi Pusat Perhatian! 📸🎬\n\nSadar nggak sih kalau sekitar kita sudah jauh berubah? Dari cara kita nongkrong, tradisi yang mulai luntur, sampai perubahan dalam diri kita sendiri. Daripada cuma jadi saksi, mending jadi narator lewat lensa!`,
+        description: `✨LISMA ART PARADE 2.0 (LAP 2.0)✨\n\nWaktunya Cerita Kamu Jadi Pusat Perhatian! 📸🎬\n\nAyo tuangkan imajinasimu lewat lensa! Ikuti Kompetisi Foto & Film Pendek tingkat SMA/SMK dan Umum Dengan Genre Fiksi melalui tema:\n- Perubahan Budaya\n- Perubahan Sosial\n- Perubahan Personal`,
         subEvents: ['Audiens short film', 'Lomba foto', 'Lomba short film'],
         startDate: '2026-05-06',
         price: 30000,
@@ -218,6 +223,8 @@ export const UNITS_MOCK = [
         name: "Main Event",
         description: "Puncak acara Lisma Art Parade 2.0. Menghadirkan bintang tamu spesial dan penampilan terbaik dari seluruh unit kesenian.",
         badgeText: "🌟 Puncak Acara",
+        highlightTitle: "Segera Hadir",
+        highlightSubtitle: "📍 UNPAS Setiabudi",
         imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop",
         cpName: "Humas LISMA",
         cpWhatsapp: "628123456784",

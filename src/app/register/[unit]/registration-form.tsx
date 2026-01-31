@@ -442,6 +442,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                                 title: opt.label,
                                                 description: "",
                                                 secondaryTitle: "",
+                                                image: opt.image,
                                                 icon: () => null
                                             }))}
                                         />

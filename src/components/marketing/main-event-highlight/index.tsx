@@ -29,10 +29,10 @@ export default function MainEventHighlight() {
                             <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
                             <div className="absolute top-6 left-6">
-                                <BadgeWithIcon 
-                                    type="pill-color" 
-                                    color="brand" 
-                                    size="md" 
+                                <BadgeWithIcon
+                                    type="pill-color"
+                                    color="brand"
+                                    size="md"
                                     iconLeading={Star01}
                                     className="backdrop-blur-sm shadow-lg border border-white/20 dark:border-white/10"
                                 >
@@ -73,7 +73,7 @@ export default function MainEventHighlight() {
                                     </div>
                                     <div>
                                         <p className="text-xs font-semibold text-tertiary uppercase tracking-wider">Lokasi</p>
-                                        <p className="text-primary font-bold">Bandung, Jawa Barat</p>
+                                        <p className="text-primary font-bold">UNPAS Setiabudi</p>
                                     </div>
                                 </div>
                             </div>
