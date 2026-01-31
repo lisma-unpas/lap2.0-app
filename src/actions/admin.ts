@@ -444,3 +444,71 @@ export async function checkUnitAvailability(unitId: string, categoryName: string
         return { success: false, available: true, remaining: 100, sold: 0, limit: 100 };
     }
 }
+
+export async function getUnitAvailability(unitId: string) {
+    try {
+        const settings = await (prisma as any).unitSetting.findMany({
+            where: { unitId: unitId.toLowerCase() }
+        });
+
+        const registrations = await prisma.registration.findMany({
+            where: {
+                unitId: unitId.toLowerCase(),
+                status: { in: ["VERIFIED", "PENDING"] }
+            },
+            select: {
+                detailedData: true,
+                subEventName: true
+            }
+        });
+
+        const availabilityMap: Record<string, { sold: number, limit: number, available: boolean }> = {};
+
+        // Pre-fill with limits from settings
+        settings.forEach((s: any) => {
+            availabilityMap[s.categoryName] = {
+                sold: 0,
+                limit: s.limit,
+                available: true
+            };
+        });
+
+        // Initialize TOTAL if not present
+        if (!availabilityMap["TOTAL"]) {
+            availabilityMap["TOTAL"] = { sold: 0, limit: 9999, available: true };
+        }
+
+        // Calculate sold counts
+        registrations.forEach(reg => {
+            const data = (reg.detailedData as any) || {};
+            const quantity = parseInt(data.quantity) || 1;
+            const categoryValue = data.category;
+            const sesiValue = data.sesi;
+            const subEventName = reg.subEventName;
+
+            let regCategory = "";
+            if (sesiValue && categoryValue) {
+                regCategory = `${sesiValue} - ${categoryValue}`;
+            } else {
+                regCategory = categoryValue || sesiValue || subEventName;
+            }
+
+            if (!availabilityMap[regCategory]) {
+                availabilityMap[regCategory] = { sold: 0, limit: 9999, available: true };
+            }
+            availabilityMap[regCategory].sold += quantity;
+            availabilityMap["TOTAL"].sold += quantity;
+        });
+
+        // Finalize availability
+        Object.keys(availabilityMap).forEach(key => {
+            const item = availabilityMap[key];
+            item.available = item.sold < item.limit;
+        });
+
+        return { success: true, data: availabilityMap };
+    } catch (error) {
+        console.error("[getUnitAvailability] Error:", error);
+        return { success: false, data: {} };
+    }
+}

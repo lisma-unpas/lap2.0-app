@@ -22,7 +22,7 @@ import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
 import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
-import { checkUnitAvailability } from "@/actions/admin";
+import { checkUnitAvailability, getUnitAvailability } from "@/actions/admin";
 
 interface RegistrationFormProps {
     unit: string;
@@ -45,6 +45,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [showDraftModal, setShowDraftModal] = useState(false);
     const [pendingDraft, setPendingDraft] = useState<{ subEvent: string; data: any } | null>(null);
     const [availability, setAvailability] = useState<{ sold: number, limit: number, remaining: number } | null>(null);
+    const [availabilityMap, setAvailabilityMap] = useState<Record<string, { sold: number, limit: number, available: boolean }>>({});
     const { isConnected } = useGoogleAuth();
     const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
 
@@ -72,6 +73,16 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
     const subEventConfig = config?.subEventConfigs?.[selectedSubEvent];
     const fields = subEventConfig?.fields || config?.formFields || [];
+
+    useEffect(() => {
+        async function fetchInitialAvailability() {
+            const res = await getUnitAvailability(unit.toLowerCase());
+            if (res.success) {
+                setAvailabilityMap(res.data);
+            }
+        }
+        fetchInitialAvailability();
+    }, [unit]);
 
     useEffect(() => {
         async function fetchAvailability() {
@@ -114,6 +125,43 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         }
         fetchAvailability();
     }, [unit, selectedSubEvent, formData.category, formData.sesi, fields]);
+
+    const isOptionDisabled = (fieldId: string, optionValue: string) => {
+        // If it's a sub-event selection (top level buttons)
+        if (fieldId === "subEvent") {
+            const avail = availabilityMap[optionValue];
+            return avail ? !avail.available : false;
+        }
+
+        // For fields like 'sesi' or 'category'
+        if (fieldId === "sesi") {
+            // A session is disabled if ALL categories for this session are full
+            const categoryField = fields.find((f: any) => f.id === "category");
+            if (categoryField && categoryField.options) {
+                return categoryField.options.every((opt: any) => {
+                    const key = `${optionValue} - ${opt.value}`;
+                    const avail = availabilityMap[key];
+                    return avail ? !avail.available : false;
+                });
+            }
+            // Fallback: search for a limit just for the session
+            const avail = availabilityMap[optionValue];
+            return avail ? !avail.available : false;
+        }
+
+        if (fieldId === "category") {
+            const sesiValue = formData.sesi;
+            if (sesiValue) {
+                const key = `${sesiValue} - ${optionValue}`;
+                const avail = availabilityMap[key];
+                return avail ? !avail.available : false;
+            }
+            const avail = availabilityMap[optionValue];
+            return avail ? !avail.available : false;
+        }
+
+        return false;
+    };
 
     // 2. Persist Data as User Types - Debounced manually or just guarded
     useEffect(() => {
@@ -424,12 +472,14 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                 {subEvents.map((se) => (
                                     <button
                                         key={se.id}
+                                        disabled={isOptionDisabled("subEvent", se.name)}
                                         onClick={() => setSelectedSubEvent(se.name)}
                                         className={cx(
                                             "p-4 rounded-lg border text-sm font-bold transition-all text-left shadow-xs",
                                             selectedSubEvent === se.name
                                                 ? "border-brand-solid bg-brand-primary/5 text-brand-secondary ring-2 ring-brand-solid/20"
-                                                : "border-secondary bg-primary text-secondary hover:border-tertiary"
+                                                : "border-secondary bg-primary text-secondary hover:border-tertiary",
+                                            isOptionDisabled("subEvent", se.name) && "opacity-50 cursor-not-allowed bg-disabled_subtle grayscale"
                                         )}
                                     >
                                         {se.name}
@@ -457,14 +507,18 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         <RadioGroup
                                             value={formData[field.id]}
                                             onChange={(val) => handleInputChange(field.id, val)}
-                                            items={field.options.map((opt: any) => ({
-                                                value: opt.value,
-                                                title: opt.label,
-                                                description: "",
-                                                secondaryTitle: "",
-                                                image: opt.image,
-                                                icon: () => null
-                                            }))}
+                                            items={field.options.map((opt: any) => {
+                                                const disabled = isOptionDisabled(field.id, opt.value);
+                                                return {
+                                                    value: opt.value,
+                                                    title: opt.label + (disabled ? " (Sold Out)" : ""),
+                                                    description: "",
+                                                    secondaryTitle: "",
+                                                    image: opt.image,
+                                                    icon: () => null,
+                                                    disabled: disabled
+                                                };
+                                            })}
                                         />
                                     </div>
                                 );
@@ -479,13 +533,17 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         placeholder="Pilih salah satu..."
                                         selectedKey={formData[field.id]}
                                         onSelectionChange={(val) => handleInputChange(field.id, val)}
-                                        items={field.options.map((opt: any) => ({
-                                            id: opt,
-                                            label: opt
-                                        }))}
+                                        items={field.options.map((opt: any) => {
+                                            const disabled = isOptionDisabled(field.id, opt);
+                                            return {
+                                                id: opt,
+                                                label: opt + (disabled ? " (Sold Out)" : ""),
+                                                isDisabled: disabled
+                                            };
+                                        })}
                                         size="md"
                                     >
-                                        {(item) => <Select.Item key={item.id} id={item.id as string}>{item.label}</Select.Item>}
+                                        {(item) => <Select.Item key={item.id} id={item.id as string} isDisabled={item.isDisabled}>{item.label}</Select.Item>}
                                     </Select>
                                 );
                             }
