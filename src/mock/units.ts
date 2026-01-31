@@ -226,21 +226,13 @@ export const UNITS_MOCK = [
         highlightTitle: "Segera Hadir",
         highlightSubtitle: "📍 UNPAS Setiabudi",
         imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop",
+        price: 50000,
         cpName: "Humas LISMA",
         cpWhatsapp: "628123456784",
         cpDescription: "Hubungi untuk informasi tiket dan acara puncak.",
         formFields: [
             { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
             { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-            {
-                id: "category", label: "Kategori Tiket", type: "radio",
-                options: [
-                    { label: "Umum (Rp40.000 - Early Bird)", value: "early", price: 40000 },
-                    { label: "Pre-sale 1 (Rp55.000)", value: "presale1", price: 55000 },
-                    { label: "Pre-sale 2 (Rp70.000)", value: "presale2", price: 70000 },
-                    { label: "Siswa Sekolah (Special Price)", value: "siswa", price: 35000 }
-                ], required: true
-            },
             { id: "quantity", label: "Jumlah Tiket", type: "number", min: 1, defaultValue: 1, required: true }
         ]
     }

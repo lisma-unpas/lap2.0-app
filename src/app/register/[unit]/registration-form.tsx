@@ -280,19 +280,39 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     };
 
     const calculatePrice = () => {
-        if (subEventConfig?.price !== undefined) return subEventConfig.price;
-        if (config?.fixedPrice !== undefined) return config.fixedPrice;
+        let basePrice = 0;
 
-        let price = 0;
-        fields.forEach((field: any) => {
-            if (field.type === "radio") {
-                const selectedOption = field.options.find((opt: any) => opt.value === formData[field.id]);
-                if (selectedOption?.price !== undefined) price = selectedOption.price;
+        if (subEventConfig?.price !== undefined) {
+            basePrice = subEventConfig.price;
+        } else if (config?.fixedPrice !== undefined) {
+            basePrice = config.fixedPrice;
+        } else {
+            // Priority: radio field selection
+            fields.forEach((field: any) => {
+                if (field.type === "radio") {
+                    const selectedOption = field.options.find((opt: any) => opt.value === formData[field.id]);
+                    if (selectedOption?.price !== undefined) basePrice = selectedOption.price;
+                }
+            });
+
+            // Fallback: unit root price
+            if (basePrice === 0 && config?.price !== undefined) {
+                basePrice = config.price;
             }
-        });
+        }
 
         const quantity = parseInt(formData.quantity) || 1;
-        return price * quantity;
+
+        // If subEventConfig or fixedPrice is specific, it might already include quantity logic 
+        // but for LAP it's usually per-item. 
+        // Check if there is a quantity field to determine if we should multiply.
+        const hasQuantityField = fields.some((f: any) => f.id === "quantity");
+
+        if (hasQuantityField) {
+            return basePrice * quantity;
+        }
+
+        return basePrice;
     };
 
     const handleAddToCart = () => {
