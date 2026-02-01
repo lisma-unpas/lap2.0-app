@@ -1,7 +1,7 @@
 import RegistrationForm from "./registration-form";
 import { notFound } from "next/navigation";
 import { UNIT_CONFIG } from "@/constants/units";
-import { checkUnitAvailability } from "@/actions/admin";
+import { checkUnitAvailability, getUnitAvailability } from "@/actions/admin";
 import { AlertCircle } from "@untitledui/icons";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
@@ -28,9 +28,15 @@ export default async function Page({ params }: PageProps) {
         notFound();
     }
 
-    const availability = await checkUnitAvailability(unitKey, "TOTAL");
+    const availabilityRes = await getUnitAvailability(unitKey);
+    const isAnyAvailable = availabilityRes.success &&
+        (Object.keys(availabilityRes.data).length === 0 ||
+            Object.values(availabilityRes.data).some((a: any) => a.available));
 
-    if (availability.success && !availability.available) {
+    if (!isAnyAvailable) {
+        // Find the lowest limit or some representative limit to show
+        const maxLimit = Object.values(availabilityRes.data).reduce((acc: number, curr: any) => acc + (curr.limit || 0), 0);
+
         return (
             <Section className="py-24 bg-primary min-h-[60vh] flex items-center">
                 <Container>
@@ -40,7 +46,7 @@ export default async function Page({ params }: PageProps) {
                         </div>
                         <h1 className="text-2xl font-bold text-primary">Pendaftaran Ditutup</h1>
                         <p className="mt-4 text-tertiary">
-                            Mohon maaf, kuota pendaftaran untuk unit <strong>{config.name}</strong> telah mencapai batas maksimal ({availability.limit}).
+                            Mohon maaf, kuota pendaftaran untuk unit <strong>{config.name}</strong> telah mencapai batas maksimal ({maxLimit || availabilityRes.data?.TOTAL?.limit || 'Batas Kuota'}).
                         </p>
                         <Button href="/#units" className="mt-8" color="secondary">
                             Lihat Unit Lain

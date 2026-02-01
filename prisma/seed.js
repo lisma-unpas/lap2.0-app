@@ -22,35 +22,39 @@ async function main() {
 
     console.log('Seed: Creating unit settings...');
 
-    // Example settings for TESAS combinations
-    const tesasSettings = [
-        { unitId: 'tesas', categoryName: 'Sesi 1 - umum', limit: 50 },
-        { unitId: 'tesas', categoryName: 'Sesi 1 - sekolah', limit: 30 },
-        { unitId: 'tesas', categoryName: 'Sesi 2 - umum', limit: 50 },
-        { unitId: 'tesas', categoryName: 'Sesi 2 - sekolah', limit: 30 },
-        { unitId: 'tesas', categoryName: 'Sesi 3 - umum', limit: 50 },
-        { unitId: 'tesas', categoryName: 'Sesi 3 - sekolah', limit: 30 },
-    ];
+    const unitSettings = [
+        // TESAS
+        { unitId: 'tesas', categoryName: 'Sesi 1 - umum', limit: 0 },
+        { unitId: 'tesas', categoryName: 'Sesi 1 - sekolah', limit: 160 },
+        { unitId: 'tesas', categoryName: 'Sesi 2 - umum', limit: 90 },
+        { unitId: 'tesas', categoryName: 'Sesi 2 - sekolah', limit: 90 },
+        { unitId: 'tesas', categoryName: 'Sesi 3 - umum', limit: 176 },
+        { unitId: 'tesas', categoryName: 'Sesi 3 - sekolah', limit: 0 },
 
-    // Example settings for TAKRE
-    const takreSettings = [
+        // KDS
+        { unitId: 'kds', categoryName: 'umum', limit: 200 },
+        { unitId: 'kds', categoryName: 'sma', limit: 100 },
+
+        // PSM
+        { unitId: 'psm', categoryName: 'PSM', limit: 50 },
+
+        // TAKRE
         { unitId: 'takre', categoryName: 'SOLO', limit: 20 },
         { unitId: 'takre', categoryName: 'Grup - hoosun', limit: 15 },
         { unitId: 'takre', categoryName: 'Grup - rookie', limit: 15 },
         { unitId: 'takre', categoryName: 'RPD', limit: 100 },
+
+        // FG
+        { unitId: 'fg', categoryName: 'Audiens short film', limit: 100 },
+        { unitId: 'fg', categoryName: 'Lomba foto - default', limit: 50 },
+        { unitId: 'fg', categoryName: 'Lomba short film - sma', limit: 30 },
+        { unitId: 'fg', categoryName: 'Lomba short film - umum', limit: 30 },
+
+        // Main Event
+        { unitId: 'main-event', categoryName: 'Main Event', limit: 1000 },
     ];
 
-    // Example settings for Main Event
-    const mainEventSettings = [
-        { unitId: 'main-event', categoryName: 'early', limit: 100 },
-        { unitId: 'main-event', categoryName: 'presale1', limit: 200 },
-        { unitId: 'main-event', categoryName: 'presale2', limit: 300 },
-        { unitId: 'main-event', categoryName: 'siswa', limit: 150 },
-    ];
-
-    const allSettings = [...tesasSettings, ...takreSettings, ...mainEventSettings];
-
-    for (const setting of allSettings) {
+    for (const setting of unitSettings) {
         await prisma.unitSetting.upsert({
             where: {
                 unitId_categoryName: {
@@ -63,7 +67,7 @@ async function main() {
         });
     }
 
-    console.log(`Seed completed successfully! Added ${allSettings.length} unit settings.`);
+    console.log(`Seed completed successfully! Added ${unitSettings.length} unit settings.`);
 }
 
 main()

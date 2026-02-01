@@ -23,15 +23,20 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
     try {
         // Check availability for all items first
         for (const item of items) {
+            const unitKey = item.unitId.toLowerCase();
+            const config = UNIT_CONFIG[unitKey];
             const sesiValue = item.formData.sesi;
             const categoryValue = item.formData.category;
+            const subEventName = item.subEventName;
 
-            let currentCategory = "";
-            if (sesiValue && categoryValue) {
-                currentCategory = `${sesiValue} - ${categoryValue}`;
-            } else {
-                currentCategory = categoryValue || sesiValue || item.subEventName || "TOTAL";
+            const parts = [];
+            if (subEventName && subEventName !== config?.name) {
+                parts.push(subEventName);
             }
+            if (sesiValue) parts.push(sesiValue);
+            if (categoryValue) parts.push(categoryValue);
+
+            const currentCategory = parts.join(" - ") || config?.name || "Uncategorized";
 
             const availability = await checkUnitAvailability(item.unitId.toLowerCase(), currentCategory);
             const requestedQuantity = parseInt(item.formData.quantity) || 1;

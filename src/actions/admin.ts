@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { RegStatus } from "@prisma/client";
+import { UNIT_CONFIG } from "@/constants/units";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { generateTicketCode } from "@/actions/registration";
@@ -292,17 +293,39 @@ export async function updateUnitSetting(unitId: string, limit: number, categoryN
         await (prisma as any).unitSetting.upsert({
             where: {
                 unitId_categoryName: {
-                    unitId,
-                    categoryName
+                    unitId: unitId.toLowerCase(),
+                    categoryName: categoryName
                 }
             },
             update: { limit },
-            create: { unitId, categoryName, limit }
+            create: { unitId: unitId.toLowerCase(), categoryName, limit }
         });
         revalidatePath("/admin/settings");
         return { success: true };
     } catch (error) {
         console.error("[updateUnitSetting] Error:", error);
+        return { success: false, message: "Gagal memperbarui pengaturan." };
+    }
+}
+
+export async function updateUnitSettings(unitId: string, settings: { categoryName: string, limit: number }[]) {
+    try {
+        await prisma.$transaction(
+            settings.map(s => (prisma as any).unitSetting.upsert({
+                where: {
+                    unitId_categoryName: {
+                        unitId: unitId.toLowerCase(),
+                        categoryName: s.categoryName
+                    }
+                },
+                update: { limit: s.limit },
+                create: { unitId: unitId.toLowerCase(), categoryName: s.categoryName, limit: s.limit }
+            }))
+        );
+        revalidatePath("/admin/settings");
+        return { success: true };
+    } catch (error) {
+        console.error("[updateUnitSettings] Error:", error);
         return { success: false, message: "Gagal memperbarui pengaturan." };
     }
 }
@@ -392,15 +415,19 @@ export async function syncTickets() {
 
 export async function checkUnitAvailability(unitId: string, categoryName: string) {
     try {
+        const unitKey = unitId.toLowerCase();
+        const unitConfig = UNIT_CONFIG[unitKey];
+        if (!unitConfig) throw new Error("Unit not found");
+
         const settings = await (prisma as any).unitSetting.findMany({
-            where: { unitId: unitId.toLowerCase() }
+            where: { unitId: unitKey }
         });
 
         const specificLimit = settings.find((s: any) => s.categoryName === categoryName)?.limit;
 
         const registrations = await prisma.registration.findMany({
             where: {
-                unitId: unitId.toLowerCase(),
+                unitId: unitKey,
                 status: { in: ["VERIFIED", "PENDING"] }
             },
             select: {
@@ -417,13 +444,16 @@ export async function checkUnitAvailability(unitId: string, categoryName: string
 
             const categoryValue = data.category;
             const sesiValue = data.sesi;
+            const subEventName = reg.subEventName;
 
-            let regCategory = "";
-            if (sesiValue && categoryValue) {
-                regCategory = `${sesiValue} - ${categoryValue}`;
-            } else {
-                regCategory = categoryValue || sesiValue || reg.subEventName;
+            const parts = [];
+            if (subEventName && subEventName !== unitConfig.name) {
+                parts.push(subEventName);
             }
+            if (sesiValue) parts.push(sesiValue);
+            if (categoryValue) parts.push(categoryValue);
+
+            const regCategory = parts.join(" - ") || unitConfig.name;
 
             if (regCategory === categoryName) {
                 categorySold += quantity;
@@ -473,9 +503,10 @@ export async function getUnitAvailability(unitId: string) {
             };
         });
 
-        // Initialize TOTAL if not present
-        if (!availabilityMap["TOTAL"]) {
-            availabilityMap["TOTAL"] = { sold: 0, limit: 9999, available: true };
+        // Initialize fallback category if not present (using unitConfig.name)
+        const unitConfig = UNIT_CONFIG[unitId.toLowerCase()];
+        if (unitConfig && !availabilityMap[unitConfig.name]) {
+            availabilityMap[unitConfig.name] = { sold: 0, limit: 9999, available: true };
         }
 
         // Calculate sold counts
@@ -486,18 +517,19 @@ export async function getUnitAvailability(unitId: string) {
             const sesiValue = data.sesi;
             const subEventName = reg.subEventName;
 
-            let regCategory = "";
-            if (sesiValue && categoryValue) {
-                regCategory = `${sesiValue} - ${categoryValue}`;
-            } else {
-                regCategory = categoryValue || sesiValue || subEventName;
+            const parts = [];
+            if (subEventName && subEventName !== unitConfig?.name) {
+                parts.push(subEventName);
             }
+            if (sesiValue) parts.push(sesiValue);
+            if (categoryValue) parts.push(categoryValue);
+
+            const regCategory = parts.join(" - ") || unitConfig?.name || unitId;
 
             if (!availabilityMap[regCategory]) {
                 availabilityMap[regCategory] = { sold: 0, limit: 9999, available: true };
             }
             availabilityMap[regCategory].sold += quantity;
-            availabilityMap["TOTAL"].sold += quantity;
         });
 
         // Finalize availability

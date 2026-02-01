@@ -6,7 +6,7 @@ import {
     Save01,
     ChevronDown,
 } from "@untitledui/icons";
-import { getUnitSettings, updateUnitSetting } from "@/actions/admin";
+import { getUnitSettings, updateUnitSettings } from "@/actions/admin";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import Container from "@/components/shared/container";
@@ -41,13 +41,19 @@ export default function SettingsClient() {
         setIsInitialLoading(false);
     }
 
-    async function handleSave(unitId: string, categoryName: string) {
-        const key = `${unitId}-${categoryName}`;
-        setIsSaving(key);
-        const limit = settings[unitId]?.[categoryName] ?? 100;
-        const res = await updateUnitSetting(unitId, limit, categoryName);
+    async function handleSaveUnit(unitId: string) {
+        setIsSaving(unitId);
+
+        const unitCategories = getUnitCategories(unitId);
+        const settingsToUpdate = unitCategories.map(cat => ({
+            categoryName: cat,
+            limit: settings[unitId]?.[cat] ?? 100
+        }));
+
+        const res = await updateUnitSettings(unitId, settingsToUpdate);
+
         if (res.success) {
-            toastSuccess("Berhasil", `Limit untuk ${unitId} (${categoryName}) diperbarui.`);
+            toastSuccess("Berhasil", `Semua limit untuk ${UNIT_CONFIG[unitId].name} diperbarui.`);
         } else {
             toastError("Gagal", res.message || "Gagal memperbarui limit.");
         }
@@ -70,47 +76,51 @@ export default function SettingsClient() {
             return { sesiOptions, categoryOptions };
         };
 
-        // 1. Check root level formFields
-        const rootOptions = getFieldOptions(unit.formFields || []);
+        const addCategory = (subEventName: string | null, sesi?: string, category?: string) => {
+            const parts = [];
+            if (subEventName && subEventName !== unit.name) parts.push(subEventName);
+            if (sesi) parts.push(sesi);
+            if (category) parts.push(category);
+            categories.add(parts.join(" - ") || unit.name);
+        };
 
-        // 2. Add combinations from root fields
-        if (rootOptions.sesiOptions.length > 0 && rootOptions.categoryOptions.length > 0) {
-            rootOptions.sesiOptions.forEach((s: string) => {
-                rootOptions.categoryOptions.forEach((c: string) => {
-                    categories.add(`${s} - ${c}`);
-                });
-            });
-        } else {
-            // Add individual if no combinations
-            rootOptions.sesiOptions.forEach((s: string) => categories.add(s));
-            rootOptions.categoryOptions.forEach((c: string) => categories.add(c));
-        }
-
-        // 3. Check subEventConfigs
+        // 1. If has subEventConfigs, iterate them
         if (unit.subEventConfigs) {
-            Object.keys(unit.subEventConfigs).forEach(subEventName => {
-                const config = unit.subEventConfigs[subEventName];
-                const cfgOptions = getFieldOptions(config.fields || []);
+            Object.keys(unit.subEventConfigs).forEach(seName => {
+                const config = unit.subEventConfigs[seName];
+                const { sesiOptions, categoryOptions } = getFieldOptions(config.fields || []);
 
-                if (cfgOptions.sesiOptions.length > 0 && cfgOptions.categoryOptions.length > 0) {
-                    cfgOptions.sesiOptions.forEach((s: string) => {
-                        cfgOptions.categoryOptions.forEach((c: string) => {
-                            categories.add(`${subEventName} - ${s} - ${c}`);
-                        });
-                    });
-                } else if (cfgOptions.sesiOptions.length > 0) {
-                    cfgOptions.sesiOptions.forEach((s: string) => categories.add(`${subEventName} - ${s}`));
-                } else if (cfgOptions.categoryOptions.length > 0) {
-                    cfgOptions.categoryOptions.forEach((c: string) => categories.add(`${subEventName} - ${c}`));
+                if (sesiOptions.length > 0 && categoryOptions.length > 0) {
+                    sesiOptions.forEach((s: string) => categoryOptions.forEach((c: string) => addCategory(seName, s, c)));
+                } else if (sesiOptions.length > 0) {
+                    sesiOptions.forEach((s: string) => addCategory(seName, s));
+                } else if (categoryOptions.length > 0) {
+                    categoryOptions.forEach((c: string) => addCategory(seName, undefined, c));
                 } else {
-                    categories.add(subEventName);
+                    addCategory(seName);
                 }
             });
         }
-
-        // 4. Add subEvents if not covered
-        if (unit.subEvents && !unit.subEventConfigs) {
-            unit.subEvents.forEach((se: string) => categories.add(se));
+        // 2. Otherwise use root formFields
+        else if (unit.formFields) {
+            const { sesiOptions, categoryOptions } = getFieldOptions(unit.formFields);
+            if (sesiOptions.length > 0 && categoryOptions.length > 0) {
+                sesiOptions.forEach((s: string) => categoryOptions.forEach((c: string) => addCategory(null, s, c)));
+            } else if (sesiOptions.length > 0) {
+                sesiOptions.forEach((s: string) => addCategory(null, s));
+            } else if (categoryOptions.length > 0) {
+                categoryOptions.forEach((c: string) => addCategory(null, undefined, c));
+            } else {
+                addCategory(null);
+            }
+        }
+        // 3. Fallback to subEvents
+        else if (unit.subEvents) {
+            unit.subEvents.forEach((se: string) => addCategory(se));
+        }
+        // 4. Absolute fallback
+        else {
+            addCategory(null);
         }
 
         return Array.from(categories);
@@ -131,7 +141,7 @@ export default function SettingsClient() {
                     </div>
 
                     <p className="bg-utility-blue-50 border border-utility-blue-100 p-4 rounded-lg text-sm text-utility-blue-700 mb-8">
-                        The registration form will automatically close if the number of <strong>Verified</strong> or <strong>Pending</strong> registrations reaches the limit for a specific category or the unit's total capacity.
+                        The registration form will automatically close if the number of <strong>Verified</strong> or <strong>Pending</strong> registrations reaches the limit for a specific category.
                     </p>
 
                     <div className="space-y-6">
@@ -146,11 +156,21 @@ export default function SettingsClient() {
 
                                 return (
                                     <div key={unitId} className="bg-primary rounded-2xl border border-secondary shadow-sm overflow-hidden">
-                                        <div className="p-4 border-b border-secondary flex items-center justify-between">
+                                        <div className="p-4 border-b border-secondary flex items-center justify-between bg-secondary/5">
                                             <div>
                                                 <h3 className="font-bold text-lg text-primary">{unit.name}</h3>
-                                                <p className="text-xs text-tertiary">Unit ID: {unitId} • {categories.length - 1} Special Categories</p>
+                                                <p className="text-xs text-tertiary">Unit ID: {unitId} • {categories.length} Categories Total</p>
                                             </div>
+                                            <Button
+                                                size="sm"
+                                                color="primary"
+                                                iconLeading={Save01}
+                                                onClick={() => handleSaveUnit(unitId)}
+                                                isLoading={isSaving === unitId}
+                                                className="min-w-[120px]"
+                                            >
+                                                Save Unit
+                                            </Button>
                                         </div>
 
                                         <div className="divide-y divide-secondary">
@@ -168,7 +188,7 @@ export default function SettingsClient() {
                                                             <Input
                                                                 type="number"
                                                                 min={0}
-                                                                value={settings[unitId]?.[cat]?.toString() || "100"}
+                                                                value={settings[unitId]?.[cat]?.toString() || (cat === "TOTAL" ? "500" : "100")}
                                                                 onChange={(val) => setSettings(prev => ({
                                                                     ...prev,
                                                                     [unitId]: {
@@ -180,16 +200,6 @@ export default function SettingsClient() {
                                                                 aria-label={`Limit for ${cat}`}
                                                             />
                                                         </div>
-                                                        <Button
-                                                            size="sm"
-                                                            color="secondary"
-                                                            iconLeading={Save01}
-                                                            onClick={() => handleSave(unitId, cat)}
-                                                            isLoading={isSaving === `${unitId}-${cat}`}
-                                                            className="min-w-[80px]"
-                                                        >
-                                                            Save
-                                                        </Button>
                                                     </div>
                                                 </div>
                                             ))}

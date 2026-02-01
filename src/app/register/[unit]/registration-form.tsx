@@ -107,7 +107,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             if (sesiValue) parts.push(sesiValue);
             if (categoryValue) parts.push(categoryValue);
 
-            const currentCategory = parts.join(" - ") || "TOTAL";
+            const currentCategory = parts.join(" - ") || config.name;
 
             if (!currentCategory) {
                 setAvailability(null);
