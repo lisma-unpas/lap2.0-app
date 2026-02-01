@@ -7,7 +7,7 @@ import { Input } from "@/components/base/input/input";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { getRegistrationStatus } from "@/actions/status";
-import { Badge } from "@/components/base/badges/badges";
+import { Badge, BadgeWithIcon } from "@/components/base/badges/badges";
 import { Modal, ModalOverlay, Dialog } from "@/components/application/modals/modal";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { UNIT_CONFIG } from "@/constants/units";
@@ -98,9 +98,9 @@ export default function CheckStatusClient() {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'VERIFIED': return <CheckCircle className="size-5 text-success-600" />;
-            case 'PENDING': return <Clock className="size-5 text-warning-600" />;
-            default: return <AlertCircle className="size-5 text-error-600" />;
+            case 'VERIFIED': return CheckCircle;
+            case 'PENDING': return Clock;
+            default: return AlertCircle;
         }
     };
 
@@ -173,12 +173,9 @@ export default function CheckStatusClient() {
                                                 </div>
                                             </div>
                                             <div className="flex flex-col items-end gap-3">
-                                                <Badge color={getStatusVariant(reg.status) as any} size="md" className="h-10 px-4 text-sm font-bold">
-                                                    <div className="flex items-center gap-2">
-                                                        {getStatusIcon(reg.status)}
-                                                        {reg.status}
-                                                    </div>
-                                                </Badge>
+                                                <BadgeWithIcon color={getStatusVariant(reg.status) as any} size="md" iconLeading={getStatusIcon(reg.status)}>
+                                                    {reg.status}
+                                                </BadgeWithIcon>
                                                 {reg.status === 'VERIFIED' && (
                                                     <Button size="sm" color="primary" className="gap-2 font-bold" onClick={() => openTicket(reg)}>
                                                         <Ticket01 className="size-4" />
@@ -202,12 +199,39 @@ export default function CheckStatusClient() {
 
                                             <div className="flex items-center gap-2">
                                                 {reg.status === 'PENDING' && (
-                                                    <p className="text-xs text-warning-700 italic font-medium px-3 py-1.5 rounded-full bg-warning-50 border border-warning-100">
-                                                        Menunggu Verifikasi Pembayaran
-                                                    </p>
+                                                    <div className="flex flex-col sm:flex-row md:items-center gap-3">
+                                                        <Badge color="warning" size="md">
+                                                            Menunggu Verifikasi Pembayaran
+                                                        </Badge>
+                                                        {config.cpWhatsapp && (
+                                                            <Button
+                                                                size="sm"
+                                                                color="secondary"
+                                                                className="h-9 px-4 text-xs font-bold gap-2"
+                                                                iconLeading={<img src="/icon-wa.webp" alt="" className="size-5" />}
+                                                                onClick={() => {
+                                                                    const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${reg.registrationCode}\n- Nama: ${reg.fullName}\n- Email: ${reg.email || '-'}\n- Item: ${config.name}${reg.subEventName ? ` (${reg.subEventName})` : ''}\n- Total: Rp ${reg.totalPrice.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${reg.paymentProof || '(Belum diunggah)'}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
+                                                                    const waUrl = `https://wa.me/${config.cpWhatsapp}?text=${encodeURIComponent(message)}`;
+                                                                    window.open(waUrl, '_blank');
+                                                                }}
+                                                            >
+                                                                Konfirmasi WA
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                 )}
                                                 {reg.status === 'REJECTED' && (
-                                                    <Button size="sm" color="link-destructive" className="text-xs font-bold">
+                                                    <Button
+                                                        size="sm"
+                                                        color="link-destructive"
+                                                        className="text-xs font-bold"
+                                                        onClick={() => {
+                                                            if (config.cpWhatsapp) {
+                                                                const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin bertanya mengenai pendaftaran saya dengan kode ${reg.registrationCode} yang ditolak. Mohon informasinya. Terima kasih.`;
+                                                                window.open(`https://wa.me/${config.cpWhatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+                                                            }
+                                                        }}
+                                                    >
                                                         Hubungi Panitia
                                                     </Button>
                                                 )}

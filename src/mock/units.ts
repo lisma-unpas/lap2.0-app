@@ -12,8 +12,8 @@ export const UNITS_MOCK = [
         highlightTitle: "16 Mei 2026",
         highlightSubtitle: "📍 Mayang Sunda",
         imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=2069&auto=format&fit=crop",
-        cpName: "Panitia TESAS",
-        cpWhatsapp: "628123456789",
+        cpName: "Kak Athari (TESAS)",
+        cpWhatsapp: "085788397608",
         cpDescription: "Hubungi pendamping unit TESAS untuk informasi teknis.",
         formFields: [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
@@ -43,8 +43,8 @@ export const UNITS_MOCK = [
         highlightTitle: "2 Mei 2026",
         highlightSubtitle: "📍 Tempat Makan Bandung – Dago Giri",
         imageUrl: "https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=1974&auto=format&fit=crop",
-        cpName: "Panitia KDS",
-        cpWhatsapp: "628123456780",
+        cpName: "Kak Raisa (KDS)",
+        cpWhatsapp: "082119381300",
         cpDescription: "Tanyakan seputar alat musik tradisional dan pupuh.",
         formFields: [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
@@ -80,8 +80,8 @@ export const UNITS_MOCK = [
         highlightTitle: "10 Mei 2026",
         highlightSubtitle: "📍 Parkiran FISS Unpas Setiabudhi",
         imageUrl: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=2070&auto=format&fit=crop",
-        cpName: "Kang PSM",
-        cpWhatsapp: "628123456781",
+        cpName: "Kak Rayi (PSM)",
+        cpWhatsapp: "08815724135",
         cpDescription: "Pertanyaan seputar alat musik dan teknis panggung.",
         formFields: [
             { id: "bandName", label: "Nama Band", type: "text", required: true },
@@ -110,8 +110,8 @@ export const UNITS_MOCK = [
         highlightTitle: "26 April 2026",
         highlightSubtitle: "📍 Bandung Indah Plaza",
         imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2069&auto=format&fit=crop",
-        cpName: "Panitia TAKRE",
-        cpWhatsapp: "628123456782",
+        cpName: "Kak Rara (TAKRE)",
+        cpWhatsapp: "083159471511",
         cpDescription: "Info seputar kategori solo dan grup dance.",
         subEventConfigs: {
             "SOLO": {
@@ -163,8 +163,8 @@ export const UNITS_MOCK = [
         highlightTitle: "6 Mei 2026",
         highlightSubtitle: "📍 Bandung Creative Hub",
         imageUrl: "https://images.unsplash.com/photo-1452784444945-3f422708fe5e?q=80&w=2072&auto=format&fit=crop",
-        cpName: "Panitia FG",
-        cpWhatsapp: "628123456783",
+        cpName: "Kak Zena (FG)",
+        cpWhatsapp: "085320634272",
         cpDescription: "Tanya seputar link submit dan durasi video.",
         subEventConfigs: {
             "Audiens short film": {
@@ -227,8 +227,8 @@ export const UNITS_MOCK = [
         highlightSubtitle: "📍 UNPAS Setiabudi",
         imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop",
         price: 50000,
-        cpName: "Humas LISMA",
-        cpWhatsapp: "628123456784",
+        cpName: "Kak Talitha (Humas Lisma)",
+        cpWhatsapp: "081324046884",
         cpDescription: "Hubungi untuk informasi tiket dan acara puncak.",
         formFields: [
             { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },

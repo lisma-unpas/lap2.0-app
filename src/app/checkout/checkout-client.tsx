@@ -9,7 +9,8 @@ import { Label } from "@/components/base/input/label";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { useCart } from "@/context/cart-context";
-import { PAYMENT_INFO } from "@/constants/units";
+import { PAYMENT_INFO, UNIT_CONFIG } from "@/constants/units";
+import { MessageCircle02 } from "@untitledui/icons";
 import { uploadImage } from "@/actions/upload";
 import { submitBulkRegistration } from "@/actions/registration";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
@@ -115,6 +116,12 @@ export default function CheckoutClient() {
     const [successfullyGeneratedCode, setSuccessfullyGeneratedCode] = useState<string | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [lastCheckoutInfo, setLastCheckoutInfo] = useState<{
+        items: typeof items;
+        url: string | null;
+        code: string | null;
+        email: string;
+    } | null>(null);
     const { toastSuccess, toastError } = useToast();
 
     useEffect(() => {
@@ -237,6 +244,12 @@ export default function CheckoutClient() {
                 }
 
                 setSuccessfullyGeneratedCode((res as any).registrationCode || null);
+                setLastCheckoutInfo({
+                    items: [...selectedItems],
+                    url: uploadedUrl,
+                    code: (res as any).registrationCode || null,
+                    email: userEmail || confirmationEmail
+                });
                 setIsSuccess(true);
                 clearCart();
                 toastSuccess("Berhasil", "Pendaftaran berhasil!");
@@ -284,9 +297,44 @@ export default function CheckoutClient() {
                             </div>
                         )}
 
-                        <Button className="mt-8 w-full" color="primary" href="/check-status" size="lg">
-                            Cek Status Pendaftaran
-                        </Button>
+                        {successfullyGeneratedCode && lastCheckoutInfo && (
+                            <div className="mt-4 space-y-3">
+                                <p className="text-xs text-tertiary">Untuk mempercepat verifikasi, silakan kirim bukti bayar ke WhatsApp Panitia:</p>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {Array.from(new Set(lastCheckoutInfo.items.map(i => i.unitId))).map(unitId => {
+                                        const config = UNIT_CONFIG[unitId];
+                                        if (!config?.cpWhatsapp) return null;
+
+                                        const unitItems = lastCheckoutInfo.items.filter(i => i.unitId === unitId);
+                                        const totalPerUnit = unitItems.reduce((acc, i) => acc + i.price, 0);
+
+                                        const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${lastCheckoutInfo.code}\n- Nama: ${userIdentity?.fullName || '-'}\n- Email: ${lastCheckoutInfo.email}\n- Item: ${unitItems.map(i => `${i.unitName}${i.subEventName ? ` (${i.subEventName})` : ''}`).join(', ')}\n- Total: Rp ${totalPerUnit.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${lastCheckoutInfo.url}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
+
+                                        const waUrl = `https://wa.me/${config.cpWhatsapp}?text=${encodeURIComponent(message)}`;
+
+                                        return (
+                                            <Button
+                                                key={unitId}
+                                                color="secondary"
+                                                iconLeading={<img src="/icon-wa.webp" alt="" className="size-6" />}
+                                                onClick={() => window.open(waUrl, '_blank')}
+                                            >
+                                                Konfirmasi {config.name}
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col gap-2 mt-8">
+                            <Button className="w-full" color="primary" href="/check-status" size="lg">
+                                Cek Status Pendaftaran
+                            </Button>
+                            <Button className="w-full" color="secondary" href="/" size="lg">
+                                Kembali ke Beranda
+                            </Button>
+                        </div>
                     </div>
                 </Container>
             </Section>
@@ -494,7 +542,11 @@ export default function CheckoutClient() {
                 <motion.div
                     key="mobile-payment-bar"
                     initial={{ y: "100%" }}
-                    animate={{ y: isMobileCollapsed ? "calc(100% - 80px)" : 0 }}
+                    animate={{
+                        y: isMobileCollapsed ? "calc(100% - 80px)" : 0,
+                        borderTopLeftRadius: isMobileCollapsed ? 0 : 32,
+                        borderTopRightRadius: isMobileCollapsed ? 0 : 32
+                    }}
                     exit={{ y: "100%" }}
                     transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
                     drag={isMobileCollapsed ? false : "y"}
@@ -505,10 +557,7 @@ export default function CheckoutClient() {
                             setIsMobileCollapsed(true);
                         }
                     }}
-                    className={cx(
-                        "fixed bottom-0 left-0 right-0 z-50 bg-primary border-t border-secondary shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.15)] px-4 pb-safe h-dvh overflow-hidden transition-all",
-                        !isMobileCollapsed ? "rounded-t-[32px]" : ""
-                    )}
+                    className="fixed bottom-0 left-0 right-0 z-50 bg-primary border-t border-secondary shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.15)] px-4 pb-safe h-dvh overflow-hidden"
                     onClick={() => isMobileCollapsed && setIsMobileCollapsed(false)}
                 >
                     {/* Handle/Toggle */}
@@ -541,10 +590,15 @@ export default function CheckoutClient() {
                     </div>
 
                     {/* Collapsible Content */}
-                    <div className={cx(
-                        "mt-4 pb-32 h-full overflow-y-auto overscroll-contain transition-opacity duration-300",
-                        isMobileCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
-                    )}>
+                    <motion.div
+                        initial={false}
+                        animate={{
+                            opacity: isMobileCollapsed ? 0 : 1,
+                            pointerEvents: isMobileCollapsed ? "none" : "auto"
+                        }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-4 pb-32 h-full overflow-y-auto overscroll-contain"
+                    >
                         <div className="flex items-center gap-3 mb-6 bg-secondary_alt p-4 rounded-2xl">
                             <div className="p-2 rounded-lg bg-brand-solid text-white">
                                 <CreditCard01 className="size-5" />
@@ -552,7 +606,7 @@ export default function CheckoutClient() {
                             <h2 className="text-lg font-bold text-primary">Detail Pembayaran</h2>
                         </div>
                         {renderPaymentCard()}
-                    </div>
+                    </motion.div>
                 </motion.div>
             )}
             {/* Centralized Modals */}

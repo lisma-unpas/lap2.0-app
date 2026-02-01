@@ -723,7 +723,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     unitName={config.name}
                     className={cx(
                         "transition-all duration-300",
-                        isPinned ? "bottom-18 md:bottom-6" : "bottom-6"
+                        isPinned ? "bottom-20 md:bottom-6" : "bottom-6"
                     )}
                 />
             )}
