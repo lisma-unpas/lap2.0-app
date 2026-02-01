@@ -1,8 +1,8 @@
 export const UNIT_IMAGES: Record<string, string[]> = {
     fg: [
-        "/images/fg/ailbhe-flynn-jkZs3Oi9pq0-unsplash.jpg",
-        "/images/fg/kyle-loftus-tn9tmUmQA4A-unsplash.jpg",
-        "/images/fg/mohamed-morsi-ROaGE2gDsbo-unsplash.jpg"
+        "/images/fg/IMG_6203.jpg",
+        "/images/fg/IMG_6204.jpg",
+        "/images/fg/IMG_6205.jpg"
     ],
     kds: [
         "/images/kds/DSCF6257.jpg",
