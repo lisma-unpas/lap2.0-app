@@ -37,6 +37,7 @@ interface SelectProps extends Omit<AriaSelectProps<SelectItemType>, "children" |
     placeholderIcon?: FC | ReactNode;
     isLoading?: boolean;
     children: ReactNode | ((item: SelectItemType) => ReactNode);
+    errorMessage?: ReactNode | ((validation: any) => ReactNode);
 }
 
 interface SelectValueProps {
@@ -130,7 +131,7 @@ const SelectValue = ({ isOpen, isFocused, isDisabled, isLoading, size, placehold
 
 export const SelectContext = createContext<{ size: "sm" | "md" }>({ size: "sm" });
 
-const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", isLoading, children, items, label, hint, tooltip, className, ...rest }: SelectProps) => {
+const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", isLoading, children, items, label, hint, tooltip, className, errorMessage, ...rest }: SelectProps) => {
     return (
         <SelectContext.Provider value={{ size }}>
             <AriaSelect
@@ -154,7 +155,13 @@ const Select = ({ placeholder = "Select", placeholderIcon, size = "sm", isLoadin
                             </AriaListBox>
                         </Popover>
 
-                        {hint && <HintText isInvalid={state.isInvalid}>{hint}</HintText>}
+                        {state.isInvalid ? (
+                            <HintText isInvalid>
+                                {typeof errorMessage === "function" ? errorMessage(state) : (errorMessage || "Format input tidak valid")}
+                            </HintText>
+                        ) : (
+                            hint && <HintText>{hint}</HintText>
+                        )}
                     </>
                 )}
             </AriaSelect>

@@ -70,6 +70,8 @@ interface FileUploadDropZoneProps {
     isConnected?: boolean;
     /** The URL to redirect to for connection */
     connectUrl?: string;
+    /** Whether the drop zone is in an invalid state */
+    isInvalid?: boolean;
 }
 
 export const FileUploadDropZone = ({
@@ -84,11 +86,14 @@ export const FileUploadDropZone = ({
     onSizeLimitExceed,
     isConnected = true,
     connectUrl = "/auth/google/login",
+    isInvalid: isInvalidProp,
 }: FileUploadDropZoneProps) => {
     const id = useId();
     const inputRef = useRef<HTMLInputElement>(null);
-    const [isInvalid, setIsInvalid] = useState(false);
+    const [isInternalInvalid, setIsInternalInvalid] = useState(false);
     const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+    const isInvalid = isInvalidProp || isInternalInvalid;
 
     const isFileTypeAccepted = (file: File): boolean => {
         if (!accept) return true;
@@ -136,8 +141,8 @@ export const FileUploadDropZone = ({
     };
 
     const processFiles = (files: File[]): void => {
-        // Reset the invalid state when processing files.
-        setIsInvalid(false);
+        // Reset the internal invalid state when processing files.
+        setIsInternalInvalid(false);
 
         const acceptedFiles: File[] = [];
         const unacceptedFiles: File[] = [];
@@ -166,7 +171,7 @@ export const FileUploadDropZone = ({
             const dataTransfer = new DataTransfer();
             (oversizedFiles as any[]).forEach((file: any) => dataTransfer.items.add(file));
 
-            setIsInvalid(true);
+            setIsInternalInvalid(true);
             onSizeLimitExceed(dataTransfer.files);
         }
 
@@ -182,7 +187,7 @@ export const FileUploadDropZone = ({
             const unacceptedDataTransfer = new DataTransfer();
             (unacceptedFiles as any[]).forEach((file: any) => unacceptedDataTransfer.items.add(file));
 
-            setIsInvalid(true);
+            setIsInternalInvalid(true);
             onDropUnacceptedFiles(unacceptedDataTransfer.files);
         }
 
@@ -242,6 +247,7 @@ export const FileUploadDropZone = ({
                 !isDisabled && "cursor-pointer",
                 isDraggingOver && "ring-2 ring-brand",
                 isDisabled && "cursor-not-allowed bg-disabled_subtle ring-disabled_subtle",
+                isInvalid && "ring-2 ring-error border-error",
                 className,
             )}
         >

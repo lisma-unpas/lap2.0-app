@@ -77,7 +77,7 @@ const EmailConfirmationModal = ({
                         autoFocus
                     />
                 </div>
-                
+
                 <Checkbox
                     size="md"
                     isSelected={agreedToTerms}

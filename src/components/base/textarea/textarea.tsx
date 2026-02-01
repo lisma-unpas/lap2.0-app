@@ -30,7 +30,7 @@ export const TextAreaBase = ({ className, ...props }: TextAreaBaseProps) => {
             className={(state) =>
                 cx(
                     "w-full scroll-py-3 rounded-lg bg-primary px-3.5 py-3 text-md text-primary shadow-xs ring-1 ring-primary transition duration-100 ease-linear ring-inset placeholder:text-placeholder autofill:rounded-lg autofill:text-primary focus:outline-hidden",
-                    
+
                     // Fix for iOS/mobile - ensure border is visible
                     "appearance-none [-webkit-appearance:none] border border-secondary",
 
@@ -72,6 +72,8 @@ interface TextFieldProps extends AriaTextFieldProps {
     rows?: number;
     /** Visible width of textarea in columns. */
     cols?: number;
+    /** Custom error message to display */
+    errorMessage?: ReactNode | ((validation: any) => ReactNode);
 }
 
 export const TextArea = ({
@@ -85,6 +87,7 @@ export const TextArea = ({
     className,
     rows,
     cols,
+    errorMessage,
     ...props
 }: TextFieldProps) => {
     return (
@@ -104,7 +107,13 @@ export const TextArea = ({
 
                     <TextAreaBase placeholder={placeholder} className={textAreaClassName} ref={textAreaRef} rows={rows} cols={cols} />
 
-                    {hint && <HintText isInvalid={isInvalid}>{hint}</HintText>}
+                    {isInvalid ? (
+                        <HintText isInvalid>
+                            {typeof errorMessage === "function" ? errorMessage({ isInvalid }) : (errorMessage || "Format input tidak valid")}
+                        </HintText>
+                    ) : (
+                        hint && <HintText>{hint}</HintText>
+                    )}
                 </>
             )}
         </AriaTextField>

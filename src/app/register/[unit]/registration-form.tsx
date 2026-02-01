@@ -364,9 +364,52 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     };
 
     const handleAddToCart = () => {
+        const errors: Record<string, string> = {};
+
+        // General validation for all fields
+        fields.forEach((field: any) => {
+            const value = formData[field.id];
+
+            // Required check
+            if (field.required) {
+                if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
+                    errors[field.id] = `${field.label} wajib diisi`;
+                }
+            }
+
+            // Email format check
+            if (value && field.type === "email") {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    errors[field.id] = "Format email tidak valid";
+                }
+            }
+
+            // URL format check
+            if (value && field.type === "url") {
+                try {
+                    new URL(value);
+                } catch (_) {
+                    errors[field.id] = "Format URL tidak valid";
+                }
+            }
+        });
+
+        // Special check for quantity
         if (formData.quantity === "0" || formData.quantity === 0 || formData.quantity === "") {
-            setFormErrors(prev => ({ ...prev, quantity: "Jumlah tiket tidak boleh 0" }));
-            toastError("Input Tidak Valid", "Jumlah tiket tidak boleh 0.");
+            errors.quantity = "Jumlah tiket tidak boleh 0";
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            toastError("Data Belum Lengkap", "Silakan lengkapi semua data yang wajib diisi dengan benar.");
+
+            // Scroll to the first error
+            const firstErrorId = Object.keys(errors)[0];
+            const element = document.getElementById(firstErrorId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -393,7 +436,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
         // After adding to cart, navigate directly to the cart page
         setIsNavigating(true);
-        router.push('/checkout');
+        window.location.href = '/checkout';
     };
 
 
@@ -502,7 +545,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
                             if (field.type === "radio") {
                                 return (
-                                    <div key={field.id} className="space-y-1.5">
+                                    <div key={field.id} id={field.id} className="space-y-1.5">
                                         <Label isRequired={field.required}>{field.label}</Label>
                                         <RadioGroup
                                             value={formData[field.id]}
@@ -520,52 +563,61 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                                 };
                                             })}
                                         />
+                                        {formErrors[field.id] && (
+                                            <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
+                                        )}
                                     </div>
                                 );
                             }
 
                             if (field.type === "select") {
                                 return (
-                                    <Select
-                                        key={field.id}
-                                        label={field.label}
-                                        isRequired={field.required}
-                                        placeholder="Pilih salah satu..."
-                                        selectedKey={formData[field.id]}
-                                        onSelectionChange={(val) => handleInputChange(field.id, val)}
-                                        items={field.options.map((opt: any) => {
-                                            const disabled = isOptionDisabled(field.id, opt);
-                                            return {
-                                                id: opt,
-                                                label: opt + (disabled ? " (Sold Out)" : ""),
-                                                isDisabled: disabled
-                                            };
-                                        })}
-                                        size="md"
-                                    >
-                                        {(item) => <Select.Item key={item.id} id={item.id as string} isDisabled={item.isDisabled}>{item.label}</Select.Item>}
-                                    </Select>
+                                    <div key={field.id} id={field.id}>
+                                        <Select
+                                            label={field.label}
+                                            isRequired={field.required}
+                                            placeholder="Pilih salah satu..."
+                                            selectedKey={formData[field.id]}
+                                            onSelectionChange={(val) => handleInputChange(field.id, val)}
+                                            items={field.options.map((opt: any) => {
+                                                const disabled = isOptionDisabled(field.id, opt);
+                                                return {
+                                                    id: opt,
+                                                    label: opt + (disabled ? " (Sold Out)" : ""),
+                                                    isDisabled: disabled
+                                                };
+                                            })}
+                                            size="md"
+                                            isInvalid={!!formErrors[field.id]}
+                                            errorMessage={formErrors[field.id]}
+                                        >
+                                            {(item) => <Select.Item key={item.id} id={item.id as string} isDisabled={item.isDisabled}>{item.label}</Select.Item>}
+                                        </Select>
+                                    </div>
                                 );
                             }
 
                             if (field.type === "textarea") {
                                 return (
-                                    <TextArea
-                                        key={field.id}
-                                        label={field.label}
-                                        isRequired={field.required}
-                                        placeholder={field.placeholder}
-                                        value={formData[field.id] || ""}
-                                        onChange={(val) => handleInputChange(field.id, val)}
-                                        rows={4}
-                                    />
+                                    <div key={field.id} id={field.id}>
+                                        <TextArea
+                                            label={field.label}
+                                            isRequired={field.required}
+                                            placeholder={field.placeholder}
+                                            value={formData[field.id] || ""}
+                                            onChange={(val) => handleInputChange(field.id, val)}
+                                            rows={4}
+                                            isInvalid={!!formErrors[field.id]}
+                                            errorMessage={formErrors[field.id]}
+                                        />
+                                    </div>
                                 );
                             }
 
                             if (field.type === "file") {
                                 const attachments = fileAttachments[field.id] || [];
                                 return (
-                                    <div key={field.id} className="space-y-1.5">
+                                    <div key={field.id} id={field.id} className="space-y-1.5">
                                         <Label isRequired={field.required}>{field.label}</Label>
                                         <FileUpload.DropZone
                                             isConnected={isConnected}
@@ -575,7 +627,11 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                             hint={`File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`}
                                             onDropFiles={(files) => Array.from(files).forEach(f => handleFileUpload(field.id, f, field.multiple))}
                                             isDisabled={isUploading}
+                                            isInvalid={!!formErrors[field.id]}
                                         />
+                                        {formErrors[field.id] && (
+                                            <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
+                                        )}
                                         {attachments && attachments.length > 0 && (
                                             <FileUpload.List className="mt-4">
                                                 {attachments.map((att, index) => (
@@ -606,32 +662,29 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             const isQuantityDisabled = isQuantity && !availability;
 
                             return (
-                                <Input
-                                    key={field.id}
-                                    type={
-                                        (field.id === "phoneNumber" || field.type === "number") ? "text" :
-                                            field.type === "url" ? "url" :
-                                                field.type === "email" ? "email" :
-                                                    "text"
-                                    }
-                                    inputMode={
-                                        (field.id === "phoneNumber" || field.type === "number") ? "numeric" : undefined
-                                    }
-                                    label={field.label}
-                                    isRequired={field.required}
-                                    hint={isQuantity && availability ? `Sisa kuota: ${availability.remaining} tiket` : undefined}
-                                    placeholder={isQuantityDisabled ? "Pilih kategori terlebih dahulu..." : (field.placeholder || `Masukkan ${field.label}...`)}
-                                    value={formData[field.id] ?? (field.type === "number" ? (field.defaultValue?.toString() || "0") : "")}
-                                    onChange={(val) => handleInputChange(field.id, val)}
-                                    size="md"
-                                    isDisabled={isQuantityDisabled}
-                                    isInvalid={!!formErrors[field.id]}
-                                    errorMessage={
-                                        formErrors[field.id] ||
-                                        (field.type === "email" ? "Format email tidak valid" :
-                                            field.type === "url" ? "Format URL tidak valid" : undefined)
-                                    }
-                                />
+                                <div key={field.id} id={field.id}>
+                                    <Input
+                                        type={
+                                            (field.id === "phoneNumber" || field.type === "number") ? "text" :
+                                                field.type === "url" ? "url" :
+                                                    field.type === "email" ? "email" :
+                                                        "text"
+                                        }
+                                        inputMode={
+                                            (field.id === "phoneNumber" || field.type === "number") ? "numeric" : undefined
+                                        }
+                                        label={field.label}
+                                        isRequired={field.required}
+                                        hint={isQuantity && availability ? `Sisa kuota: ${availability.remaining} tiket` : undefined}
+                                        placeholder={isQuantityDisabled ? "Pilih kategori terlebih dahulu..." : (field.placeholder || `Masukkan ${field.label}...`)}
+                                        value={formData[field.id] ?? (field.type === "number" ? (field.defaultValue?.toString() || "0") : "")}
+                                        onChange={(val) => handleInputChange(field.id, val)}
+                                        size="md"
+                                        isDisabled={isQuantityDisabled}
+                                        isInvalid={!!formErrors[field.id]}
+                                        errorMessage={formErrors[field.id]}
+                                    />
+                                </div>
                             );
                         })}
                     </div>
@@ -655,7 +708,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                 isLoading={isUploading || isNavigating}
                                 className="w-fit sm:w-auto md:px-10"
                             >
-                                Checkout
+                                Masukan <span className="hidden sm:inline">Keranjang</span>
                             </Button>
                         </div>
                     </div>
