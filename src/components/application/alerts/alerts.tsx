@@ -61,7 +61,7 @@ export const AlertFloating = ({ title, description, confirmLabel, onClose, onCon
                 <BackgroundPattern
                     pattern="circle"
                     size="xs"
-                    className="absolute top-1/6 left-1/4 -translate-x-1/2 -translate-y-1/2 z-0 opacity-20 text-secondary"
+                    className="absolute top-2.5 left-2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-20 text-secondary"
                 />
             </div>
 
