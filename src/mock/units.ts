@@ -53,7 +53,7 @@ export const UNITS_MOCK = [
                 ], required: true
             },
             {
-                id: "ticketType", label: "Kategori tiket", type: "radio",
+                id: "ticketType", label: "Kategori tiket (Umum)", type: "radio",
                 options: [
                     { label: "Tiket + eskosu 2 kaum", value: "eskosu", image: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=2000&auto=format&fit=crop" },
                     { label: "Tiket + hazelnut choco", value: "hazelnut", image: "https://images.unsplash.com/photo-1650793456548-733c7c656da2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }

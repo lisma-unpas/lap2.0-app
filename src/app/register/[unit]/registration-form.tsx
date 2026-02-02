@@ -161,8 +161,23 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             return avail ? !avail.available : false;
         }
 
+        if (fieldId === "ticketType") {
+            return formData.category !== "umum";
+        }
+
         return false;
     };
+
+    // Clear ticketType if category is changed from 'umum'
+    useEffect(() => {
+        const isNotUmum = formData.category !== "umum";
+        if (isNotUmum && formData.ticketType) {
+            setFormData(prev => {
+                const { ticketType, ...rest } = prev as Record<string, any>;
+                return rest;
+            });
+        }
+    }, [formData.category, formData.ticketType]);
 
     // 2. Persist Data as User Types - Debounced manually or just guarded
     useEffect(() => {
@@ -224,7 +239,17 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             }
         }
 
-        setFormData(prev => ({ ...prev, [id]: finalValue }));
+        setFormData(prev => {
+            const next = { ...prev, [id]: finalValue };
+
+            // Clear ticketType if category is changed to anything other than "umum"
+            if (id === "category" && finalValue !== "umum") {
+                const { ticketType, ...rest } = next as Record<string, any>;
+                return rest;
+            }
+
+            return next;
+        });
 
         if (formErrors[id]) {
             setFormErrors(prev => {
