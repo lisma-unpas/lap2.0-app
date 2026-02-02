@@ -172,10 +172,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     useEffect(() => {
         const isNotUmum = formData.category !== "umum";
         if (isNotUmum && formData.ticketType) {
-            setFormData(prev => {
-                const { ticketType, ...rest } = prev as Record<string, any>;
-                return rest;
-            });
+            setFormData(prev => ({ ...prev, ticketType: null }));
         }
     }, [formData.category, formData.ticketType]);
 
@@ -244,8 +241,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
             // Clear ticketType if category is changed to anything other than "umum"
             if (id === "category" && finalValue !== "umum") {
-                const { ticketType, ...rest } = next as Record<string, any>;
-                return rest;
+                return { ...next, ticketType: null };
             }
 
             return next;
