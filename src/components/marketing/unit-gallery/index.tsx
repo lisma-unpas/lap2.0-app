@@ -8,7 +8,7 @@ import { cx } from "@/utils/cx";
 import { UnitImage } from "@/components/application/unit/unit-image";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { getUnitAvailability } from "@/actions/admin";
+import { getUnitsAvailability } from "@/actions/admin";
 import { Badge } from "@/components/base/badges/badges";
 
 function UnitCardSkeleton({ index }: { index: number }) {
@@ -158,14 +158,13 @@ export function UnitGallery({
             const unitBatch = showMainEvent ? sortedUnits : sortedUnits.filter(u => u.id !== "main-event");
 
             try {
-                // Fetch in parallel but wait for all
-                const responses = await Promise.all(unitBatch.map(u => getUnitAvailability(u.id)));
+                // Fetch all availabilities in one batch call
+                const response = await getUnitsAvailability(unitBatch.map(u => u.id));
                 if (!isSubscribed) return;
 
-                unitBatch.forEach((u, i) => {
-                    results[u.id] = responses[i];
-                });
-                setAvailabilities(results);
+                if (response.success && response.data) {
+                    setAvailabilities(response.data);
+                }
             } catch (err) {
                 console.error("Failed to fetch unit availabilities:", err);
             } finally {

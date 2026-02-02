@@ -694,3 +694,97 @@ export async function getUnitAvailability(unitId: string) {
         return { success: false, data: {} };
     }
 }
+
+export async function getUnitsAvailability(unitIds: string[]) {
+    try {
+        const normalizedIds = unitIds.map(id => id.toLowerCase());
+
+        const [settings, registrations] = await Promise.all([
+            prisma.unitSetting.findMany({
+                where: { unitId: { in: normalizedIds } }
+            }),
+            prisma.registration.findMany({
+                where: {
+                    unitId: { in: normalizedIds },
+                    status: { in: ["VERIFIED", "PENDING"] }
+                },
+                select: {
+                    unitId: true,
+                    detailedData: true,
+                    subEventName: true
+                }
+            })
+        ]);
+
+        const results: Record<string, any> = {};
+
+        normalizedIds.forEach(unitId => {
+            const unitSettings = settings.filter(s => s.unitId === unitId);
+            const unitRegistrations = registrations.filter(r => r.unitId === unitId);
+            const unitConfig = UNIT_CONFIG[unitId];
+
+            const availabilityMap: Record<string, { sold: number, limit: number, available: boolean }> = {};
+
+            // Pre-fill with limits
+            unitSettings.forEach((s: any) => {
+                availabilityMap[s.categoryName] = {
+                    sold: 0,
+                    limit: s.limit,
+                    available: true
+                };
+            });
+
+            // Fallback category
+            if (unitConfig && !availabilityMap[unitConfig.name]) {
+                availabilityMap[unitConfig.name] = { sold: 0, limit: 9999, available: true };
+            }
+
+            // Calculate sold
+            unitRegistrations.forEach(reg => {
+                const data = (reg.detailedData as any) || {};
+                const quantity = parseInt(data.quantity) || 1;
+                const categoryValue = data.category;
+                const sesiValue = data.sesi;
+                const subEventName = reg.subEventName;
+
+                const parts = [];
+                if (subEventName && subEventName !== unitConfig?.name) {
+                    parts.push(subEventName);
+                }
+                if (sesiValue) parts.push(sesiValue);
+                if (categoryValue) parts.push(categoryValue);
+
+                const regCategory = parts.join(" - ") || unitConfig?.name || unitId;
+
+                if (!availabilityMap[regCategory]) {
+                    availabilityMap[regCategory] = { sold: 0, limit: 9999, available: true };
+                }
+                availabilityMap[regCategory].sold += quantity;
+            });
+
+            // Finalize
+            Object.keys(availabilityMap).forEach(key => {
+                const item = availabilityMap[key];
+                item.available = item.sold < item.limit;
+            });
+
+            const startDate = unitSettings.find(s => s.startDate)?.startDate || null;
+            const endDate = unitSettings.find(s => s.endDate)?.endDate || null;
+            const eventDate = unitSettings.find(s => s.eventDate)?.eventDate || null;
+
+            results[unitId] = {
+                success: true,
+                data: availabilityMap,
+                startDate,
+                endDate,
+                eventDate
+            };
+        });
+
+        return { success: true, data: results };
+    } catch (error) {
+        console.error("[getUnitsAvailability] Error:", error);
+        return { success: false, data: {} };
+    }
+}
+
