@@ -122,6 +122,7 @@ export default function CheckoutClient() {
         code: string | null;
         email: string;
     } | null>(null);
+    const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
     const { toastSuccess, toastError } = useToast();
 
     useEffect(() => {
@@ -216,6 +217,8 @@ export default function CheckoutClient() {
                 setAttachment({ file: compressedFile, progress: 0, status: 'error', error: uploadRes.message || "Gagal upload" });
                 if (uploadRes.error === "AUTH_REQUIRED") {
                     window.location.href = "/auth/google/login";
+                } else if (uploadRes.error === "AUTH_INVALID") {
+                    setIsReAuthModalOpen(true);
                 }
             }
         } catch (error) {
@@ -651,6 +654,25 @@ export default function CheckoutClient() {
                     </Dialog>
                 </Modal>
             </ModalOverlay>
+
+            <SharedModal
+                isOpen={isReAuthModalOpen}
+                onOpenChange={setIsReAuthModalOpen}
+                title="Sesi Google Drive Berakhir"
+                description="Sesi Anda telah berakhir atau kredensial tidak valid. Silakan login kembali untuk melanjutkan upload bukti pembayaran."
+                icon={LogIn01}
+                iconColor="brand"
+                primaryAction={{
+                    label: "Login Kembali",
+                    onClick: () => {
+                        window.open("/auth/google/login", "_blank");
+                    }
+                }}
+                secondaryAction={{
+                    label: "Batal",
+                    onClick: () => setIsReAuthModalOpen(false)
+                }}
+            />
         </Section>
     )
 }

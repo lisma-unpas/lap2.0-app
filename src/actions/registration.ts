@@ -45,8 +45,8 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
                 return {
                     success: false,
                     error: availability.remaining! > 0
-                        ? `Maaf, sisa kuota untuk kategori ${currentCategory} hanya tinggal ${availability.remaining} tiket.`
-                        : `Maaf, kuota untuk kategori ${currentCategory} sudah penuh.`
+                        ? `Maaf, sisa tiket untuk kategori ${currentCategory} hanya tinggal ${availability.remaining} tiket.`
+                        : `Maaf, tiket untuk kategori ${currentCategory} sudah penuh.`
                 };
             }
         }
@@ -92,33 +92,95 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
             const targetEmail = userEmail || firstReg.email;
             const adminEmail = appConfig.email.adminEmail;
 
-            if (targetEmail && targetEmail !== "Unspecified") {
-                const itemsSummary = validRegs.map(reg => {
-                    const config = UNIT_CONFIG[reg.unitId.toLowerCase()];
-                    return `- ${config?.name || reg.unitId} (${reg.subEventName})`;
-                }).join("\n");
+            console.log(`[Registration] Preparing notifications. Admin: ${adminEmail}, User: ${targetEmail}`);
 
-                const totalSessionPrice = validRegs.reduce((sum, reg) => sum + reg.totalPrice, 0);
+            const itemsSummary = validRegs.map(reg => {
+                const config = UNIT_CONFIG[reg.unitId.toLowerCase()];
+                return `- ${config?.name || reg.unitId} (${reg.subEventName})`;
+            }).join("\n");
 
-                // Consolidated Email to User
+            const totalSessionPrice = validRegs.reduce((sum, reg) => sum + reg.totalPrice, 0);
+
+            const itemsSummaryHtml = `
+                <ul style="padding-left: 20px; margin: 10px 0; color: #374151;">
+                    ${validRegs.map(reg => {
+                const config = UNIT_CONFIG[reg.unitId.toLowerCase()];
+                return `<li style="margin-bottom: 5px;"><strong>${config?.name || reg.unitId}</strong> (${reg.subEventName})</li>`;
+            }).join("")}
+                </ul>
+            `;
+
+            const userMessage = `
+                <p>Pendaftaran Anda untuk <strong>Lisma Art Parade 2.0</strong> telah kami terima dan saat ini sedang dalam proses verifikasi.</p>
+                
+                <div style="margin: 20px 0; padding: 16px; background: #ffffff; border-radius: 10px; border: 1px solid #e5e7eb; display: inline-block; min-width: 200px;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em;">Status Saat Ini</p>
+                    <span style="background: #fef0c7; color: #93370d; padding: 6px 14px; border-radius: 99px; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #fde68a;">⏳ PENDING</span>
+                </div>
+
+                <p><strong>Rincian Pesanan:</strong></p>
+                ${itemsSummaryHtml}
+
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                    <p style="margin: 0;">Total Pembayaran: <span style="font-size: 18px; color: #7f56d9; font-weight: bold;">Rp ${totalSessionPrice.toLocaleString('id-ID')}</span></p>
+                    <p style="margin: 10px 0 0 0;">Kode Pendaftaran: <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-family: ui-monospace, monospace; color: #111827; border: 1px solid #e5e7eb;">${sessionRegistrationCode}</code></p>
+                </div>
+                
+                <p style="margin-top: 25px; font-size: 15px; line-height: 1.6;">Tim kami akan memverifikasi bukti pembayaran Anda dalam waktu maksimal <strong>24 jam</strong>. Anda dapat memantau status pendaftaran dan mengunduh e-tiket melalui halaman <strong>Cek Status</strong> menggunakan kode di atas.</p>
+            `;
+
+            // 1. Branded Email to User (Registrant)
+            // Skip if user email is the same as admin email to avoid double notifications to admin during testing
+            if (targetEmail && targetEmail !== "Unspecified" && targetEmail !== adminEmail) {
                 await sendEmail({
                     email: targetEmail,
                     subject: `Konfirmasi Pendaftaran: Lisma Art Parade 2.0`,
                     name: firstReg.fullName,
-                    message: `Halo ${firstReg.fullName},\n\nPendaftaran Anda untuk event berikut telah kami terima:\n\n${itemsSummary}\n\n**Kode Pendaftaran (Gunakan untuk Cek Status)**: ${sessionRegistrationCode}\n**Total Pembayaran**: Rp ${totalSessionPrice.toLocaleString('id-ID')}\n\nStatus pendaftaran Anda saat ini adalah **PENDING**. Pembayaran Anda sedang dalam proses verifikasi oleh tim kami, mohon tunggu sebentar. Tim kami akan memverifikasi bukti pembayaran Anda dalam waktu maksimal 24 jam.\n\nSimpan kode di atas untuk melihat status verifikasi dan mengunduh tiket di halaman Cek Status.\n\nTerima kasih atas partisipasi Anda!`,
-                    title: "Konfirmasi Pendaftaran"
+                    title: "Konfirmasi Pendaftaran",
+                    message: userMessage,
                 }).catch(err => console.error("[Registration] Error user email:", err));
+            }
 
-                // Consolidated Email to Admin
-                if (adminEmail) {
-                    await sendEmail({
-                        email: adminEmail,
-                        subject: `🚨 Pendaftaran Baru: ${firstReg.fullName}`,
-                        name: "Admin Lisma",
-                        message: `Halo Admin,\n\nTerdeteksi pendaftaran baru dari **${firstReg.fullName}**:\n\n${itemsSummary}\n\n📧 **Email**: ${targetEmail}\n📱 **WhatsApp**: ${firstReg.phoneNumber}\n💰 **Total Transaksi**: Rp ${totalSessionPrice.toLocaleString('id-ID')}\n🔑 **Kode Pendaftaran**: ${sessionRegistrationCode}\n\nSilakan cek dashboard admin untuk memverifikasi pembayaran.`,
-                        title: "Pendaftaran Masuk"
-                    }).catch(err => console.error("[Registration] Error admin email:", err));
-                }
+            // 2. Simple Notification Email to Admin
+            if (adminEmail) {
+                const adminHtml = `
+                    <div style="font-family: sans-serif; color: #333; max-width: 600px;">
+                        <h2 style="color: #4f46e5;">Pendaftaran Baru Terdeteksi</h2>
+                        <p>Halo Admin, seseorang baru saja melakukan checkout pendaftaran:</p>
+                        
+                        <div style="background: #f3f4f6; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                            <p><strong>Pendaftar:</strong> ${firstReg.fullName}</p>
+                            <p><strong>Total Bayar:</strong> Rp ${totalSessionPrice.toLocaleString('id-ID')}</p>
+                            <p><strong>Kode:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px solid #ddd;">${sessionRegistrationCode}</code></p>
+                            <hr style="border: none; border-top: 1px solid #ddd; margin: 15px 0;">
+                            <p><strong>Kontak:</strong></p>
+                            <ul>
+                                <li>Email: ${targetEmail}</li>
+                                <li>WhatsApp: <a href="https://wa.me/${firstReg.phoneNumber.replace(/\D/g, '')}">${firstReg.phoneNumber}</a></li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Item yang dipilih:</strong></p>
+                        <pre style="background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #eee; font-size: 13px;">${itemsSummary}</pre>
+                        
+                        <div style="margin-top: 30px; text-align: center;">
+                            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://lisma-unpas.com'}/admin/registrations" 
+                               style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                               Buka Dashboard Admin
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                await sendEmail({
+                    email: adminEmail,
+                    subject: `🚨 [NEW REG] ${firstReg.fullName} - ${sessionRegistrationCode}`,
+                    name: "Admin",
+                    message: `Pendaftaran baru dari ${firstReg.fullName} (${sessionRegistrationCode}). Total: Rp ${totalSessionPrice.toLocaleString('id-ID')}`,
+                    htmlBody: adminHtml
+                }).catch(err => console.error("[Registration] Error admin email:", err));
+            } else {
+                console.error("[Registration] Admin email not configured in environment variables");
             }
         }
 

@@ -48,8 +48,11 @@ export async function uploadImage(formData: FormData, tokensRaw: string | null) 
             url: response.data.webViewLink,
             fileId: response.data.id,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Google Drive upload error:", error);
+        if (error.code === 401 || error.status === 401) {
+            return { success: false, error: "AUTH_INVALID", message: "Sesi Google Drive telah berakhir. Silakan hubungkan kembali." };
+        }
         return { success: false, error: "Upload failed" };
     }
 }
@@ -68,8 +71,11 @@ export async function deleteImage(fileId: string, tokensRaw: string | null) {
         });
 
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Google Drive delete error:", error);
+        if (error.code === 401 || error.status === 401) {
+            return { success: false, error: "AUTH_INVALID", message: "Sesi Google Drive telah berakhir. Silakan hubungkan kembali." };
+        }
         return { success: false, error: "Delete failed" };
     }
 }

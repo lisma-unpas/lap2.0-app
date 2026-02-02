@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
 import { LogIn01 } from "@untitledui/icons";
+import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
 
 interface PaymentFormProps {
     registrationId: string;
@@ -29,6 +30,7 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
     const { isConnected } = useGoogleAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
     const { toastSuccess, toastError } = useToast();
     const config = UNIT_CONFIG[eventName.toLowerCase()];
 
@@ -71,6 +73,8 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                 setAttachment({ file, progress: 0, status: 'error', error: uploadRes.message || "Gagal upload" });
                 if (uploadRes.error === "AUTH_REQUIRED") {
                     window.location.href = "/auth/google/login";
+                } else if (uploadRes.error === "AUTH_INVALID") {
+                    setIsReAuthModalOpen(true);
                 }
             }
         } catch (error) {
@@ -217,6 +221,25 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                     unitName={eventName}
                 />
             )}
+
+            <SharedModal
+                isOpen={isReAuthModalOpen}
+                onOpenChange={setIsReAuthModalOpen}
+                title="Sesi Google Drive Berakhir"
+                description="Sesi Anda telah berakhir atau kredensial tidak valid. Silakan login kembali untuk melanjutkan upload bukti pembayaran."
+                icon={LogIn01}
+                iconColor="brand"
+                primaryAction={{
+                    label: "Login Kembali",
+                    onClick: () => {
+                        window.open("/auth/google/login", "_blank");
+                    }
+                }}
+                secondaryAction={{
+                    label: "Batal",
+                    onClick: () => setIsReAuthModalOpen(false)
+                }}
+            />
         </>
     );
 }

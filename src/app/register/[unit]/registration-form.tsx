@@ -48,6 +48,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [availabilityMap, setAvailabilityMap] = useState<Record<string, { sold: number, limit: number, available: boolean }>>({});
     const { isConnected } = useGoogleAuth();
     const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
+    const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
 
     const hasCheckedDraft = useRef(false);
     const DRAFT_KEY = `lisma_draft_${unit.toLowerCase()}`;
@@ -311,6 +312,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                 });
                 if (res.error === "AUTH_REQUIRED") {
                     window.location.href = "/auth/google/login";
+                } else if (res.error === "AUTH_INVALID") {
+                    setIsReAuthModalOpen(true);
                 }
             }
         } catch (err) {
@@ -727,6 +730,25 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     )}
                 />
             )}
+
+            <SharedModal
+                isOpen={isReAuthModalOpen}
+                onOpenChange={setIsReAuthModalOpen}
+                title="Sesi Google Drive Berakhir"
+                description="Sesi Anda telah berakhir atau kredensial tidak valid. Silakan login kembali untuk melanjutkan upload file pendukung."
+                icon={LogIn01}
+                iconColor="brand"
+                primaryAction={{
+                    label: "Login Kembali",
+                    onClick: () => {
+                        window.open("/auth/google/login", "_blank");
+                    }
+                }}
+                secondaryAction={{
+                    label: "Batal",
+                    onClick: () => setIsReAuthModalOpen(false)
+                }}
+            />
         </Section>
     );
 }
