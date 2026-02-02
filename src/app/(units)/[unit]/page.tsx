@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import UnitContent from "@/components/application/unit/unit-content";
 import { UNIT_CONFIG } from "@/constants/units";
+import { getUnitAvailability } from "@/actions/admin";
 
 interface PageProps {
     params: Promise<{ unit: string }>;
@@ -34,6 +35,11 @@ export default async function UnitDetailPage({ params }: PageProps) {
         subEvents = [{ id: 'default', name: config.name, price: config.fixedPrice || 0 }];
     }
 
+    const availabilityRes = await getUnitAvailability(unitKey);
+    const startDate = availabilityRes.startDate ? new Date(availabilityRes.startDate) : null;
+    const endDate = availabilityRes.endDate ? new Date(availabilityRes.endDate) : null;
+    const eventDate = availabilityRes.eventDate ? new Date(availabilityRes.eventDate) : null;
+
     return (
         <UnitContent
             unitId={unitKey}
@@ -49,6 +55,9 @@ export default async function UnitDetailPage({ params }: PageProps) {
             cpName={config.cpName}
             cpWhatsapp={config.cpWhatsapp}
             cpDescription={config.cpDescription}
+            startDate={startDate}
+            endDate={endDate}
+            eventDate={eventDate}
         />
     );
 }

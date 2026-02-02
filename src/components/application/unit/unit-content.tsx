@@ -8,6 +8,7 @@ import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { UnitImage } from "./unit-image";
 import { Badge } from "@/components/base/badges/badges";
 import { cx } from "@/utils/cx";
+import { formatDate, formatDateTime } from "@/utils/date";
 
 interface UnitContentProps {
     unitId: string;
@@ -23,6 +24,9 @@ interface UnitContentProps {
     cpWhatsapp: string;
     cpDescription: string;
     colorClass: string; // e.g., "purple", "indigo", "rose", "cyan", "orange"
+    startDate?: Date | null;
+    endDate?: Date | null;
+    eventDate?: Date | null;
 }
 
 export default function UnitContent({
@@ -39,6 +43,9 @@ export default function UnitContent({
     cpWhatsapp,
     cpDescription,
     colorClass,
+    startDate,
+    endDate,
+    eventDate,
 }: UnitContentProps) {
     const ICON_MAP: Record<string, any> = {
         ticket: Ticket01,
@@ -58,6 +65,28 @@ export default function UnitContent({
     const colors = colorMap[colorClass] || colorMap.purple;
     const HighlightIcon = ICON_MAP[highlightIconId] || Ticket01;
 
+    const today = new Date();
+    const startDateObj = startDate ? new Date(startDate) : null;
+    const endDateObj = endDate ? new Date(endDate) : null;
+
+    const isComingSoon = !!(startDateObj && today < startDateObj);
+    const isClosed = !!(endDateObj && today > endDateObj);
+
+    // Final Status Determination
+    let statusLabel = "Daftar Sekarang";
+    let buttonColor: any = "primary";
+    let statusBadge = null;
+
+    if (isClosed) {
+        statusLabel = "Pendaftaran Berakhir";
+        buttonColor = "secondary";
+        statusBadge = <Badge color="error" size="lg" type="pill-color">Pendaftaran Berakhir</Badge>;
+    } else if (isComingSoon) {
+        statusLabel = "Coming Soon";
+        buttonColor = "secondary";
+        statusBadge = <Badge color="blue" size="lg" type="pill-color">Coming Soon</Badge>;
+    }
+
     return (
         <>
             <Section className="relative">
@@ -66,10 +95,13 @@ export default function UnitContent({
 
                     <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         <div>
-                            <Badge color={colors.badge} size="lg" type="pill-color" className="uppercase">
-                                {badgeText}
-                            </Badge>
-                            <h1 className="mt-4 text-display-md font-semibold text-primary">{unitName}</h1>
+                            <div className="flex items-center gap-3 mb-4">
+                                <Badge color={colors.badge} size="lg" type="pill-color">
+                                    {badgeText}
+                                </Badge>
+                                {statusBadge}
+                            </div>
+                            <h1 className="text-display-md font-semibold text-primary">{unitName}</h1>
                             <p className="mt-6 text-lg text-tertiary leading-relaxed whitespace-pre-wrap">
                                 {description}
                             </p>
@@ -101,14 +133,28 @@ export default function UnitContent({
                                             <HighlightIcon className="size-6" />
                                         </div>
                                         <div>
-                                            <p className="font-bold text-primary">{highlightTitle}</p>
-                                            <p className="text-sm text-tertiary">{highlightSubtitle}</p>
+                                            <p className="font-bold text-primary">
+                                                {eventDate ? formatDate(eventDate) : highlightTitle}
+                                            </p>
+                                            <p className="text-sm text-tertiary">
+                                                {eventDate
+                                                    ? `${formatDateTime(eventDate).split(" ").slice(-2).join(" ")} • ${highlightSubtitle}`
+                                                    : highlightSubtitle}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <Button size="xl" color="primary" href={`/register/${unitName.toLowerCase()}`} className="h-14 rounded-lg shadow-lg shadow-brand-solid/20">
-                                    Daftar Sekarang
+                            <div className="mt-10">
+                                <Button
+                                    size="xl"
+                                    color={buttonColor}
+                                    href={`/register/${unitId}`}
+                                    className="h-14 rounded-lg w-full"
+                                    isDisabled={isComingSoon || isClosed}
+                                >
+                                    {statusLabel}
                                 </Button>
                             </div>
                         </div>

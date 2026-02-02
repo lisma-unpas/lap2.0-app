@@ -15,7 +15,9 @@ import { uploadImage } from "@/actions/upload";
 import { submitBulkRegistration } from "@/actions/registration";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
-import { LogIn01 } from "@untitledui/icons";
+import { LogIn01, AlertTriangle } from "@untitledui/icons";
+import { getUnitAvailability } from "@/actions/admin";
+import { Badge } from "@/components/base/badges/badges";
 import { cx } from "@/utils/cx";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { compressImage } from "@/utils/image-converter";
@@ -123,6 +125,7 @@ export default function CheckoutClient() {
         email: string;
     } | null>(null);
     const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
+    const [availabilities, setAvailabilities] = useState<Record<string, { startDate: string | null; endDate: string | null; success: boolean }>>({});
     const { toastSuccess, toastError } = useToast();
 
     useEffect(() => {
@@ -133,6 +136,30 @@ export default function CheckoutClient() {
     useEffect(() => {
         if (items.length > 0 && selectedIds.length === 0) {
             setSelectedIds(items.map(i => i.id));
+        }
+    }, [items]);
+
+    // Fetch availabilities for units in cart
+    useEffect(() => {
+        async function fetchAvailabilities() {
+            const unitIds = Array.from(new Set(items.map(i => i.unitId.toLowerCase())));
+            const resMap: Record<string, any> = {};
+
+            for (const id of unitIds) {
+                const res = await getUnitAvailability(id);
+                if (res.success) {
+                    resMap[id] = {
+                        startDate: res.startDate,
+                        endDate: res.endDate,
+                        success: true
+                    };
+                }
+            }
+            setAvailabilities(resMap);
+        }
+
+        if (items.length > 0) {
+            fetchAvailabilities();
         }
     }, [items]);
 
@@ -461,6 +488,21 @@ export default function CheckoutClient() {
                     className="w-full shadow-lg h-12"
                     onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
+                        // Check if any selected item is closed
+                        const hasClosedItem = selectedItems.some(item => {
+                            const avail = availabilities[item.unitId.toLowerCase()];
+                            if (!avail) return false;
+                            const today = new Date();
+                            const isComingSoon = avail.startDate && today < new Date(avail.startDate);
+                            const isClosed = avail.endDate && today > new Date(avail.endDate);
+                            return isComingSoon || isClosed;
+                        });
+
+                        if (hasClosedItem) {
+                            toastError("Pendaftaran Ditutup", "Beberapa item pilihan Anda sudah tidak tersedia untuk didaftarkan.");
+                            return;
+                        }
+
                         setIsEmailModalOpen(true);
                     }}
                     isLoading={isSubmitting}
@@ -492,36 +534,57 @@ export default function CheckoutClient() {
                         </div>
 
                         <div className="space-y-3">
-                            {items.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cx(
-                                        "p-4 rounded-2xl border transition-all flex items-center gap-4 bg-primary shadow-xs group",
-                                        selectedIds.includes(item.id) ? "border-secondary ring-1 ring-brand-secondary/10" : "border-secondary grayscale opacity-80"
-                                    )}
-                                    onClick={() => toggleItem(item.id)}
-                                >
-                                    <Checkbox
-                                        size="md"
-                                        isSelected={selectedIds.includes(item.id)}
-                                        onChange={() => toggleItem(item.id)}
-                                    />
-                                    <div className="flex-1 text-left cursor-pointer">
-                                        <p className="text-[10px] font-bold text-brand-secondary uppercase tracking-wider">{item.unitName}</p>
-                                        <h3 className="text-md font-bold text-primary mt-0.5">{item.subEventName || "Pendaftaran"}</h3>
-                                        <p className="text-sm text-tertiary mt-0.5 font-mono">Rp {item.price.toLocaleString('id-ID')}</p>
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeFromCart(item.id);
-                                        }}
-                                        className="p-2 text-fg-quaternary hover:text-error-600 hover:bg-error-50 rounded-lg transition-all"
+                            {items.map((item) => {
+                                const avail = availabilities[item.unitId.toLowerCase()];
+                                const today = new Date();
+                                const isComingSoon = !!(avail?.startDate && today < new Date(avail.startDate));
+                                const isClosed = !!(avail?.endDate && today > new Date(avail.endDate));
+                                const isDisabled = isComingSoon || isClosed;
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className={cx(
+                                            "p-4 rounded-2xl border transition-all flex items-center gap-4 bg-primary shadow-xs group relative",
+                                            selectedIds.includes(item.id) ? "border-secondary ring-1 ring-brand-secondary/10" : "border-secondary grayscale opacity-80",
+                                            isDisabled && "bg-secondary/5 border-dashed"
+                                        )}
+                                        onClick={() => !isDisabled && toggleItem(item.id)}
                                     >
-                                        <Trash01 className="size-4.5" />
-                                    </button>
-                                </div>
-                            ))}
+                                        <Checkbox
+                                            size="md"
+                                            isSelected={selectedIds.includes(item.id)}
+                                            onChange={() => !isDisabled && toggleItem(item.id)}
+                                            isDisabled={isDisabled}
+                                        />
+                                        <div className="flex-1 text-left cursor-pointer">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-[10px] font-bold text-brand-secondary uppercase tracking-wider">{item.unitName}</p>
+                                                {isComingSoon && <Badge color="blue" size="sm" type="pill-color" className="text-[8px] px-1.5 py-0">Coming Soon</Badge>}
+                                                {isClosed && <Badge color="error" size="sm" type="pill-color" className="text-[8px] px-1.5 py-0">Closed</Badge>}
+                                            </div>
+                                            <h3 className="text-md font-bold text-primary mt-0.5">{item.subEventName || "Pendaftaran"}</h3>
+                                            <p className="text-sm text-tertiary mt-0.5 font-mono">Rp {item.price.toLocaleString('id-ID')}</p>
+
+                                            {isDisabled && (
+                                                <div className="mt-2 flex items-center gap-1.5 text-error-600">
+                                                    <AlertTriangle className="size-3.5" />
+                                                    <p className="text-[10px] font-medium">Maaf, pendaftaran unit ini sudah ditutup atau belum dimulai.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeFromCart(item.id);
+                                            }}
+                                            className="p-2 text-fg-quaternary hover:text-error-600 hover:bg-error-50 rounded-lg transition-all"
+                                        >
+                                            <Trash01 className="size-4.5" />
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 

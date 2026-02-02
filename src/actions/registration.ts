@@ -41,7 +41,14 @@ export async function submitBulkRegistration(items: any[], paymentProofUrl: stri
             const availability = await checkUnitAvailability(item.unitId.toLowerCase(), currentCategory);
             const requestedQuantity = parseInt(item.formData.quantity) || 1;
 
-            if (availability.success && availability.remaining! < requestedQuantity) {
+            if (!availability.success) {
+                return {
+                    success: false,
+                    error: availability.message || `Pendaftaran untuk ${config?.name || unitKey} tidak tersedia saat ini.`
+                };
+            }
+
+            if (availability.remaining! < requestedQuantity) {
                 return {
                     success: false,
                     error: availability.remaining! > 0

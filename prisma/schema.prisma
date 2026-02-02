@@ -76,6 +76,9 @@ model UnitSetting {
   unitId       String   // Reference to UNIT_CONFIG key (e.g. "tesas", "kds")
   categoryName String   @default("TOTAL") // Specific category name or "TOTAL"
   limit        Int      @default(100)
+  startDate    DateTime?
+  endDate      DateTime?
+  eventDate    DateTime?
   updatedAt    DateTime @updatedAt
 
   @@unique([unitId, categoryName])

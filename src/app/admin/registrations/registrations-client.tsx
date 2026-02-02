@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, memo, useCallback, useMemo } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     Users01 as Users,
     CheckCircle,
@@ -37,22 +38,34 @@ import type { Selection } from "react-aria-components";
 import { TableBody } from "react-aria-components";
 import { useToast } from "@/context/toast-context";
 import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
+import { EmptyState } from "@/components/application/empty-state/empty-state";
 import { formatDateTime } from "@/utils/date";
 
 export default function RegistrationsClient() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    // Get initial values from URL or defaults
+    const initialPage = Number(searchParams.get("page")) || 1;
+    const initialStatus = searchParams.get("status") || "ALL";
+    const initialUnit = searchParams.get("unit") || "ALL";
+    const initialSearch = searchParams.get("search") || "";
+
     const [registrations, setRegistrations] = useState<any[]>([]);
     const [stats, setStats] = useState<any>(null);
     const [totalCount, setTotalCount] = useState(0);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(initialPage);
     const limit = 10;
 
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [filter, setFilter] = useState("ALL");
-    const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [filter, setFilter] = useState(initialStatus);
+    const [unitId, setUnitId] = useState(initialUnit);
+    const [search, setSearch] = useState(initialSearch);
+    const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
     const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
     const [isSyncing, setIsSyncing] = useState(false);
     const [spreadsheetUrl, setSpreadsheetUrl] = useState("");
@@ -80,10 +93,29 @@ export default function RegistrationsClient() {
         }
     };
 
+    // Sync state to URL
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (page > 1) params.set("page", page.toString());
+        if (filter !== "ALL") params.set("status", filter);
+        if (unitId !== "ALL") params.set("unit", unitId);
+        if (debouncedSearch) params.set("search", debouncedSearch);
+
+        const newQuery = params.toString();
+        const currentQuery = window.location.search.replace(/^\?/, "");
+
+        if (newQuery !== currentQuery) {
+            router.replace(`${pathname}${newQuery ? "?" + newQuery : ""}`, { scroll: false });
+        }
+    }, [page, filter, unitId, debouncedSearch, pathname, router]);
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
-            if (isInitialLoading === false) setPage(1);
+            // Only reset page if search actually changed and it's not the initial mount
+            if (search !== debouncedSearch && !isInitialLoading) {
+                setPage(1);
+            }
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -94,7 +126,7 @@ export default function RegistrationsClient() {
         } else {
             fetchData();
         }
-    }, [page, filter, debouncedSearch]);
+    }, [page, filter, unitId, debouncedSearch]);
 
     async function fetchInitialData() {
         setIsInitialLoading(true);
@@ -108,6 +140,7 @@ export default function RegistrationsClient() {
             getRegistrations({
                 search: debouncedSearch,
                 status: filter,
+                unitId: unitId,
                 page,
                 limit
             }),
@@ -136,13 +169,9 @@ export default function RegistrationsClient() {
         setUpdatingStatusId(null);
     }, [fetchData, toastSuccess, toastError]);
 
-    const handleFilterChange = useCallback((selection: Selection) => {
-        if (selection === "all") return;
-        const selectedValue = Array.from(selection)[0] as string;
-        if (selectedValue) {
-            setFilter(selectedValue);
-            setPage(1);
-        }
+    const handleFilterChange = useCallback((key: string) => {
+        setFilter(key);
+        setPage(1);
     }, []);
 
     const handleExpand = useCallback((id: string) => {
@@ -216,26 +245,49 @@ export default function RegistrationsClient() {
                         badge={totalCount}
                         description="Manage and verify registrations."
                         contentTrailing={
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                                <Input
-                                    placeholder="Search..."
-                                    value={search}
-                                    onChange={(val) => setSearch(val)}
-                                    icon={SearchRefraction}
-                                    size="sm"
-                                    className="grow sm:w-64"
-                                />
-                                <div className="overflow-x-auto pb-1 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
-                                    <ButtonGroup
+                            <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 w-full md:w-auto">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Input
+                                        placeholder="Search..."
+                                        value={search}
+                                        onChange={(val) => setSearch(val)}
+                                        icon={SearchRefraction}
                                         size="sm"
-                                        selectedKeys={[filter]}
-                                        onSelectionChange={handleFilterChange}
-                                        className="w-max"
+                                        className="sm:w-64"
+                                    />
+                                    <div className="w-full sm:w-48">
+                                        <Select
+                                            size="sm"
+                                            selectedKey={unitId}
+                                            onSelectionChange={(key) => {
+                                                setUnitId(key as string);
+                                                setPage(1);
+                                            }}
+                                            placeholder="Filter Unit"
+                                            aria-label="Filter by Unit"
+                                        >
+                                            <Select.Item id="ALL">All Units</Select.Item>
+                                            {useMemo(() => Object.values(UNIT_CONFIG).map((unit: any) => (
+                                                <Select.Item id={unit.id} key={unit.id}>
+                                                    {unit.name}
+                                                </Select.Item>
+                                            )), [])}
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="w-full sm:w-48">
+                                    <Select
+                                        size="sm"
+                                        selectedKey={filter}
+                                        onSelectionChange={(key) => handleFilterChange(key as string)}
+                                        placeholder="Filter Status"
+                                        aria-label="Filter by Status"
                                     >
-                                        {["ALL", "PENDING", "VERIFIED", "REJECTED"].map((s) => (
-                                            <ButtonGroupItem id={s} key={s}>{s}</ButtonGroupItem>
-                                        ))}
-                                    </ButtonGroup>
+                                        <Select.Item id="ALL">All Status</Select.Item>
+                                        <Select.Item id="PENDING">Pending</Select.Item>
+                                        <Select.Item id="VERIFIED">Verified</Select.Item>
+                                        <Select.Item id="REJECTED">Rejected</Select.Item>
+                                    </Select>
                                 </div>
                             </div>
                         }
@@ -252,7 +304,7 @@ export default function RegistrationsClient() {
                                 <Table.Head label="" className="md:hidden w-10 px-4" />
                             </Table.Header>
                             <TableBody>
-                                {isInitialLoading ? (
+                                {isInitialLoading || isLoading ? (
                                     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                                         <Table.Row key={i}>
                                             <Table.Cell><div className="h-10 w-40 bg-secondary animate-pulse rounded" /></Table.Cell>
@@ -263,7 +315,7 @@ export default function RegistrationsClient() {
                                             <Table.Cell className="md:hidden"><div className="h-8 w-8 bg-secondary animate-pulse rounded ml-auto" /></Table.Cell>
                                         </Table.Row>
                                     ))
-                                ) : (
+                                ) : registrations.length > 0 ? (
                                     registrations.map((reg) => (
                                         <RegistrationRow
                                             key={reg.id}
@@ -275,6 +327,36 @@ export default function RegistrationsClient() {
                                             isUpdating={updatingStatusId === reg.id}
                                         />
                                     ))
+                                ) : (
+                                    <Table.Row>
+                                        <Table.Cell colSpan={6} className="py-12 overflow-hidden">
+                                            <EmptyState size="sm">
+                                                <EmptyState.Header pattern="circle">
+                                                    <EmptyState.FeaturedIcon icon={SearchRefraction} color="gray" />
+                                                </EmptyState.Header>
+                                                <EmptyState.Content>
+                                                    <EmptyState.Title>No registrations found</EmptyState.Title>
+                                                    <EmptyState.Description>
+                                                        We couldn't find any registrations matching your filters.
+                                                    </EmptyState.Description>
+                                                </EmptyState.Content>
+                                                <EmptyState.Footer>
+                                                    <Button
+                                                        size="sm"
+                                                        color="secondary"
+                                                        onClick={() => {
+                                                            setSearch("");
+                                                            setFilter("ALL");
+                                                            setUnitId("ALL");
+                                                            setPage(1);
+                                                        }}
+                                                    >
+                                                        Clear all filters
+                                                    </Button>
+                                                </EmptyState.Footer>
+                                            </EmptyState>
+                                        </Table.Cell>
+                                    </Table.Row>
                                 )}
                             </TableBody>
                         </Table>
@@ -317,11 +399,11 @@ const RegistrationRow = memo(({
 
     const actions = (
         <div className="flex items-center gap-2">
-            {reg.paymentProof && (
+            {reg.paymentProof ? (
                 <Tooltip title="View Proof">
                     <Button size="sm" color="tertiary" iconLeading={Eye} onClick={() => window.open(reg.paymentProof, '_blank')} className="size-8 p-0" />
                 </Tooltip>
-            )}
+            ) : <div className="size-8 p-0"></div>}
             <Tooltip title="View Details">
                 <Button
                     size="sm"

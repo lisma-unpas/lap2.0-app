@@ -9,8 +9,8 @@ import { generateTicketCode } from "@/actions/registration";
 import { sendEmail } from "@/lib/email";
 import { config } from "@/lib/config";
 
-export async function getRegistrations(params: { search?: string; status?: string; page?: number; limit?: number } = {}) {
-    const { search = "", status = "ALL", page = 1, limit = 10 } = params;
+export async function getRegistrations(params: { search?: string; status?: string; unitId?: string; page?: number; limit?: number } = {}) {
+    const { search = "", status = "ALL", unitId = "ALL", page = 1, limit = 10 } = params;
     const skip = (page - 1) * limit;
 
     try {
@@ -18,6 +18,10 @@ export async function getRegistrations(params: { search?: string; status?: strin
 
         if (status !== "ALL") {
             where.status = status;
+        }
+
+        if (unitId !== "ALL") {
+            where.unitId = unitId.toLowerCase();
         }
 
         if (search) {
@@ -30,7 +34,7 @@ export async function getRegistrations(params: { search?: string; status?: strin
         }
 
         const [registrations, total] = await Promise.all([
-            (prisma.registration as any).findMany({
+            prisma.registration.findMany({
                 where,
                 orderBy: {
                     createdAt: "desc"
@@ -54,7 +58,7 @@ export async function getRegistrations(params: { search?: string; status?: strin
 export async function updateRegistrationStatus(id: string, status: RegStatus) {
     try {
         await prisma.$transaction(async (tx) => {
-            const registration = await (tx.registration as any).findUnique({
+            const registration = await tx.registration.findUnique({
                 where: { id },
                 include: { tickets: true }
             });
@@ -92,7 +96,7 @@ export async function updateRegistrationStatus(id: string, status: RegStatus) {
 
             // Send Email if VERIFIED
             if (status === "VERIFIED") {
-                const updatedRegistration = await (tx.registration as any).findUnique({
+                const updatedRegistration = await tx.registration.findUnique({
                     where: { id },
                     include: { tickets: true }
                 });
@@ -193,12 +197,24 @@ export async function updateRegistrationStatus(id: string, status: RegStatus) {
     }
 }
 
-export async function getTickets(params: { search?: string; page?: number; limit?: number } = {}) {
-    const { search = "", page = 1, limit = 10 } = params;
+export async function getTickets(params: { search?: string; unitId?: string; status?: string; page?: number; limit?: number } = {}) {
+    const { search = "", unitId = "ALL", status = "ALL", page = 1, limit = 10 } = params;
     const skip = (page - 1) * limit;
 
     try {
         const where: any = {};
+
+        if (unitId !== "ALL") {
+            where.registration = {
+                unitId: unitId.toLowerCase()
+            };
+        }
+
+        if (status === "CHECKED_IN") {
+            where.isUsed = true;
+        } else if (status === "NOT_CHECKED_IN") {
+            where.isUsed = false;
+        }
 
         if (search) {
             where.OR = [
@@ -277,7 +293,7 @@ export async function getDashboardStats() {
 
 export async function getUnitSettings() {
     try {
-        const settings = await (prisma as any).unitSetting.findMany();
+        const settings = await prisma.unitSetting.findMany();
         return { success: true, data: settings };
     } catch (error) {
         return { success: false, message: "Gagal mengambil pengaturan unit." };
@@ -290,7 +306,7 @@ export async function getSpreadsheetUrl() {
 
 export async function updateUnitSetting(unitId: string, limit: number, categoryName: string = "TOTAL") {
     try {
-        await (prisma as any).unitSetting.upsert({
+        await prisma.unitSetting.upsert({
             where: {
                 unitId_categoryName: {
                     unitId: unitId.toLowerCase(),
@@ -308,20 +324,46 @@ export async function updateUnitSetting(unitId: string, limit: number, categoryN
     }
 }
 
-export async function updateUnitSettings(unitId: string, settings: { categoryName: string, limit: number }[]) {
+export async function updateUnitSettings(
+    unitId: string,
+    settings: { categoryName: string, limit: number }[],
+    dates?: { startDate: string | null, endDate: string | null, eventDate?: string | null }
+) {
     try {
-        await prisma.$transaction(
-            settings.map(s => (prisma as any).unitSetting.upsert({
+        const startDate = dates?.startDate ? new Date(dates.startDate) : null;
+        const endDate = dates?.endDate ? new Date(dates.endDate) : null;
+        const eventDate = dates?.eventDate ? new Date(dates.eventDate) : null;
+
+        await prisma.$transaction([
+            // Update all existing records for this unit to ensure dates are synced
+            prisma.unitSetting.updateMany({
+                where: { unitId: unitId.toLowerCase() },
+                data: { startDate, endDate, eventDate }
+            }),
+            // Upsert the specific categories being saved from the UI
+            ...settings.map(s => prisma.unitSetting.upsert({
                 where: {
                     unitId_categoryName: {
                         unitId: unitId.toLowerCase(),
                         categoryName: s.categoryName
                     }
                 },
-                update: { limit: s.limit },
-                create: { unitId: unitId.toLowerCase(), categoryName: s.categoryName, limit: s.limit }
+                update: {
+                    limit: s.limit,
+                    startDate,
+                    endDate,
+                    eventDate
+                },
+                create: {
+                    unitId: unitId.toLowerCase(),
+                    categoryName: s.categoryName,
+                    limit: s.limit,
+                    startDate,
+                    endDate,
+                    eventDate
+                }
             }))
-        );
+        ]);
         revalidatePath("/admin/settings");
         return { success: true };
     } catch (error) {
@@ -340,34 +382,71 @@ export async function syncRegistrations() {
         const syncUrl = config.spreadsheet.scriptUrlSync;
         if (!syncUrl) throw new Error("GOOGLE_SCRIPT_URL_SPREADSHEET not configured");
 
-        // Format data for spreadsheet
-        const formattedData = registrations.map(reg => ({
-            id: reg.id,
+        // Group registrations by unitId
+        const groupedByUnit: Record<string, any[]> = {};
+
+        registrations.forEach(reg => {
+            const unitKey = reg.unitId.toUpperCase();
+            if (!groupedByUnit[unitKey]) groupedByUnit[unitKey] = [];
+
+            const detailedData = (reg.detailedData as any) || {};
+            groupedByUnit[unitKey].push({
+                registrationCode: reg.registrationCode,
+                fullName: reg.fullName,
+                email: reg.email,
+                phoneNumber: reg.phoneNumber,
+                unitId: reg.unitId,
+                subEventName: reg.subEventName,
+                totalPrice: reg.totalPrice,
+                status: reg.status,
+                createdAt: reg.createdAt.toISOString(),
+                tickets: reg.tickets.map((t: any) => t.ticketCode).join(", "),
+                ...detailedData
+            });
+        });
+
+        let totalSynced = 0;
+
+        // Sync each unit to its specific sheet
+        for (const [unit, data] of Object.entries(groupedByUnit)) {
+            const sheetName = `Reg-${unit}`;
+            const response = await fetch(`${syncUrl}?sheet=${encodeURIComponent(sheetName)}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "sync",
+                    data: data
+                })
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                console.error(`Sync failed for ${sheetName}:`, result.error);
+                continue;
+            }
+            totalSynced += data.length;
+        }
+
+        // Also sync all to a master sheet
+        const allFormatted = registrations.map(reg => ({
+            registrationCode: reg.registrationCode,
             fullName: reg.fullName,
             email: reg.email,
             phoneNumber: reg.phoneNumber,
             unitId: reg.unitId,
             subEventName: reg.subEventName,
-            status: reg.status,
             totalPrice: reg.totalPrice,
-            registrationCode: reg.registrationCode,
+            status: reg.status,
             createdAt: reg.createdAt.toISOString(),
             tickets: reg.tickets.map((t: any) => t.ticketCode).join(", "),
             ...(typeof reg.detailedData === 'object' ? (reg.detailedData as any) : {})
         }));
 
-        const response = await fetch(`${syncUrl}?sheet=Registrations`, {
+        await fetch(`${syncUrl}?sheet=All-Registrations`, {
             method: "POST",
-            body: JSON.stringify({
-                action: "sync",
-                data: formattedData
-            })
+            body: JSON.stringify({ action: "sync", data: allFormatted })
         });
 
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error || "Sync failed");
-
-        return { success: true, count: formattedData.length };
+        return { success: true, count: totalSynced };
     } catch (error) {
         console.error("Sync Error:", error);
         return { success: false, message: error instanceof Error ? error.message : "Gagal sinkronisasi." };
@@ -384,7 +463,48 @@ export async function syncTickets() {
         const syncUrl = config.spreadsheet.scriptUrlSync;
         if (!syncUrl) throw new Error("GOOGLE_SCRIPT_URL_SPREADSHEET not configured");
 
-        const formattedData = tickets.map(t => ({
+        // Group tickets by unitId
+        const groupedByUnit: Record<string, any[]> = {};
+
+        tickets.forEach(t => {
+            const unitKey = t.registration.unitId.toUpperCase();
+            if (!groupedByUnit[unitKey]) groupedByUnit[unitKey] = [];
+
+            groupedByUnit[unitKey].push({
+                id: t.id,
+                ticketCode: t.ticketCode,
+                isUsed: t.isUsed ? "YES" : "NO",
+                issuedAt: t.issuedAt.toISOString(),
+                registrantName: t.registration.fullName,
+                registrantEmail: t.registration.email,
+                unit: t.registration.unitId,
+                event: t.registration.subEventName
+            });
+        });
+
+        let totalSynced = 0;
+
+        // Sync each unit to its specific sheet
+        for (const [unit, data] of Object.entries(groupedByUnit)) {
+            const sheetName = `Ticket-${unit}`;
+            const response = await fetch(`${syncUrl}?sheet=${encodeURIComponent(sheetName)}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "sync",
+                    data: data
+                })
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                console.error(`Sync failed for ${sheetName}:`, result.error);
+                continue;
+            }
+            totalSynced += data.length;
+        }
+
+        // Also sync all to a master sheet
+        const allFormatted = tickets.map(t => ({
             id: t.id,
             ticketCode: t.ticketCode,
             isUsed: t.isUsed ? "YES" : "NO",
@@ -395,18 +515,12 @@ export async function syncTickets() {
             event: t.registration.subEventName
         }));
 
-        const response = await fetch(`${syncUrl}?sheet=Tickets`, {
+        await fetch(`${syncUrl}?sheet=All-Tickets`, {
             method: "POST",
-            body: JSON.stringify({
-                action: "sync",
-                data: formattedData
-            })
+            body: JSON.stringify({ action: "sync", data: allFormatted })
         });
 
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error || "Sync failed");
-
-        return { success: true, count: formattedData.length };
+        return { success: true, count: totalSynced };
     } catch (error) {
         console.error("Sync Error:", error);
         return { success: false, message: error instanceof Error ? error.message : "Gagal sinkronisasi." };
@@ -419,9 +533,34 @@ export async function checkUnitAvailability(unitId: string, categoryName: string
         const unitConfig = UNIT_CONFIG[unitKey];
         if (!unitConfig) throw new Error("Unit not found");
 
-        const settings = await (prisma as any).unitSetting.findMany({
+        const settings = await prisma.unitSetting.findMany({
             where: { unitId: unitKey }
         });
+
+        // Date validation - Find dates from any record that has them
+        const today = new Date();
+        const startDateSettings = settings.find((s: any) => s.startDate);
+        const endDateSettings = settings.find((s: any) => s.endDate);
+        const eventDateSettings = settings.find((s: any) => s.eventDate);
+        const startDate = startDateSettings?.startDate ? new Date(startDateSettings.startDate) : null;
+        const endDate = endDateSettings?.endDate ? new Date(endDateSettings.endDate) : null;
+        const eventDate = eventDateSettings?.eventDate ? new Date(eventDateSettings.eventDate) : null;
+
+        if (startDate && today < startDate) {
+            return {
+                success: false,
+                isComingSoon: true,
+                message: `Pendaftaran untuk ${unitConfig.name} belum dibuka.`
+            };
+        }
+
+        if (endDate && today > endDate) {
+            return {
+                success: false,
+                isClosed: true,
+                message: `Pendaftaran untuk ${unitConfig.name} sudah ditutup.`
+            };
+        }
 
         const specificLimit = settings.find((s: any) => s.categoryName === categoryName)?.limit;
 
@@ -471,13 +610,13 @@ export async function checkUnitAvailability(unitId: string, categoryName: string
         };
     } catch (error) {
         console.error("[checkUnitAvailability] Error:", error);
-        return { success: false, available: true, remaining: 100, sold: 0, limit: 100 };
+        return { success: false, available: true, remaining: 100, sold: 0, limit: 100, message: "Terjadi kesalahan saat memeriksa ketersediaan." };
     }
 }
 
 export async function getUnitAvailability(unitId: string) {
     try {
-        const settings = await (prisma as any).unitSetting.findMany({
+        const settings = await prisma.unitSetting.findMany({
             where: { unitId: unitId.toLowerCase() }
         });
 
@@ -538,7 +677,18 @@ export async function getUnitAvailability(unitId: string) {
             item.available = item.sold < item.limit;
         });
 
-        return { success: true, data: availabilityMap };
+        // Get dates from any setting that has them (synced across categories)
+        const startDate = settings.find((s: any) => s.startDate)?.startDate || null;
+        const endDate = settings.find((s: any) => s.endDate)?.endDate || null;
+        const eventDate = settings.find((s: any) => s.eventDate)?.eventDate || null;
+
+        return {
+            success: true,
+            data: availabilityMap,
+            startDate: startDate,
+            endDate: endDate,
+            eventDate: eventDate
+        };
     } catch (error) {
         console.error("[getUnitAvailability] Error:", error);
         return { success: false, data: {} };

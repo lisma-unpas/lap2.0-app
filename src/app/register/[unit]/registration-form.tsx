@@ -330,7 +330,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         }
     };
 
-    const calculatePrice = () => {
+    const calculatePrice = (data: Record<string, any> = formData) => {
         let basePrice = 0;
 
         if (subEventConfig?.price !== undefined) {
@@ -341,7 +341,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             // Priority: radio field selection
             fields.forEach((field: any) => {
                 if (field.type === "radio") {
-                    const selectedOption = field.options.find((opt: any) => opt.value === formData[field.id]);
+                    const selectedOption = field.options.find((opt: any) => opt.value === data[field.id]);
                     if (selectedOption?.price !== undefined) basePrice = selectedOption.price;
                 }
             });
@@ -352,7 +352,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             }
         }
 
-        const quantity = parseInt(formData.quantity) || 1;
+        const quantity = parseInt(data.quantity) || 1;
 
         // If subEventConfig or fixedPrice is specific, it might already include quantity logic 
         // but for LAP it's usually per-item. 
@@ -369,9 +369,21 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const handleAddToCart = () => {
         const errors: Record<string, string> = {};
 
-        // General validation for all fields
+        // 1. Prepare final form data (merging defaults)
+        const finalData = { ...formData };
         fields.forEach((field: any) => {
-            const value = formData[field.id];
+            if (finalData[field.id] === undefined || finalData[field.id] === "") {
+                if (field.id === "quantity") {
+                    finalData[field.id] = "1";
+                } else if (field.defaultValue !== undefined) {
+                    finalData[field.id] = field.defaultValue.toString();
+                }
+            }
+        });
+
+        // 2. Validate using finalData
+        fields.forEach((field: any) => {
+            const value = finalData[field.id];
 
             // Required check
             if (field.required) {
@@ -398,8 +410,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             }
         });
 
-        // Special check for quantity
-        if (formData.quantity === "0" || formData.quantity === 0 || formData.quantity === "") {
+        // Special check for quantity in finalData
+        if (finalData.quantity === "0" || finalData.quantity === 0 || finalData.quantity === "") {
             errors.quantity = "Jumlah tiket tidak boleh 0";
         }
 
@@ -416,14 +428,15 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             return;
         }
 
+        // 3. Submit with finalData
         const item = {
             id: Math.random().toString(36).substr(2, 9),
             unitId: unit,
             subEventId: selectedSubEvent,
             unitName: config.name,
             subEventName: selectedSubEvent,
-            formData,
-            price: calculatePrice()
+            formData: finalData,
+            price: calculatePrice(finalData)
         };
 
         updateUserIdentity({

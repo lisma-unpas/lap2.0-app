@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     CheckCircle,
     Clock,
@@ -21,28 +22,43 @@ import { markTicketAsUsed, revertTicketUsage } from "@/actions/check-in";
 import { Button } from "@/components/base/buttons/button";
 import { Badge } from "@/components/base/badges/badges";
 import { Input } from "@/components/base/input/input";
-import { Table, TableCard } from "@/components/application/table/table";
+import { Select } from "@/components/base/select/select";
 import { PaginationCardDefault } from "@/components/application/pagination/pagination";
+import { UNIT_CONFIG } from "@/constants/units";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { TableBody } from "react-aria-components";
 import { useToast } from "@/context/toast-context";
 import { cx } from "@/utils/cx";
 import { formatDateTime } from "@/utils/date";
+import { EmptyState } from "@/components/application/empty-state/empty-state";
+import { Table, TableCard } from "@/components/application/table/table";
 
 export default function TicketsClient() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    // Get initial values from URL or defaults
+    const initialPage = Number(searchParams.get("page")) || 1;
+    const initialUnit = searchParams.get("unit") || "ALL";
+    const initialSearch = searchParams.get("search") || "";
+    const initialStatus = searchParams.get("status") || "ALL";
+
     const [tickets, setTickets] = useState<any[]>([]);
     const [stats, setStats] = useState<any>(null);
     const [totalCount, setTotalCount] = useState(0);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(initialPage);
     const limit = 10;
 
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [search, setSearch] = useState(initialSearch);
+    const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+    const [unitId, setUnitId] = useState(initialUnit);
+    const [statusFilter, setStatusFilter] = useState(initialStatus);
 
     const { toastSuccess, toastError } = useToast();
     const [isSyncing, setIsSyncing] = useState(false);
@@ -69,10 +85,26 @@ export default function TicketsClient() {
         }
     };
 
+    // Sync state to URL
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (page > 1) params.set("page", page.toString());
+        if (unitId !== "ALL") params.set("unit", unitId);
+        if (statusFilter !== "ALL") params.set("status", statusFilter);
+        if (debouncedSearch) params.set("search", debouncedSearch);
+
+        const newQuery = params.toString();
+        const currentQuery = window.location.search.replace(/^\?/, "");
+
+        if (newQuery !== currentQuery) {
+            router.replace(`${pathname}${newQuery ? "?" + newQuery : ""}`, { scroll: false });
+        }
+    }, [page, unitId, statusFilter, debouncedSearch, pathname, router]);
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
-            if (!isInitialLoading) setPage(1);
+            if (!isInitialLoading && search !== debouncedSearch) setPage(1);
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -83,7 +115,7 @@ export default function TicketsClient() {
         } else {
             fetchData();
         }
-    }, [page, debouncedSearch]);
+    }, [page, debouncedSearch, unitId, statusFilter]);
 
     async function fetchInitialData() {
         setIsInitialLoading(true);
@@ -96,6 +128,8 @@ export default function TicketsClient() {
         const [ticketRes, statsRes] = await Promise.all([
             getTickets({
                 search: debouncedSearch,
+                unitId: unitId,
+                status: statusFilter,
                 page,
                 limit
             }),
@@ -199,6 +233,41 @@ export default function TicketsClient() {
                                     size="sm"
                                     className="grow sm:w-64"
                                 />
+                                <div className="w-full sm:w-48">
+                                    <Select
+                                        size="sm"
+                                        selectedKey={statusFilter}
+                                        onSelectionChange={(key) => {
+                                            setStatusFilter(key as string);
+                                            setPage(1);
+                                        }}
+                                        placeholder="Filter Attendance"
+                                        aria-label="Filter by Attendance"
+                                    >
+                                        <Select.Item id="ALL">All Status</Select.Item>
+                                        <Select.Item id="CHECKED_IN">Checked In</Select.Item>
+                                        <Select.Item id="NOT_CHECKED_IN">Not Checked In</Select.Item>
+                                    </Select>
+                                </div>
+                                <div className="w-full sm:w-48">
+                                    <Select
+                                        size="sm"
+                                        selectedKey={unitId}
+                                        onSelectionChange={(key) => {
+                                            setUnitId(key as string);
+                                            setPage(1);
+                                        }}
+                                        placeholder="Filter Unit"
+                                        aria-label="Filter by Unit"
+                                    >
+                                        <Select.Item id="ALL">All Units</Select.Item>
+                                        {useMemo(() => Object.values(UNIT_CONFIG).map((unit: any) => (
+                                            <Select.Item id={unit.id} key={unit.id}>
+                                                {unit.name}
+                                            </Select.Item>
+                                        )), [])}
+                                    </Select>
+                                </div>
                             </div>
                         }
                     />
@@ -214,7 +283,7 @@ export default function TicketsClient() {
                                 <Table.Head label="" className="md:hidden w-10 px-4" />
                             </Table.Header>
                             <TableBody>
-                                {isInitialLoading ? (
+                                {isInitialLoading || isLoading ? (
                                     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                                         <Table.Row key={i}>
                                             <Table.Cell><div className="h-4 w-32 bg-secondary animate-pulse rounded" /></Table.Cell>
@@ -225,7 +294,7 @@ export default function TicketsClient() {
                                             <Table.Cell className="md:hidden"><div className="h-8 w-8 bg-secondary animate-pulse rounded ml-auto" /></Table.Cell>
                                         </Table.Row>
                                     ))
-                                ) : (
+                                ) : tickets.length > 0 ? (
                                     tickets.flatMap((ticket) => {
                                         const isExpanded = expandedId === ticket.id;
 
@@ -315,6 +384,36 @@ export default function TicketsClient() {
                                             ] : [])
                                         ];
                                     })
+                                ) : (
+                                    <Table.Row>
+                                        <Table.Cell colSpan={6} className="py-12 overflow-hidden">
+                                            <EmptyState size="sm">
+                                                <EmptyState.Header pattern="circle">
+                                                    <EmptyState.FeaturedIcon icon={SearchRefraction} color="gray" />
+                                                </EmptyState.Header>
+                                                <EmptyState.Content>
+                                                    <EmptyState.Title>No tickets found</EmptyState.Title>
+                                                    <EmptyState.Description>
+                                                        We couldn't find any tickets matching your search or filters.
+                                                    </EmptyState.Description>
+                                                </EmptyState.Content>
+                                                <EmptyState.Footer>
+                                                    <Button
+                                                        size="sm"
+                                                        color="secondary"
+                                                        onClick={() => {
+                                                            setSearch("");
+                                                            setUnitId("ALL");
+                                                            setStatusFilter("ALL");
+                                                            setPage(1);
+                                                        }}
+                                                    >
+                                                        Clear all filters
+                                                    </Button>
+                                                </EmptyState.Footer>
+                                            </EmptyState>
+                                        </Table.Cell>
+                                    </Table.Row>
                                 )}
                             </TableBody>
                         </Table>

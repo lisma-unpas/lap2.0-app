@@ -14,12 +14,32 @@ import Section from "@/components/shared/section";
 import { UNIT_CONFIG } from "@/constants/units";
 import { useToast } from "@/context/toast-context";
 import { cx } from "@/utils/cx";
+import { DateField } from "@/components/base/input/date-field";
+import { parseDateTime } from "@internationalized/date";
+
+function toLocalISOString(date: Date) {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+const safeParseDateTime = (val: string) => {
+    try {
+        if (!val) return null;
+        // If it's just a date (YYYY-MM-DD), append time
+        if (val.length === 10) val += "T00:00";
+        return parseDateTime(val);
+    } catch (e) {
+        return null;
+    }
+};
 
 export default function SettingsClient() {
     // unitId -> categoryName -> limit
     const [settings, setSettings] = useState<Record<string, Record<string, number>>>({});
+    const [unitDates, setUnitDates] = useState<Record<string, { startDate: string; endDate: string; eventDate: string }>>({});
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState<string | null>(null);
+    const [saveQueue, setSaveQueue] = useState<string[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const { toastSuccess, toastError } = useToast();
 
@@ -32,32 +52,64 @@ export default function SettingsClient() {
         const res = await getUnitSettings();
         if (res.success && res.data) {
             const mapped: Record<string, Record<string, number>> = {};
+            const dates: Record<string, { startDate: string; endDate: string; eventDate: string }> = {};
+
             res.data.forEach((curr: any) => {
                 if (!mapped[curr.unitId]) mapped[curr.unitId] = {};
                 mapped[curr.unitId][curr.categoryName] = curr.limit;
+
+                // Capture dates and ensure we don't overwrite valid dates with nulls from other records
+                const existing = dates[curr.unitId] || { startDate: "", endDate: "", eventDate: "" };
+
+                if (curr.startDate || curr.endDate || curr.eventDate) {
+                    dates[curr.unitId] = {
+                        startDate: curr.startDate ? toLocalISOString(new Date(curr.startDate)) : existing.startDate,
+                        endDate: curr.endDate ? toLocalISOString(new Date(curr.endDate)) : existing.endDate,
+                        eventDate: curr.eventDate ? toLocalISOString(new Date(curr.eventDate)) : existing.eventDate
+                    };
+                }
             });
             setSettings(mapped);
+            setUnitDates(dates);
         }
         setIsInitialLoading(false);
     }
 
-    async function handleSaveUnit(unitId: string) {
-        setIsSaving(unitId);
+    useEffect(() => {
+        if (saveQueue.length > 0 && !isProcessing) {
+            const nextUnitId = saveQueue[0];
+            executeSave(nextUnitId);
+        }
+    }, [saveQueue, isProcessing]);
 
+    async function executeSave(unitId: string) {
+        setIsProcessing(true);
         const unitCategories = getUnitCategories(unitId);
         const settingsToUpdate = unitCategories.map(cat => ({
             categoryName: cat,
             limit: settings[unitId]?.[cat] ?? 100
         }));
 
-        const res = await updateUnitSettings(unitId, settingsToUpdate);
+        const dates = unitDates[unitId];
+        const res = await updateUnitSettings(unitId, settingsToUpdate, {
+            startDate: dates?.startDate || null,
+            endDate: dates?.endDate || null,
+            eventDate: dates?.eventDate || null
+        });
 
         if (res.success) {
             toastSuccess("Berhasil", `Semua limit untuk ${UNIT_CONFIG[unitId].name} diperbarui.`);
         } else {
             toastError("Gagal", res.message || "Gagal memperbarui limit.");
         }
-        setIsSaving(null);
+
+        setSaveQueue(prev => prev.filter(id => id !== unitId));
+        setIsProcessing(false);
+    }
+
+    async function handleSaveUnit(unitId: string) {
+        if (saveQueue.includes(unitId)) return;
+        setSaveQueue(prev => [...prev, unitId]);
     }
 
     const units = Object.keys(UNIT_CONFIG);
@@ -166,11 +218,44 @@ export default function SettingsClient() {
                                                 color="primary"
                                                 iconLeading={Save01}
                                                 onClick={() => handleSaveUnit(unitId)}
-                                                isLoading={isSaving === unitId}
+                                                isLoading={saveQueue.includes(unitId)}
                                                 className="min-w-[120px]"
                                             >
-                                                Save Unit
+                                                {saveQueue.includes(unitId) ? "In Queue..." : "Save Unit"}
                                             </Button>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 py-4 bg-secondary_alt/30 border-b border-secondary">
+                                            <div className="flex-1">
+                                                <DateField
+                                                    label="Pendaftaran Dibuka"
+                                                    value={safeParseDateTime(unitDates[unitId]?.startDate || "")}
+                                                    onChange={(val) => setUnitDates(prev => ({
+                                                        ...prev,
+                                                        [unitId]: { ...(prev[unitId] || { startDate: "", endDate: "", eventDate: "" }), startDate: val ? val.toString() : "" }
+                                                    }))}
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <DateField
+                                                    label="Pendaftaran Ditutup"
+                                                    value={safeParseDateTime(unitDates[unitId]?.endDate || "")}
+                                                    onChange={(val) => setUnitDates(prev => ({
+                                                        ...prev,
+                                                        [unitId]: { ...(prev[unitId] || { startDate: "", endDate: "", eventDate: "" }), endDate: val ? val.toString() : "" }
+                                                    }))}
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <DateField
+                                                    label="Tanggal Pelaksanaan Event"
+                                                    value={safeParseDateTime(unitDates[unitId]?.eventDate || "")}
+                                                    onChange={(val) => setUnitDates(prev => ({
+                                                        ...prev,
+                                                        [unitId]: { ...(prev[unitId] || { startDate: "", endDate: "", eventDate: "" }), eventDate: val ? val.toString() : "" }
+                                                    }))}
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="divide-y divide-secondary">
