@@ -593,9 +593,12 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                             onChange={(val) => handleInputChange(field.id, val)}
                                             items={field.options.map((opt: any) => {
                                                 const disabled = isOptionDisabled(field.id, opt.value);
+                                                // Only show "Sold Out" if it's not the ticketType field being disabled by category
+                                                const showSoldOut = disabled && (field.id !== "ticketType" || formData.category === "umum");
+
                                                 return {
                                                     value: opt.value,
-                                                    title: opt.label + (disabled ? " (Sold Out)" : ""),
+                                                    title: opt.label + (showSoldOut ? " (Sold Out)" : ""),
                                                     description: "",
                                                     secondaryTitle: "",
                                                     image: opt.image,
