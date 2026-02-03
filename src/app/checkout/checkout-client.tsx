@@ -338,7 +338,13 @@ export default function CheckoutClient() {
                                         const unitItems = lastCheckoutInfo.items.filter(i => i.unitId === unitId);
                                         const totalPerUnit = unitItems.reduce((acc, i) => acc + i.price, 0);
 
-                                        const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${lastCheckoutInfo.code}\n- Nama: ${userIdentity?.fullName || '-'}\n- Email: ${lastCheckoutInfo.email}\n- Item: ${unitItems.map(i => `${i.unitName}${i.subEventName ? ` (${i.subEventName})` : ''}`).join(', ')}\n- Total: Rp ${totalPerUnit.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${lastCheckoutInfo.url}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
+                                        const itemsList = unitItems.map((i, idx) => {
+                                            const name = i.formData?.fullName || i.formData?.producer || i.formData?.groupName || i.formData?.bandName || '-';
+                                            const subEventText = i.subEventName && i.subEventName !== i.unitName ? ` (${i.subEventName})` : '';
+                                            return `${idx + 1}. *${name}* - ${i.unitName}${subEventText} - Rp ${i.price.toLocaleString('id-ID')}`;
+                                        }).join('\n');
+
+                                        const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${lastCheckoutInfo.code}\n- Email: ${lastCheckoutInfo.email}\n\n*Daftar Peserta & Item:*\n${itemsList}\n\n*Total Tagihan (${config.name}):* Rp ${totalPerUnit.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${lastCheckoutInfo.url}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
 
                                         const waUrl = `https://wa.me/${config.cpWhatsapp}?text=${encodeURIComponent(message)}`;
 
@@ -563,7 +569,7 @@ export default function CheckoutClient() {
                                                 {isComingSoon && <Badge color="blue" size="sm" type="pill-color" className="text-[8px] px-1.5 py-0">Coming Soon</Badge>}
                                                 {isClosed && <Badge color="error" size="sm" type="pill-color" className="text-[8px] px-1.5 py-0">Closed</Badge>}
                                             </div>
-                                            <h3 className="text-md font-bold text-primary mt-0.5">{item.subEventName || "Pendaftaran"}</h3>
+                                            <h3 className="text-md font-bold text-primary mt-0.5">{item.subEventName && item.subEventName !== item.unitName ? item.subEventName : "Pendaftaran"}</h3>
                                             <p className="text-sm text-tertiary mt-0.5 font-mono">Rp {item.price.toLocaleString('id-ID')}</p>
 
                                             {isDisabled && (

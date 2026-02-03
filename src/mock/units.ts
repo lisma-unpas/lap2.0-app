@@ -4,7 +4,6 @@ export const UNITS_MOCK = [
         name: 'TESAS',
         description: `LISMA ART PARADE 2.0 (LAP 2.0): Pagelaran Teater Drama Musikal \n\nTahta bisa direbut. Wajah bisa diubah. Tapi ketulusan selalu menemukan jalannya.\n\nSaat Purbasari diusir ke hutan, takdir justru mempertemukannya dengan Lutung Kasarung—Pangeran yang terkutuk. Saat semua topeng runtuh, siapakah yang berkuasa?\n\nTemukan jawabannya dan saksikan legenda hidup LUTUNG KASARUNG 🎭`,
         subEvents: ['Teater Drama Musikal'],
-        price: 25000,
         badgeText: "🎭 Teater dan Sastra",
         colorClass: "purple",
         iconId: "ticket",

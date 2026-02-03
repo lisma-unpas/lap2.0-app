@@ -163,7 +163,7 @@ export default function CheckStatusClient() {
                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                                             <div className="space-y-1">
                                                 <p className="text-[10px] font-bold text-brand-secondary uppercase tracking-[0.2em]">
-                                                    {config.name} — {reg.subEventName}
+                                                    {config.name}{reg.subEventName && reg.subEventName !== config.name ? ` — ${reg.subEventName}` : ''}
                                                 </p>
                                                 <h3 className="text-xl font-bold text-primary">{reg.fullName}</h3>
                                                 <div className="flex items-center gap-2 mt-2">
@@ -210,7 +210,16 @@ export default function CheckStatusClient() {
                                                                 className="h-9 px-4 text-xs font-bold gap-2"
                                                                 iconLeading={<img src="/icon-wa.webp" alt="" className="size-5" />}
                                                                 onClick={() => {
-                                                                    const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${reg.registrationCode}\n- Nama: ${reg.fullName}\n- Email: ${reg.email || '-'}\n- Item: ${config.name}${reg.subEventName ? ` (${reg.subEventName})` : ''}\n- Total: Rp ${reg.totalPrice.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${reg.paymentProof || '(Belum diunggah)'}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
+                                                                    // Group items by registration code (which should be the same for all results)
+                                                                    const itemsList = results.map((r, index) => {
+                                                                        const rConfig = UNIT_CONFIG[r.unitId.toLowerCase()] || { name: r.unitId };
+                                                                        const subEventText = r.subEventName && r.subEventName !== rConfig.name ? ` (${r.subEventName})` : '';
+                                                                        return `${index + 1}. *${r.fullName}* - ${rConfig.name}${subEventText} - Rp ${r.totalPrice.toLocaleString('id-ID')}`;
+                                                                    }).join('\n');
+
+                                                                    const totalAmount = results.reduce((acc, r) => acc + (r.totalPrice || 0), 0);
+
+                                                                    const message = `Halo ${config.cpName || 'Panitia'},\n\nSaya ingin konfirmasi pembayaran untuk pendaftaran LISMA Art Parade 2.0.\n\n*Detail Pendaftaran:*\n- Kode: ${reg.registrationCode}\n- Email: ${reg.email || '-'}\n\n*Daftar Item Pesanan:*\n${itemsList}\n\n*Total Keseluruhan:* Rp ${totalAmount.toLocaleString('id-ID')}\n\n*Bukti Pembayaran:*\n${reg.paymentProof || '(Belum diunggah)'}\n\nMohon untuk segera diverifikasi. Terima kasih!`;
                                                                     const waUrl = `https://wa.me/${config.cpWhatsapp}?text=${encodeURIComponent(message)}`;
                                                                     window.open(waUrl, '_blank');
                                                                 }}

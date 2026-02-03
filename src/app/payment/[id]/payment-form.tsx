@@ -148,7 +148,7 @@ export default function PaymentForm({ registrationId, fullName, subEventName, ev
                                 </div>
                                 <div>
                                     <h2 className="font-bold text-primary">Instruksi Pembayaran</h2>
-                                    <p className="text-sm text-tertiary">{eventName} — {subEventName}</p>
+                                    <p className="text-sm text-tertiary">{eventName}{subEventName && subEventName !== eventName ? ` — ${subEventName}` : ''}</p>
                                 </div>
                             </div>
                             <div className="mt-6">

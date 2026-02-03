@@ -441,7 +441,9 @@ const RegistrationRow = memo(({
                 <Table.Cell className="hidden md:table-cell">
                     <div className="flex flex-col text-xs">
                         <span className="font-bold text-brand-secondary">{config.name}</span>
-                        <span className="text-tertiary">{reg.subEventName}</span>
+                        {reg.subEventName && reg.subEventName !== config.name && (
+                            <span className="text-tertiary">{reg.subEventName}</span>
+                        )}
                     </div>
                 </Table.Cell>
                 <Table.Cell>
@@ -567,10 +569,12 @@ const RegistrationDetailModal = memo(({
                         <p className="text-xs font-bold text-quaternary uppercase">Unit</p>
                         <p className="text-sm font-semibold text-primary">{UNIT_CONFIG[registration?.unitId.toLowerCase()]?.name || registration?.unitId}</p>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-quaternary uppercase">Event</p>
-                        <p className="text-sm font-semibold text-primary">{registration?.subEventName}</p>
-                    </div>
+                    {registration?.subEventName && registration?.subEventName !== (UNIT_CONFIG[registration?.unitId.toLowerCase()]?.name || registration?.unitId) && (
+                        <div>
+                            <p className="text-xs font-bold text-quaternary uppercase">Event</p>
+                            <p className="text-sm font-semibold text-primary">{registration?.subEventName}</p>
+                        </div>
+                    )}
                 </div>
 
                 <div>

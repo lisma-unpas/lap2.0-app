@@ -171,7 +171,9 @@ export default function CheckInPage() {
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-quaternary tracking-widest">Event & Kategori</p>
                                         <p className="font-bold text-primary text-lg">{config.name}</p>
-                                        <Badge color="gray" size="md">{reg.subEventName}</Badge>
+                                        {reg.subEventName && reg.subEventName !== config.name && (
+                                            <Badge color="gray" size="md">{reg.subEventName}</Badge>
+                                        )}
                                     </div>
                                 </div>
 
