@@ -166,19 +166,13 @@ export const UNITS_MOCK = [
                 price: 0
             },
             "Lomba foto": {
+                price: 25000,
                 fields: [
                     { id: "fullName", label: "Nama Fotografer", type: "text", required: true, persistent: true },
                     { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
-                    { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
                     { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
                     { id: "instagram", label: "Instagram", type: "text", required: true },
-                    {
-                        id: "category", label: "Kategori Peserta", type: "radio",
-                        options: [
-                            { label: "Umum & SMA/SMK (Rp25.000)", value: "default", price: 25000 }
-                        ], required: true
-                    },
                     { id: "karya", label: "Pengumpulan foto", type: "file", multiple: true, required: true },
                     { id: "photoName", label: "Nama Foto", type: "text", required: true },
                     { id: "description", label: "Deskripsi Foto", type: "textarea", required: true }

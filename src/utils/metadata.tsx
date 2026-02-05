@@ -7,7 +7,7 @@ export const openSharedMetadata = (title?: string, description?: string): Metada
 
     return {
         title: fullTitle,
-        description: description || defaultDesc,
+        desctription: description || defaultDesc,
         openGraph: {
             title: fullTitle,
             description: description || defaultDesc,
