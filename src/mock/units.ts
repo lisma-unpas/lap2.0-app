@@ -161,7 +161,8 @@ export const UNITS_MOCK = [
                     { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
                     { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
-                    { id: "origin", label: "Asal", type: "text", required: true }
+                    { id: "origin", label: "Asal", type: "text", required: true },
+                    { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1 (Hanya untuk SMA/SMK Free)", "Sesi 2 (Hanya untuk Umum Free)"], required: true }
                 ],
                 price: 0
             },
