@@ -7,7 +7,8 @@
         "build": "NODE_OPTIONS=\"--max-old-space-size=4096\" next build",
         "start": "next start",
         "lint": "next lint",
-        "postinstall": "prisma generate"
+        "postinstall": "prisma generate",
+        "db:reset-dummy": "node prisma/clear-dummy.js"
     },
     "dependencies": {
         "@floating-ui/dom": "^1.7.4",

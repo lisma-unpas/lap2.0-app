@@ -28,6 +28,7 @@ import { FileUpload } from "@/components/application/file-upload/file-upload-bas
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { Modal } from "@/components/shared/modals/modal/index";
+import { EmptyState } from "@/components/application/empty-state/empty-state";
 import { cx } from "@/utils/cx";
 import { formatDateTime } from "@/utils/date";
 import { TableBody } from "react-aria-components";
@@ -152,8 +153,32 @@ export default function InfoClient({ initialInfo = [] }: { initialInfo: any[] })
                         <TableBody>
                             {filteredInfo.length === 0 ? (
                                 <Table.Row>
-                                    <Table.Cell colSpan={4} className="py-10 text-center text-tertiary">
-                                        Belum ada informasi.
+                                    <Table.Cell colSpan={4} className="py-12 overflow-hidden">
+                                        <EmptyState size="sm">
+                                            <EmptyState.Header pattern="circle">
+                                                <EmptyState.FeaturedIcon icon={SearchRefraction} color="gray" />
+                                            </EmptyState.Header>
+                                            <EmptyState.Content>
+                                                <EmptyState.Title>Belum ada informasi</EmptyState.Title>
+                                                <EmptyState.Description>
+                                                    {search
+                                                        ? "Kami tidak menemukan informasi yang sesuai dengan pencarian Anda."
+                                                        : "Belum ada informasi yang ditambahkan ke sistem."
+                                                    }
+                                                </EmptyState.Description>
+                                            </EmptyState.Content>
+                                            {search && (
+                                                <EmptyState.Footer>
+                                                    <Button
+                                                        size="sm"
+                                                        color="secondary"
+                                                        onClick={() => setSearch("")}
+                                                    >
+                                                        Bersihkan Pencarian
+                                                    </Button>
+                                                </EmptyState.Footer>
+                                            )}
+                                        </EmptyState>
                                     </Table.Cell>
                                 </Table.Row>
                             ) : (

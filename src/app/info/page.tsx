@@ -13,6 +13,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatDateTime } from "@/utils/date";
 import { Markdown } from "@/components/shared/markdown";
+import { InfoEmptyState } from "@/components/application/empty-state/info-empty-state";
 
 
 
@@ -93,11 +94,7 @@ export default async function NewsPage() {
                 </div>
 
                 {infoList.length === 0 && (
-                    <div className="mt-20 text-center py-20 bg-secondary_alt rounded-3xl border-2 border-dashed border-secondary">
-                        <ImageIcon className="size-12 text-quaternary mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-primary">Belum ada informasi</h3>
-                        <p className="text-tertiary mt-1">Kembali lagi nanti untuk update terbaru.</p>
-                    </div>
+                    <InfoEmptyState />
                 )}
             </Container>
         </Section>
