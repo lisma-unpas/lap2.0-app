@@ -7,7 +7,7 @@ import { UNITS_MOCK } from "@/mock/units";
 import { cx } from "@/utils/cx";
 import { UnitImage } from "@/components/application/unit/unit-image";
 import { motion } from "motion/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getUnitsAvailability } from "@/actions/admin";
 import { Badge } from "@/components/base/badges/badges";
 
@@ -134,19 +134,34 @@ interface UnitGalleryProps {
     showMainEvent?: boolean;
 }
 
+const getUnitStatusRank = (availability: any) => {
+    if (!availability) return 1; // Treat as open or neutral if no data yet
+
+    const today = new Date();
+    const startDate = availability.startDate ? new Date(availability.startDate) : null;
+    const endDate = availability.endDate ? new Date(availability.endDate) : null;
+
+    const isComingSoon = !!(startDate && today < startDate);
+    const isClosed = !!(endDate && today > endDate);
+
+    const availabilityMap = availability.data || {};
+    const hasSettings = Object.keys(availabilityMap).length > 0;
+    const isFull = availability.success &&
+        hasSettings &&
+        Object.values(availabilityMap).every((a: any) => !a.available);
+
+    if (isClosed) return 4;
+    if (isComingSoon) return 3;
+    if (isFull) return 2;
+    return 1; // OPEN
+};
+
 export function UnitGallery({
     title = "Jelajahi Unit Kesenian LISMA",
     description = "Pilih unit yang sesuai dengan minat dan bakat Anda untuk bersinar di LISMA ART PARADE 2.0.",
     className,
     showMainEvent = false
 }: UnitGalleryProps) {
-    // Order units: main-event first, then others
-    const sortedUnits = [...UNITS_MOCK].sort((a, b) => {
-        if (a.id === "main-event") return -1;
-        if (b.id === "main-event") return 1;
-        return 0;
-    });
-
     const [availabilities, setAvailabilities] = useState<Record<string, any>>({});
     const [isLoading, setIsLoading] = useState(true);
 
@@ -154,12 +169,9 @@ export function UnitGallery({
         let isSubscribed = true;
         async function fetchAllAvailabilities() {
             setIsLoading(true);
-            const results: Record<string, any> = {};
-            const unitBatch = showMainEvent ? sortedUnits : sortedUnits.filter(u => u.id !== "main-event");
-
             try {
                 // Fetch all availabilities in one batch call
-                const response = await getUnitsAvailability(unitBatch.map(u => u.id));
+                const response = await getUnitsAvailability(UNITS_MOCK.map(u => u.id));
                 if (!isSubscribed) return;
 
                 if (response.success && response.data) {
@@ -173,11 +185,26 @@ export function UnitGallery({
         }
         fetchAllAvailabilities();
         return () => { isSubscribed = false; };
-    }, [showMainEvent]); // Dependency on showMainEvent to refetch if view changes
+    }, []);
 
-    const units = showMainEvent
-        ? sortedUnits
-        : sortedUnits.filter(unit => unit.id !== "main-event");
+    const units = useMemo(() => {
+        // 1. Filter based on showMainEvent
+        const filtered = UNITS_MOCK.filter(u => showMainEvent || u.id !== "main-event");
+
+        // 2. Sort: main-event first, then by status rank
+        return [...filtered].sort((a, b) => {
+            if (a.id === "main-event") return -1;
+            if (b.id === "main-event") return 1;
+
+            const rankA = getUnitStatusRank(availabilities[a.id]);
+            const rankB = getUnitStatusRank(availabilities[b.id]);
+
+            if (rankA !== rankB) return rankA - rankB;
+
+            // Secondary sort by name to keep it consistent
+            return a.name.localeCompare(b.name);
+        });
+    }, [availabilities, showMainEvent]);
 
     return (
         <Section className={cx("bg-primary", className)} id="units">

@@ -156,6 +156,11 @@ export default function UnitContent({
                                 >
                                     {statusLabel}
                                 </Button>
+                                {isComingSoon && startDateObj && (
+                                    <p className="mt-4 text-center text-md font-medium text-tertiary">
+                                        Pendaftaran dibuka pada: <span className="text-primary font-bold">{formatDateTime(startDateObj)}</span>
+                                    </p>
+                                )}
                             </div>
                         </div>
 
