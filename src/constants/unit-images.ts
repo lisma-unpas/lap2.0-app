@@ -1,27 +1,26 @@
 export const UNIT_IMAGES: Record<string, string[]> = {
     fg: [
-        "/images/fg/IMG_6203.jpg",
-        "/images/fg/IMG_6204.jpg",
-        "/images/fg/IMG_6205.jpg"
+        "/images/fg/01.jpg",
+        "/images/fg/02.jpg",
+        "/images/fg/03.jpg"
     ],
     kds: [
-        "/images/kds/DSCF6257.jpg",
-        "/images/kds/DSCF6263.jpg",
-        "/images/kds/DSN09319.jpg"
+        "/images/kds/01.jpg",
+        "/images/kds/02.jpg",
+        "/images/kds/03.jpg"
     ],
     psm: [
-        "/images/psm/DSCF6139.jpg",
-        "/images/psm/DSCF6156.jpg",
-        "/images/psm/DSCF6169.jpg"
+        "/images/psm/01.jpg",
+        "/images/psm/02.jpg",
+        "/images/psm/03.jpg"
     ],
     takre: [
-        "/images/takre/DSCF6246.jpg",
-        "/images/takre/DSN08652.jpg",
-        "/images/takre/DSN08665.jpg"
+        "/images/takre/01.jpg",
+        "/images/takre/02.jpg",
+        "/images/takre/03.jpg"
     ],
     tesas: [
-        "/images/tesas/DSCF6106.jpg",
-        "/images/tesas/DSCF6118.jpg",
-        "/images/tesas/DSCF6120.jpg"
+        "/images/tesas/01.jpg",
+        "/images/tesas/02.jpg"
     ]
 };
