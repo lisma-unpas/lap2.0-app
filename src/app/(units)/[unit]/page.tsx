@@ -44,6 +44,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
         <UnitContent
             unitId={unitKey}
             unitName={config.name}
+            subTitle={config.subTitle}
             description={config.description || "Unit kesenian LISMA yang mewadahi bakat dan minat mahasiswa."}
             subEvents={subEvents}
             badgeText={config.badgeText}

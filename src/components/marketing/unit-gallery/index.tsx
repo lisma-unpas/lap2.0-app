@@ -106,6 +106,11 @@ function UnitCard({ unit, index, availability }: { unit: any; index: number; ava
                 <h3 className="text-xl font-black text-primary tracking-tight uppercase">
                     {unit.name}
                 </h3>
+                {unit.subTitle && (
+                    <p className="text-xs font-bold text-brand-600 uppercase tracking-widest mt-1">
+                        {unit.subTitle}
+                    </p>
+                )}
                 <p className="mt-4 text-md text-tertiary leading-relaxed flex-1 line-clamp-4 whitespace-pre-wrap">
                     {unit.description}
                 </p>

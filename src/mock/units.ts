@@ -2,6 +2,7 @@ export const UNITS_MOCK = [
     {
         id: 'tesas',
         name: 'TESAS',
+        subTitle: 'Pagelaran Drama Musikal Lutung Kasarung',
         description: `LISMA ART PARADE 2.0 (LAP 2.0): Pagelaran Teater Drama Musikal \n\nTahta bisa direbut. Wajah bisa diubah. Tapi ketulusan selalu menemukan jalannya.\n\nSaat Purbasari diusir ke hutan, takdir justru mempertemukannya dengan Lutung Kasarung—Pangeran yang terkutuk. Saat semua topeng runtuh, siapakah yang berkuasa?\n\nTemukan jawabannya dan saksikan legenda hidup LUTUNG KASARUNG 🎭`,
         subEvents: ['Teater Drama Musikal'],
         badgeText: "🎭 Teater dan Sastra",
@@ -29,8 +30,9 @@ export const UNITS_MOCK = [
     {
         id: 'kds',
         name: 'KDS',
-        description: `Sampur Sekar Jagat by LISMA ART PARADE 2.0 (LAP 2.0)\n\nKeindahan Alam Semesta yang Terjalin dalam Tarian\n\nSampur sekar jagat by Lisma Art Parade merupakan pagelaran seni budaya Sunda yang dirancang sebagai ruang apresiasi antara tradisi, spiritualitas, dan keindahan artistik. Melalui perpaduan tari klasik, musik live, dan wayang golek, acara ini menghadirkan pengalaman budaya yang utuh, hangat, and bermakna dalam suasana eksklusif khas Bandung.`,
-        subEvents: ['Tari Badaya', 'Tari Sulanjana', 'Tari Subali Sugriwa', 'Tari Gaplek', 'Tari Yudharini', 'Tari Jaya Perbangsa', 'Wayang Golek'],
+        subTitle: 'Pagelaran Jaya Perbangsa',
+        description: "Jaya Perbangsa by LISMA ART PARADE merupakan pagelaran seni budaya yang dirancang sebagai ruang apresiasi antara tradisi, spiritualitas, dan keindahan artistik. Melalui perpaduan tari klasik, musik live, dan pertunjukan wayang, acara ini menghadirkan pengalaman budaya yang utuh, hangat, dan bermakna dalam suasana eksklusif khas Bandung.",
+        subEvents: ['Badaya', 'Yudharini', 'Karaton Mandala Agung', 'Gaplek', 'Arimbi', 'Jaya Perbangsa'],
         price: 35000,
         badgeText: "🪭 Kategori Seni Tradisional",
         colorClass: "rose",
@@ -64,6 +66,7 @@ export const UNITS_MOCK = [
     {
         id: 'psm',
         name: 'PSM',
+        subTitle: '"Soundclash Arena" Band Competition',
         description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n🔥 BENEFIT EKSKLUSIF: Juara 1, 2, dan 3 akan mendapatkan kesempatan emas untuk tampil di Main Event dan berbagi panggung langsung dengan Guest Star kami!`,
         subEvents: ['Band Competition'],
         price: 150000,
@@ -91,6 +94,7 @@ export const UNITS_MOCK = [
     {
         id: 'takre',
         name: 'TAKRE',
+        subTitle: 'K-Pop Dance Cover Competition',
         description: `LISMA ART PARADE 2.0 (LAP 2.0): K-POP DANCE COMPETITION\n\nInilah saatnya kamu bersinar dan menunjukkan bakat terbaikmu di dunia K-Pop dance! Lisma Art Parade mengajak seluruh dancer untuk bergabung dalam K-Pop Dance Competition dengan kategori Dance Solo, Rookie, dan Hoosun.\n\n✨ Jangan lewatkan keseruannya! akan ada Random Play Dance dan Noraebang yang siap bikin acara makin pecah! 🔥`,
         subEvents: ['SOLO', 'Grup', 'RPD'],
         price: 50000,
@@ -141,6 +145,7 @@ export const UNITS_MOCK = [
     {
         id: 'fg',
         name: 'FG',
+        subTitle: '"Retak Tradisi" Photography & Short Movie Competition',
         description: `✨LISMA ART PARADE 2.0 (LAP 2.0)✨\n\nWaktunya Cerita Kamu Jadi Pusat Perhatian! 📸🎬\n\nAyo tuangkan imajinasimu lewat lensa! Ikuti Kompetisi Foto & Film Pendek tingkat SMA/SMK dan Umum Dengan Genre Fiksi melalui tema:\n- Perubahan Budaya\n- Perubahan Sosial\n- Perubahan Personal`,
         subEvents: ['Audiens short film', 'Lomba foto', 'Lomba short film'],
         price: 30000,

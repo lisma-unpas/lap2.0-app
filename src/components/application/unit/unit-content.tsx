@@ -14,6 +14,7 @@ interface UnitContentProps {
     unitId: string;
     badgeText: string;
     unitName: string;
+    subTitle?: string;
     description: string;
     subEvents: { name: string }[];
     highlightIconId: string;
@@ -33,6 +34,7 @@ export default function UnitContent({
     unitId,
     badgeText,
     unitName,
+    subTitle,
     description,
     subEvents,
     highlightIconId,
@@ -102,6 +104,11 @@ export default function UnitContent({
                                 {statusBadge}
                             </div>
                             <h1 className="text-display-md font-semibold text-primary">{unitName}</h1>
+                            {subTitle && (
+                                <p className="text-lg font-bold text-brand-600 uppercase tracking-widest mt-1">
+                                    {subTitle}
+                                </p>
+                            )}
                             <p className="mt-6 text-lg text-tertiary leading-relaxed whitespace-pre-wrap">
                                 {description}
                             </p>
