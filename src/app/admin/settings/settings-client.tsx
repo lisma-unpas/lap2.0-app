@@ -91,10 +91,23 @@ export default function SettingsClient() {
         }));
 
         const dates = unitDates[unitId];
+
+        // Ensure dates are parsed as local time from the UI strings and converted to UTC for the server
+        const toUTC = (val: string | undefined | null) => {
+            if (!val) return null;
+            try {
+                const date = new Date(val);
+                if (isNaN(date.getTime())) return val;
+                return date.toISOString();
+            } catch (e) {
+                return val;
+            }
+        };
+
         const res = await updateUnitSettings(unitId, settingsToUpdate, {
-            startDate: dates?.startDate || null,
-            endDate: dates?.endDate || null,
-            eventDate: dates?.eventDate || null
+            startDate: toUTC(dates?.startDate),
+            endDate: toUTC(dates?.endDate),
+            eventDate: toUTC(dates?.eventDate)
         });
 
         if (res.success) {

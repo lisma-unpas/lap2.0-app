@@ -330,9 +330,17 @@ export async function updateUnitSettings(
     dates?: { startDate: string | null, endDate: string | null, eventDate?: string | null }
 ) {
     try {
-        const startDate = dates?.startDate ? new Date(dates.startDate) : null;
-        const endDate = dates?.endDate ? new Date(dates.endDate) : null;
-        const eventDate = dates?.eventDate ? new Date(dates.eventDate) : null;
+        const parseDate = (d: string | null | undefined) => {
+            if (!d) return null;
+            // If it already has an offset or is UTC, parse as is
+            if (d.includes('Z') || d.includes('+')) return new Date(d);
+            // Default to Asia/Jakarta (GMT+7) for floating strings from local UI
+            return new Date(`${d}+07:00`);
+        };
+
+        const startDate = parseDate(dates?.startDate);
+        const endDate = parseDate(dates?.endDate);
+        const eventDate = parseDate(dates?.eventDate);
 
         await prisma.$transaction([
             // Update all existing records for this unit to ensure dates are synced
