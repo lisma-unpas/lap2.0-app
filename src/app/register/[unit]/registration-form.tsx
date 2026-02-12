@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ArrowLeft, ShoppingCart01, InfoCircle, CheckCircle, Upload01, Copy01, Eraser, LogIn01, RefreshCw01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
@@ -46,6 +46,17 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const [pendingDraft, setPendingDraft] = useState<{ subEvent: string; data: any } | null>(null);
     const [availability, setAvailability] = useState<{ sold: number, limit: number, remaining: number } | null>(null);
     const [availabilityMap, setAvailabilityMap] = useState<Record<string, { sold: number, limit: number, available: boolean }>>({});
+    const activePricingStage = useMemo(() => {
+        if (!config?.pricingStages) return null;
+        const today = new Date();
+        return config.pricingStages.find((stage: any) => {
+            const start = new Date(stage.startDate);
+            const end = new Date(stage.endDate);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            return today >= start && today <= end;
+        });
+    }, [config]);
     const { isConnected } = useGoogleAuth();
     const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
     const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
@@ -354,22 +365,41 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const calculatePrice = (data: Record<string, any> = formData) => {
         let basePrice = 0;
 
-        if (subEventConfig?.price !== undefined) {
-            basePrice = subEventConfig.price;
-        } else if (config?.fixedPrice !== undefined) {
-            basePrice = config.fixedPrice;
-        } else {
-            // Priority: radio field selection
-            fields.forEach((field: any) => {
-                if (field.type === "radio") {
-                    const selectedOption = field.options.find((opt: any) => opt.value === data[field.id]);
-                    if (selectedOption?.price !== undefined) basePrice = selectedOption.price;
-                }
+        // 1. Detect dynamic pricing stages (automatic date-based detection)
+        if (config?.pricingStages && config.pricingStages.length > 0) {
+            const today = new Date();
+            const activeStage = config.pricingStages.find((stage: any) => {
+                const start = new Date(stage.startDate);
+                const end = new Date(stage.endDate);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                return today >= start && today <= end;
             });
 
-            // Fallback: unit root price
-            if (basePrice === 0 && config?.price !== undefined) {
-                basePrice = config.price;
+            if (activeStage) {
+                basePrice = activeStage.price;
+            }
+        }
+
+        // 2. Fallback to existing logic if no dynamic stage is active
+        if (basePrice === 0) {
+            if (subEventConfig?.price !== undefined) {
+                basePrice = subEventConfig.price;
+            } else if (config?.fixedPrice !== undefined) {
+                basePrice = config.fixedPrice;
+            } else {
+                // Priority: radio field selection
+                fields.forEach((field: any) => {
+                    if (field.type === "radio") {
+                        const selectedOption = field.options.find((opt: any) => opt.value === data[field.id]);
+                        if (selectedOption?.price !== undefined) basePrice = selectedOption.price;
+                    }
+                });
+
+                // Fallback: unit root price
+                if (basePrice === 0 && config?.price !== undefined) {
+                    basePrice = config.price;
+                }
             }
         }
 
@@ -449,13 +479,29 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             return;
         }
 
+        // Detect active stage name for display in cart
+        let detectedStageName = selectedSubEvent || config.name;
+        if (config?.pricingStages) {
+            const today = new Date();
+            const activeStage = config.pricingStages.find((stage: any) => {
+                const start = new Date(stage.startDate);
+                const end = new Date(stage.endDate);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                return today >= start && today <= end;
+            });
+            if (activeStage) {
+                detectedStageName = activeStage.name;
+            }
+        }
+
         // 3. Submit with finalData
         const item = {
             id: Math.random().toString(36).substr(2, 9),
             unitId: unit,
             subEventId: selectedSubEvent,
             unitName: config.name,
-            subEventName: selectedSubEvent,
+            subEventName: detectedStageName,
             formData: finalData,
             price: calculatePrice(finalData)
         };
@@ -542,7 +588,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
                     <div className="mt-8">
                         <h1 className="text-display-xs font-bold text-primary">Form Pendaftaran</h1>
-                        <p className="text-tertiary">Unit {config.name} — Silakan isi data pendukung di bawah ini.</p>
+                        <p className="text-tertiary">Unit {config.name} {activePricingStage ? ` — ${activePricingStage.name}` : ""} — Silakan isi data pendukung di bawah ini.</p>
                     </div>
 
                     {subEvents.length > 1 && !config.formFields && (
@@ -737,7 +783,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     <div className="max-w-2xl mx-auto">
                         <div className="px-4 py-2 md:px-4 md:py-4 flex justify-between items-center border-t md:border border-secondary md:rounded-lg bg-primary dark:bg-gray-900 shadow-lg md:shadow-none">
                             <div>
-                                <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran</p>
+                                <p className="text-sm font-medium text-tertiary uppercase tracking-widest font-mono">Biaya Pendaftaran {activePricingStage ? `(${activePricingStage.name})` : ""}</p>
                                 <p className="text-xl md:text-3xl font-bold text-primary mt-1">Rp {calculatePrice().toLocaleString('id-ID')}</p>
                             </div>
                             <Button

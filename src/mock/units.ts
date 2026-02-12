@@ -213,6 +213,11 @@ export const UNITS_MOCK = [
         cpName: "Kak Talitha (Humas Lisma)",
         cpWhatsapp: "6281324046884",
         cpDescription: "Hubungi untuk informasi tiket dan acara puncak.",
+        pricingStages: [
+            { name: "Early", price: 35000, startDate: "2026-03-08", endDate: "2026-04-08" },
+            { name: "Presale 1", price: 45000, startDate: "2026-04-09", endDate: "2026-04-23" },
+            { name: "Presale 2", price: 50000, startDate: "2026-04-24", endDate: "2026-05-08" }
+        ],
         formFields: [
             { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
             { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
