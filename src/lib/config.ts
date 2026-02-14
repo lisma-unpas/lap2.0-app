@@ -15,7 +15,7 @@ export const config = {
     email: {
         scriptUrl: process.env.GOOGLE_SCRIPT_URL || "",
         scriptToken: process.env.GOOGLE_SCRIPT_TOKEN || "",
-        adminEmail: process.env.ADMIN_EMAIL || process.env.NOTIFICATION_ADMIN_EMAIL || "muhhjam@gmail.com",
+        adminEmail: process.env.NOTIFICATION_ADMIN_EMAIL || "",
     },
     googleDrive: {
         clientId: process.env.GOOGLE_CLIENT_ID || "",
