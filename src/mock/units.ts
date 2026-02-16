@@ -9,8 +9,8 @@ export const UNITS_MOCK = [
         colorClass: "purple",
         iconId: "ticket",
         highlightSubtitle: "📍 Mayang Sunda",
-        cpName: "Kak Athari (TESAS)",
-        cpWhatsapp: "6285788397608",
+        cpName: "Kak Fajar (TESAS)",
+        cpWhatsapp: "6281222596036",
         cpDescription: "Hubungi pendamping unit TESAS untuk informasi teknis.",
         formFields: [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
