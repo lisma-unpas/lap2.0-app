@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Camera01, MusicNote02, PlayCircle, Ticket01, Calendar, CheckCircle, Star01 } from "@untitledui/icons";
+import { ArrowLeft, Camera01, MusicNote02, PlayCircle, Ticket01, Star01, LinkExternal02, MarkerPin02 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
@@ -20,6 +20,7 @@ interface UnitContentProps {
     highlightIconId: string;
     highlightTitle: string;
     highlightSubtitle: string;
+    locationUrl?: string;
     imageUrl: string;
     cpName: string;
     cpWhatsapp: string;
@@ -40,6 +41,7 @@ export default function UnitContent({
     highlightIconId,
     highlightTitle,
     highlightSubtitle,
+    locationUrl,
     imageUrl,
     cpName,
     cpWhatsapp,
@@ -143,11 +145,25 @@ export default function UnitContent({
                                             <p className="font-bold text-primary">
                                                 {eventDate ? formatDate(eventDate) : highlightTitle}
                                             </p>
-                                            <p className="text-sm text-tertiary">
-                                                {eventDate
-                                                    ? `${formatDateTime(eventDate).split(" ").slice(-2).join(" ")} • ${highlightSubtitle}`
-                                                    : highlightSubtitle}
-                                            </p>
+                                            <div className="flex items-center gap-1.5 text-sm text-tertiary">
+                                                {eventDate && (
+                                                    <span>{formatDateTime(eventDate).split(" ").slice(-2).join(" ")} • </span>
+                                                )}
+                                                {locationUrl ? (
+                                                    <a
+                                                        href={locationUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-1 hover:text-brand-600 transition-colors hover:underline"
+                                                    >
+                                                        <MarkerPin02 className="size-4 text-red-600" />
+                                                        {highlightSubtitle}
+                                                        <LinkExternal02 className="size-3.5" />
+                                                    </a>
+                                                ) : (
+                                                    <span>{highlightSubtitle}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

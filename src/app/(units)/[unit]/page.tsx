@@ -53,6 +53,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
             highlightIconId={config.iconId}
             highlightTitle={config.highlightTitle}
             highlightSubtitle={config.highlightSubtitle}
+            locationUrl={config.locationUrl}
             cpName={config.cpName}
             cpWhatsapp={config.cpWhatsapp}
             cpDescription={config.cpDescription}
