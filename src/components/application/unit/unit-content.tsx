@@ -145,9 +145,12 @@ export default function UnitContent({
                                             <p className="font-bold text-primary">
                                                 {eventDate ? formatDate(eventDate) : highlightTitle}
                                             </p>
-                                            <div className="flex items-center gap-1.5 text-sm text-tertiary">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 text-sm text-tertiary">
                                                 {eventDate && (
-                                                    <span>{formatDateTime(eventDate).split(" ").slice(-2).join(" ")} • </span>
+                                                    <span>
+                                                        {formatDateTime(eventDate).split(" ").slice(-2).join(" ")}
+                                                        <span className="hidden sm:inline"> • </span>
+                                                    </span>
                                                 )}
                                                 {locationUrl ? (
                                                     <a
