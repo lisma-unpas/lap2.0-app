@@ -138,7 +138,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         fetchAvailability();
     }, [unit, selectedSubEvent, formData.category, formData.sesi, fields]);
 
-    const isOptionDisabled = (fieldId: string, optionValue: string) => {
+    const isOptionDisabled = (fieldId: string, optionValue: string): boolean => {
         // If it's a sub-event selection (top level buttons)
         if (fieldId === "subEvent") {
             const avail = availabilityMap[optionValue];
@@ -436,6 +436,11 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         fields.forEach((field: any) => {
             const value = finalData[field.id];
 
+            // Skip validation for fields hidden by category logic
+            const isNotUmum = finalData.category && finalData.category !== "umum";
+            if (field.id === "ticketType" && isNotUmum) return;
+            if (field.id === "note_1" && unit.toLowerCase() === "kds" && isNotUmum) return;
+
             // Required check
             if (field.required) {
                 if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
@@ -617,6 +622,15 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
                     <div className="mt-10 space-y-8">
                         {fields.map((field: any) => {
+                            // Conditional visibility logic
+                            const isNotUmum = formData.category && formData.category !== "umum";
+                            if (field.id === "ticketType" && isNotUmum) {
+                                return null;
+                            }
+                            if (field.id === "note_1" && unit.toLowerCase() === "kds" && isNotUmum) {
+                                return null;
+                            }
+
                             if (field.type === "info") {
                                 return (
                                     <div key={field.id} className="p-4 rounded-lg bg-utility-blue-50 border border-utility-blue-100 flex gap-3">

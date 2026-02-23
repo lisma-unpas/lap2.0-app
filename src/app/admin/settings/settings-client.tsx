@@ -16,6 +16,7 @@ import { useToast } from "@/context/toast-context";
 import { cx } from "@/utils/cx";
 import { DateField } from "@/components/base/input/date-field";
 import { parseDateTime } from "@internationalized/date";
+import { parseSafeDate } from "@/utils/date";
 
 function toLocalISOString(date: Date) {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -25,9 +26,13 @@ function toLocalISOString(date: Date) {
 const safeParseDateTime = (val: string) => {
     try {
         if (!val) return null;
-        // If it's just a date (YYYY-MM-DD), append time
-        if (val.length === 10) val += "T00:00";
-        return parseDateTime(val);
+        const d = parseSafeDate(val);
+        if (!d) return null;
+
+        // Convert to YYYY-MM-DDTHH:mm format for parseDateTime
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        return parseDateTime(formatted);
     } catch (e) {
         return null;
     }
@@ -96,8 +101,8 @@ export default function SettingsClient() {
         const toUTC = (val: string | undefined | null) => {
             if (!val) return null;
             try {
-                const date = new Date(val);
-                if (isNaN(date.getTime())) return val;
+                const date = parseSafeDate(val);
+                if (!date) return val;
                 return date.toISOString();
             } catch (e) {
                 return val;

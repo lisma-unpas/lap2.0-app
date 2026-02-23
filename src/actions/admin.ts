@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { generateTicketCode } from "@/actions/registration";
 import { sendEmail } from "@/lib/email";
 import { config } from "@/lib/config";
+import { parseSafeDate } from "@/utils/date";
 
 export async function getRegistrations(params: { search?: string; status?: string; unitId?: string; page?: number; limit?: number } = {}) {
     const { search = "", status = "ALL", unitId = "ALL", page = 1, limit = 10 } = params;
@@ -330,17 +331,9 @@ export async function updateUnitSettings(
     dates?: { startDate: string | null, endDate: string | null, eventDate?: string | null }
 ) {
     try {
-        const parseDate = (d: string | null | undefined) => {
-            if (!d) return null;
-            // If it already has an offset or is UTC, parse as is
-            if (d.includes('Z') || d.includes('+')) return new Date(d);
-            // Default to Asia/Jakarta (GMT+7) for floating strings from local UI
-            return new Date(`${d}+07:00`);
-        };
-
-        const startDate = parseDate(dates?.startDate);
-        const endDate = parseDate(dates?.endDate);
-        const eventDate = parseDate(dates?.eventDate);
+        const startDate = parseSafeDate(dates?.startDate);
+        const endDate = parseSafeDate(dates?.endDate);
+        const eventDate = parseSafeDate(dates?.eventDate);
 
         await prisma.$transaction([
             // Update all existing records for this unit to ensure dates are synced

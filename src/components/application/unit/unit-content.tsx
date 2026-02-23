@@ -8,7 +8,7 @@ import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { UnitImage } from "./unit-image";
 import { Badge } from "@/components/base/badges/badges";
 import { cx } from "@/utils/cx";
-import { formatDate, formatDateTime } from "@/utils/date";
+import { formatDate, formatDateTime, parseSafeDate } from "@/utils/date";
 
 interface UnitContentProps {
     unitId: string;
@@ -70,8 +70,8 @@ export default function UnitContent({
     const HighlightIcon = ICON_MAP[highlightIconId] || Ticket01;
 
     const today = new Date();
-    const startDateObj = startDate ? new Date(startDate) : null;
-    const endDateObj = endDate ? new Date(endDate) : null;
+    const startDateObj = parseSafeDate(startDate);
+    const endDateObj = parseSafeDate(endDate);
 
     const isComingSoon = !!(startDateObj && today < startDateObj);
     const isClosed = !!(endDateObj && today > endDateObj);

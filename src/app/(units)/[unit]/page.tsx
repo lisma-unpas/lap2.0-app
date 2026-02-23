@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import UnitContent from "@/components/application/unit/unit-content";
 import { UNIT_CONFIG } from "@/constants/units";
 import { getUnitAvailability } from "@/actions/admin";
+import { parseSafeDate } from "@/utils/date";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
     params: Promise<{ unit: string }>;
@@ -36,9 +39,9 @@ export default async function UnitDetailPage({ params }: PageProps) {
     }
 
     const availabilityRes = await getUnitAvailability(unitKey);
-    const startDate = availabilityRes.startDate ? new Date(availabilityRes.startDate) : null;
-    const endDate = availabilityRes.endDate ? new Date(availabilityRes.endDate) : null;
-    const eventDate = availabilityRes.eventDate ? new Date(availabilityRes.eventDate) : null;
+    const startDate = parseSafeDate(availabilityRes.startDate);
+    const endDate = parseSafeDate(availabilityRes.endDate);
+    const eventDate = parseSafeDate(availabilityRes.eventDate);
 
     return (
         <UnitContent
