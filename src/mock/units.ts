@@ -10,8 +10,8 @@ export const UNITS_MOCK = [
         iconId: "ticket",
         highlightSubtitle: "RRI Bandung",
         locationUrl: "https://maps.app.goo.gl/7k49M7p1dHfTSiR67",
-        cpName: "Kak Fajar (TESAS)",
-        cpWhatsapp: "6281222596036",
+        cpName: "Kak Syavira (TESAS)",
+        cpWhatsapp: "6287733196269",
         cpDescription: "Hubungi pendamping unit TESAS untuk informasi teknis.",
         formFields: [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
