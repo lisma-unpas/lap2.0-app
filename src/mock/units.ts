@@ -71,7 +71,7 @@ export const UNITS_MOCK = [
         subTitle: '"Soundclash Arena" Band Competition',
         description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n🔥 BENEFIT EKSKLUSIF: Juara 1, 2, dan 3 akan mendapatkan kesempatan emas untuk tampil di Main Event dan berbagi panggung langsung dengan Guest Star kami!`,
         subEvents: ['Band Competition'],
-        price: 150000,
+        price: 50000,
         badgeText: "🎼 Paduan Suara dan Musik",
         colorClass: "indigo",
         iconId: "music",
@@ -87,12 +87,12 @@ export const UNITS_MOCK = [
             { id: "instagram", label: "Instagram", type: "text", required: true },
             { id: "domisili", label: "Domisili", type: "text", required: true },
             { id: "bandPhoto", label: "Foto Band", type: "file", required: true },
-            { id: "priceInfo", label: "Biaya Registrasi", type: "info", text: "Biaya: Rp300.000 / Tim" },
-            { id: "note_psm_1", label: "Info PENTING", type: "info", text: "Peserta wajib membawakan satu lagu bebas berbahasa inggris atau indonesia dan membawakan 1 dari 20 lagu yang telah ditentukan panitia bergenre non pop punk yang akan di aransemen menjadi pop punk (penentuan lagu akan diumumkan saat technical meeting)" },
+            { id: "videoBand", label: "Video Penampilan Band", type: "file", required: true, accept: "video/*", maxSize: 100 * 1024 * 1024 },
+            { id: "selectionInfo", label: "Keterangan Seleksi", type: "info", text: "Cukup unggah video band sedang membawakan satu lagu bebas. Dari video tersebut akan diseleksi top 20 band terbaik yang akan lanjut ke tahap selanjutnya (biaya tambahan Rp150.000) dan akan dihubungi melalui WhatsApp Ketua Tim." },
             { id: "note_psm_2", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" },
             { id: "catatan", label: "🔌 CATATAN PESERTA", type: "info", text: "Bagi peserta yang memiliki gearband atau kabel jack sendiri, dipersilakan untuk membawanya masing-masing demi kenyamanan performa." }
         ],
-        fixedPrice: 300000
+        fixedPrice: 50000
     },
     {
         id: 'takre',

@@ -270,6 +270,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     const getFileType = (file: File) => {
         const ext = file.name.split('.').pop()?.toLowerCase();
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return 'image';
+        if (['mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', 'webm', '3gp'].includes(ext || '')) return 'video';
         if (ext === 'pdf') return 'pdf';
         return 'empty';
     };
@@ -281,13 +282,10 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             return;
         }
 
-        if (!file.type.startsWith("image/")) {
-            toastError("Format File Tidak Valid", "Hanya diperbolehkan mengunggah file gambar (JPG, PNG, GIF).");
-            return;
-        }
-
-        const compressedFile = await compressImage(file);
-        const newAttachment = { file: compressedFile, progress: 10, status: 'uploading' as const };
+        // Only compress if it's an image
+        const isImage = file.type.startsWith("image/");
+        const fileToUpload = isImage ? await compressImage(file) : file;
+        const newAttachment = { file: fileToUpload, progress: 10, status: 'uploading' as const };
 
         setFileAttachments(prev => ({
             ...prev,
@@ -298,12 +296,12 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
         try {
             const fd = new FormData();
-            fd.append("file", compressedFile);
+            fd.append("file", fileToUpload);
 
             const progressInterval = setInterval(() => {
                 setFileAttachments(prev => {
                     const list = prev[id] || [];
-                    const index = list.findIndex(att => att.file === compressedFile);
+                    const index = list.findIndex(att => att.file === fileToUpload);
                     if (index === -1 || list[index].status !== 'uploading') {
                         clearInterval(progressInterval);
                         return prev;
@@ -321,7 +319,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             if (res.success) {
                 setFileAttachments(prev => {
                     const list = prev[id] || [];
-                    const index = list.findIndex(att => att.file === compressedFile);
+                    const index = list.findIndex(att => att.file === fileToUpload);
                     if (index === -1) return prev;
                     const newList = [...list];
                     newList[index] = { ...newList[index], progress: 100, status: 'success', url: res.url || undefined };
@@ -721,10 +719,13 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         <Label isRequired={field.required}>{field.label}</Label>
                                         <FileUpload.DropZone
                                             isConnected={isConnected}
-                                            accept="image/*"
+                                            accept={field.accept || "image/*"}
                                             allowsMultiple={field.multiple}
-                                            maxSize={5 * 1024 * 1024}
-                                            hint={`File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`}
+                                            maxSize={field.maxSize || 5 * 1024 * 1024}
+                                            hint={field.hint || (field.accept?.startsWith("video/") 
+                                                ? `File Video (Maks. ${field.maxSize ? Math.round(field.maxSize / 1024 / 1024) : 100}MB)`
+                                                : `File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`
+                                            )}
                                             onDropFiles={(files) => Array.from(files).forEach(f => handleFileUpload(field.id, f, field.multiple))}
                                             isDisabled={isUploading}
                                             isInvalid={!!formErrors[field.id]}
