@@ -88,7 +88,7 @@ export const UNITS_MOCK = [
             { id: "domisili", label: "Domisili", type: "text", required: true },
             { id: "bandPhoto", label: "Foto Band", type: "file", required: true },
             { id: "videoBand", label: "Video Penampilan Band", type: "file", required: true, accept: "video/*", maxSize: 100 * 1024 * 1024 },
-            { id: "selectionInfo", label: "Keterangan Seleksi", type: "info", text: "Cukup unggah video band sedang membawakan satu lagu bebas. Dari video tersebut akan diseleksi top 20 band terbaik yang akan lanjut ke tahap selanjutnya (biaya tambahan Rp150.000) dan akan dihubungi melalui WhatsApp Ketua Tim." },
+            { id: "selectionInfo", label: "Keterangan Seleksi", type: "info", text: "Peserta yang terpilih ke audisi tahap 2 akan dihubungi melalui WhatsApp Ketua Tim dan wajib berkomitmen untuk berkompetisi dan membayar biaya registrasi sebesar Rp150.000" },
             { id: "note_psm_2", label: "Info PENTING", type: "info", text: "Invoice akan dikirimkan melalui WhatsApp oleh CP" },
             { id: "catatan", label: "🔌 CATATAN PESERTA", type: "info", text: "Bagi peserta yang memiliki gearband atau kabel jack sendiri, dipersilakan untuk membawanya masing-masing demi kenyamanan performa." }
         ],
