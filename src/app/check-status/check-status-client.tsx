@@ -266,7 +266,7 @@ export default function CheckStatusClient() {
                                             setSearch(reg.code);
                                             handleSearch(undefined, reg.code);
                                         }}
-                                        className="p-5 rounded-2xl border border-secondary bg-primary hover:bg-white hover:border-brand-solid hover:shadow-lg transition-all flex items-center justify-between text-left group"
+                                        className="p-5 rounded-2xl border border-secondary bg-primary hover:bg-white dark:hover:bg-secondary hover:border-brand-solid hover:shadow-lg transition-all flex items-center justify-between text-left group"
                                     >
                                         <div className="space-y-1">
                                             <p className="text-[10px] font-bold text-quaternary uppercase tracking-widest">{reg.unit || "Unit Lisma"}</p>
