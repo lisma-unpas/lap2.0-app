@@ -20,6 +20,7 @@ import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
 import { useToast } from "@/context/toast-context";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
+import { Tabs } from "@/components/application/tabs/tabs";
 import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { getUnitAvailability, checkUnitAvailability } from "@/actions/admin";
@@ -60,6 +61,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
     }, [config]);
     const { isConnected } = useGoogleAuth();
     const [fileAttachments, setFileAttachments] = useState<Record<string, Array<{ file: File, progress: number, status: 'idle' | 'uploading' | 'success' | 'error', error?: string, url?: string }>>>({});
+    const [fileUploadMethods, setFileUploadMethods] = useState<Record<string, 'upload' | 'url'>>({});
     const [isReAuthModalOpen, setIsReAuthModalOpen] = useState(false);
 
     const hasCheckedDraft = useRef(false);
@@ -717,46 +719,90 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
                             if (field.type === "file") {
                                 const attachments = fileAttachments[field.id] || [];
+                                const method = fileUploadMethods[field.id] || 'upload';
+
                                 return (
-                                    <div key={field.id} id={field.id} className="space-y-1.5">
+                                    <div key={field.id} id={field.id} className="space-y-3">
                                         <Label isRequired={field.required}>{field.label}</Label>
-                                        <FileUpload.DropZone
-                                            isConnected={isConnected}
-                                            accept={field.accept || "image/*"}
-                                            allowsMultiple={field.multiple}
-                                            maxSize={field.maxSize || 5 * 1024 * 1024}
-                                            hint={field.hint || (field.accept?.startsWith("video/") 
-                                                ? `File Video (Maks. ${field.maxSize ? Math.round(field.maxSize / 1024 / 1024) : 100}MB)`
-                                                : `File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`
-                                            )}
-                                            onDropFiles={(files) => Array.from(files).forEach(f => handleFileUpload(field.id, f, field.multiple))}
-                                            isDisabled={isUploading}
-                                            isInvalid={!!formErrors[field.id]}
-                                        />
+                                        
+                                        <Tabs 
+                                            selectedKey={method} 
+                                            onSelectionChange={(key) => {
+                                                const newMethod = key as 'upload' | 'url';
+                                                setFileUploadMethods(prev => ({ ...prev, [field.id]: newMethod }));
+                                                
+                                                // Clear other method's data when switching
+                                                if (newMethod === 'url') {
+                                                    setFileAttachments(prev => ({ ...prev, [field.id]: [] }));
+                                                    handleInputChange(field.id, "");
+                                                } else {
+                                                    handleInputChange(field.id, "");
+                                                }
+                                            }}
+                                        >
+                                            <Tabs.List type="button-minimal" className="mb-4">
+                                                <Tabs.Item id="upload">Upload File</Tabs.Item>
+                                                <Tabs.Item id="url">Input URL Google Drive</Tabs.Item>
+                                            </Tabs.List>
+
+                                            <Tabs.Panel id="upload" className="space-y-4">
+                                                <FileUpload.DropZone
+                                                    isConnected={isConnected}
+                                                    accept={field.accept || "image/*"}
+                                                    allowsMultiple={field.multiple}
+                                                    maxSize={field.maxSize || 5 * 1024 * 1024}
+                                                    hint={field.hint || (field.accept?.startsWith("video/") 
+                                                        ? `File Video (Maks. ${field.maxSize ? Math.round(field.maxSize / 1024 / 1024) : 100}MB)`
+                                                        : `File Gambar (PNG, JPG) (Maks. 5MB${field.multiple ? ', bisa beberapa file' : ''})`
+                                                    )}
+                                                    onDropFiles={(files) => Array.from(files).forEach(f => handleFileUpload(field.id, f, field.multiple))}
+                                                    isDisabled={isUploading}
+                                                    isInvalid={!!formErrors[field.id]}
+                                                />
+                                                {attachments && attachments.length > 0 && (
+                                                    <FileUpload.List>
+                                                        {attachments.map((att, index) => (
+                                                            <FileUpload.ListItemProgressBar
+                                                                key={`${att.file.name}-${index}`}
+                                                                name={att.file.name}
+                                                                size={att.file.size}
+                                                                progress={att.progress}
+                                                                failed={att.status === 'error'}
+                                                                error={att.error}
+                                                                type={getFileType(att.file) as any}
+                                                                onDelete={() => {
+                                                                    const newList = attachments.filter((_, i) => i !== index);
+                                                                    setFileAttachments(prev => ({ ...prev, [field.id]: newList }));
+                                                                    const urls = newList.filter(a => a.status === 'success' && a.url).map(a => a.url);
+                                                                    handleInputChange(field.id, field.multiple ? urls : urls[0] || undefined);
+                                                                }}
+                                                                onRetry={() => handleFileUpload(field.id, att.file, field.multiple)}
+                                                            />
+                                                        ))}
+                                                    </FileUpload.List>
+                                                )}
+                                            </Tabs.Panel>
+
+                                            <Tabs.Panel id="url">
+                                                <div className="space-y-2">
+                                                    <Input
+                                                        placeholder="https://drive.google.com/file/d/..."
+                                                        value={formData[field.id] || ""}
+                                                        onChange={(val) => handleInputChange(field.id, val)}
+                                                        isInvalid={!!formErrors[field.id]}
+                                                    />
+                                                    <div className="flex gap-2 p-3 rounded-lg bg-utility-gray-50 border border-secondary">
+                                                        <InfoCircle className="size-4 text-tertiary mt-0.5 shrink-0" />
+                                                        <p className="text-xs text-tertiary leading-normal">
+                                                            <strong>Penting!</strong> Pastikan file Google Drive Anda sudah diatur ke <strong>"Siapa saja yang memiliki link"</strong> (Public) agar panitia dapat mengakses file tersebut.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </Tabs.Panel>
+                                        </Tabs>
+
                                         {formErrors[field.id] && (
                                             <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
-                                        )}
-                                        {attachments && attachments.length > 0 && (
-                                            <FileUpload.List className="mt-4">
-                                                {attachments.map((att, index) => (
-                                                    <FileUpload.ListItemProgressBar
-                                                        key={`${att.file.name}-${index}`}
-                                                        name={att.file.name}
-                                                        size={att.file.size}
-                                                        progress={att.progress}
-                                                        failed={att.status === 'error'}
-                                                        error={att.error}
-                                                        type={getFileType(att.file) as any}
-                                                        onDelete={() => {
-                                                            const newList = attachments.filter((_, i) => i !== index);
-                                                            setFileAttachments(prev => ({ ...prev, [field.id]: newList }));
-                                                            const urls = newList.filter(a => a.status === 'success' && a.url).map(a => a.url);
-                                                            handleInputChange(field.id, field.multiple ? urls : urls[0] || undefined);
-                                                        }}
-                                                        onRetry={() => handleFileUpload(field.id, att.file, field.multiple)}
-                                                    />
-                                                ))}
-                                            </FileUpload.List>
                                         )}
                                     </div>
                                 );

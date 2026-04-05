@@ -97,7 +97,7 @@ interface TabListComponentProps<T extends object, K extends Orientation> extends
     /** The orientation of the tab list. */
     orientation?: K;
     /** The items of the tab list. */
-    items: T[];
+    items?: T[];
     /** Whether the tab list is full width. */
     fullWidth?: boolean;
 }
