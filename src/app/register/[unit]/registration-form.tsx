@@ -22,7 +22,8 @@ import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
 import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
-import { checkUnitAvailability, getUnitAvailability } from "@/actions/admin";
+import { getUnitAvailability, checkUnitAvailability } from "@/actions/admin";
+import { uploadToDriveClient } from "@/utils/google-drive-client-upload";
 
 interface RegistrationFormProps {
     unit: string;
@@ -294,27 +295,27 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
         setIsUploading(true);
 
-        try {
-            const fd = new FormData();
-            fd.append("file", fileToUpload);
+        const tokensRaw = localStorage.getItem("gdrive_tokens");
+        if (!tokensRaw) {
+            toastError("Akses Ditolak", "Silakan hubungkan Google Drive terlebih dahulu.");
+            window.location.href = "/auth/google/login";
+            setIsUploading(false);
+            return;
+        }
 
-            const progressInterval = setInterval(() => {
+        const tokens = JSON.parse(tokensRaw);
+
+        try {
+            const res: any = await uploadToDriveClient(fileToUpload, tokens.access_token, (progress) => {
                 setFileAttachments(prev => {
                     const list = prev[id] || [];
                     const index = list.findIndex(att => att.file === fileToUpload);
-                    if (index === -1 || list[index].status !== 'uploading') {
-                        clearInterval(progressInterval);
-                        return prev;
-                    }
+                    if (index === -1) return prev;
                     const newList = [...list];
-                    newList[index] = { ...newList[index], progress: Math.min(newList[index].progress + 15, 90) };
+                    newList[index] = { ...newList[index], progress: Math.max(10, progress) }; // Keep at least 10% initially
                     return { ...prev, [id]: newList };
                 });
-            }, 300);
-
-            const tokens = localStorage.getItem("gdrive_tokens");
-            const res = await uploadImage(fd, tokens);
-            clearInterval(progressInterval);
+            });
 
             if (res.success) {
                 setFileAttachments(prev => {
@@ -334,7 +335,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             } else {
                 setFileAttachments(prev => {
                     const list = prev[id] || [];
-                    const index = list.findIndex(att => att.file === file);
+                    const index = list.findIndex(att => att.file === fileToUpload);
                     if (index === -1) return prev;
                     const newList = [...list];
                     newList[index] = { ...newList[index], progress: 0, status: 'error', error: res.message || "Gagal upload" };
@@ -346,15 +347,17 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     setIsReAuthModalOpen(true);
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
+            console.error("Upload error:", err);
             setFileAttachments(prev => {
                 const list = prev[id] || [];
-                const index = list.findIndex(att => att.file === file);
+                const index = list.findIndex(att => att.file === fileToUpload);
                 if (index === -1) return prev;
                 const newList = [...list];
-                newList[index] = { ...newList[index], progress: 0, status: 'error', error: "Kesalahan sistem" };
+                newList[index] = { ...newList[index], progress: 0, status: 'error', error: err.message || "Kesalahan sistem" };
                 return { ...prev, [id]: newList };
             });
+            toastError("Upload Gagal", err.message || "Terjadi kesalahan saat mengunggah file.");
         } finally {
             setIsUploading(false);
         }
