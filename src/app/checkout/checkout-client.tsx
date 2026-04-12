@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, PanInfo } from "motion/react";
-import { ArrowLeft, CreditCard01, Trash01, CheckCircle, Upload01, ShoppingCart01, Copy07, ChevronUp, ChevronDown, QrCode01, Check } from "@untitledui/icons";
+import { ArrowLeft, CreditCard01, Trash01, CheckCircle, Upload01, ShoppingCart01, Copy07, ChevronUp, ChevronDown, QrCode01, Check, InfoCircle } from "@untitledui/icons";
 import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { Button } from "@/components/base/buttons/button";
 import { Label } from "@/components/base/input/label";
@@ -15,6 +15,9 @@ import { uploadImage } from "@/actions/upload";
 import { submitBulkRegistration } from "@/actions/registration";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { FileUpload } from "@/components/application/file-upload/file-upload-base";
+import FileUploadWithUrl from "@/components/application/file-upload-with-url";
+import { Tabs } from "@/components/application/tabs/tabs";
+import { uploadToDriveClient } from "@/utils/google-drive-client-upload";
 import { LogIn01, AlertTriangle } from "@untitledui/icons";
 import { getUnitAvailability } from "@/actions/admin";
 import { Badge } from "@/components/base/badges/badges";
@@ -219,22 +222,21 @@ export default function CheckoutClient() {
         setAttachment({ file: compressedFile, progress: 10, status: 'uploading' });
 
         try {
-            const formData = new FormData();
-            formData.append("file", compressedFile);
+            const tokensRaw = localStorage.getItem("gdrive_tokens");
+            if (!tokensRaw) {
+                toastError("Akses Ditolak", "Silakan hubungkan Google Drive terlebih dahulu.");
+                window.location.href = "/auth/google/login";
+                return;
+            }
 
-            const progressInterval = setInterval(() => {
+            const tokens = JSON.parse(tokensRaw);
+
+            const uploadRes: any = await uploadToDriveClient(compressedFile, tokens.access_token, (progress) => {
                 setAttachment(prev => {
-                    if (!prev || prev.status !== 'uploading') {
-                        clearInterval(progressInterval);
-                        return prev;
-                    }
-                    return { ...prev, progress: Math.min(prev.progress + 15, 90) };
+                    if (!prev || prev.status !== 'uploading') return prev;
+                    return { ...prev, progress: Math.max(10, progress) };
                 });
-            }, 300);
-
-            const tokens = localStorage.getItem("gdrive_tokens");
-            const uploadRes = await uploadImage(formData, tokens);
-            clearInterval(progressInterval);
+            });
 
             if (uploadRes.success) {
                 setAttachment({ file: compressedFile, progress: 100, status: 'success' });
@@ -248,8 +250,10 @@ export default function CheckoutClient() {
                     setIsReAuthModalOpen(true);
                 }
             }
-        } catch (error) {
-            setAttachment({ file: compressedFile, progress: 0, status: 'error', error: "Kesalahan sistem" });
+        } catch (error: any) {
+            console.error("[Checkout] Upload Error:", error);
+            setAttachment({ file: compressedFile, progress: 0, status: 'error', error: error.message || "Kesalahan sistem" });
+            toastError("Upload Gagal", error.message || "Terjadi kesalahan saat mengunggah bukti pembayaran.");
         }
     };
 
@@ -457,35 +461,23 @@ export default function CheckoutClient() {
 
             <div className="space-y-4 pt-4 border-t border-secondary">
                 {isNotFreePayment ? (
-                    <div className="space-y-1.5">
-                        <Label isRequired className="text-[11px] uppercase tracking-wider font-bold">Upload Bukti Transfer</Label>
-                        <FileUpload.DropZone
-                            isConnected={isConnected}
-                            accept="image/*"
-                            allowsMultiple={false}
-                            maxSize={5 * 1024 * 1024}
-                            hint="Maks. 5MB"
-                            onDropFiles={handleFileDrop}
-                            className="py-6"
-                        />
-
-                        {attachment && (
-                            <FileUpload.List className="mt-2">
-                                <FileUpload.ListItemProgressBar
-                                    name={attachment.file.name}
-                                    size={attachment.file.size}
-                                    progress={attachment.progress}
-                                    failed={attachment.status === 'error'}
-                                    error={attachment.error}
-                                    type="image"
-                                    onDelete={() => {
-                                        setAttachment(null);
-                                        setUploadedUrl(null);
-                                    }}
-                                />
-                            </FileUpload.List>
-                        )}
-                    </div>
+                    <FileUploadWithUrl
+                        label="Bukti Transfer"
+                        isRequired
+                        isConnected={isConnected}
+                        accept="image/*"
+                        maxSize={5 * 1024 * 1024}
+                        hint="Maks. 5MB"
+                        value={uploadedUrl || ""}
+                        onValueChange={(val) => setUploadedUrl(typeof val === 'string' ? val : null)}
+                        attachments={attachment ? [attachment] : []}
+                        onUpload={(file) => handleFileDrop([file] as any)}
+                        onRetry={(file) => handleFileDrop([file] as any)}
+                        onDelete={() => {
+                            setAttachment(null);
+                            setUploadedUrl(null);
+                        }}
+                    />
                 ) : null}
 
                 <Button
