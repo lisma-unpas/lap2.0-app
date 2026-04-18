@@ -165,6 +165,7 @@ export const UNITS_MOCK = [
             "Screening Short Film": {
                 price: 0,
                 fields: [
+                    { id: "info_syarat", type: "info", text: "Tim yang dinyatakan lolos kurasi, wajib mengundang 10 audiens untuk membeli tiket (minimal 5 saat pendaftaran dan wajib mengirimkan bukti)." },
                     { id: "producer", label: "Nama Producer", type: "text", required: true },
                     { id: "director", label: "Nama Director", type: "text", required: true },
                     { id: "script", label: "Nama Script", type: "text", required: true },
