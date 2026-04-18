@@ -15,7 +15,6 @@ export default function Footer() {
                         <ul className="flex flex-wrap justify-center gap-6 text-md font-semibold text-tertiary">
                             <li><a href="/" className="hover:text-primary transition-colors">Beranda</a></li>
                             <li><a href="/#about" className="hover:text-primary transition-colors">Tentang Kami</a></li>
-                            <li><a href="/main-event" className="hover:text-primary transition-colors">Main Event</a></li>
                             <li><a href="/info" className="hover:text-primary transition-colors">Info</a></li>
                             <li><a href="/check-status" className="hover:text-primary transition-colors">Cek Status</a></li>
                             <li><a href="/registrations" className="hover:text-primary transition-colors">Pendaftaran</a></li>

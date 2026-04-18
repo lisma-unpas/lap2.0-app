@@ -136,7 +136,6 @@ interface UnitGalleryProps {
     description?: string;
     showFooter?: boolean;
     className?: string;
-    showMainEvent?: boolean;
 }
 
 const getUnitStatusRank = (availability: any) => {
@@ -164,8 +163,7 @@ const getUnitStatusRank = (availability: any) => {
 export function UnitGallery({
     title = "Jelajahi Unit Kesenian LISMA",
     description = "Pilih unit yang sesuai dengan minat dan bakat Anda untuk bersinar di LISMA ART PARADE 2.0.",
-    className,
-    showMainEvent = false
+    className
 }: UnitGalleryProps) {
     const [availabilities, setAvailabilities] = useState<Record<string, any>>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -193,14 +191,7 @@ export function UnitGallery({
     }, []);
 
     const units = useMemo(() => {
-        // 1. Filter based on showMainEvent
-        const filtered = UNITS_MOCK.filter(u => showMainEvent || u.id !== "main-event");
-
-        // 2. Sort: main-event first, then by status rank
-        return [...filtered].sort((a, b) => {
-            if (a.id === "main-event") return -1;
-            if (b.id === "main-event") return 1;
-
+        return [...UNITS_MOCK].sort((a, b) => {
             const rankA = getUnitStatusRank(availabilities[a.id]);
             const rankB = getUnitStatusRank(availabilities[b.id]);
 
@@ -209,7 +200,7 @@ export function UnitGallery({
             // Secondary sort by name to keep it consistent
             return a.name.localeCompare(b.name);
         });
-    }, [availabilities, showMainEvent]);
+    }, [availabilities]);
 
     return (
         <Section className={cx("bg-primary", className)} id="units">

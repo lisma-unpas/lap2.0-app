@@ -11,7 +11,6 @@ export default function RegistrationsPage() {
             <UnitGallery
                 title="Pilih Kategori Event"
                 description="Silakan pilih unit kesenian yang ingin Anda ikuti untuk memulai proses pendaftaran-mu di LAP 2.0."
-                showMainEvent={true}
             />
     );
 }

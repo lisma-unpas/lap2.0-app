@@ -25,7 +25,6 @@ export default function Header() {
 
     const navItems = [
         { label: "Beranda", href: "/" },
-        { label: "Main Event", href: "/main-event" },
         {
             label: "Unit LISMA",
             href: "/unit-lisma",

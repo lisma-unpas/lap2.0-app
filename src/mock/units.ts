@@ -69,13 +69,13 @@ export const UNITS_MOCK = [
         id: 'psm',
         name: 'PSM',
         subTitle: '"Soundclash Arena" Band Competition',
-        description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n🔥 BENEFIT EKSKLUSIF:\nPara pemenang tidak hanya membawa pulang hadiah tunai! Juara 1, 2, dan 3 akan mendapatkan kesempatan emas untuk tampil di Main Event dan berbagi panggung (1 stage) langsung dengan Guest Star kami!\n\n📍 WAKTU & TEMPAT\n📅 Tanggal: 10 Mei 2026\n🕗 Waktu: 08.00 – 17.00 WIB\n🏢 Tempat: Parkiran FISS Unpas Setiabudhi\n\n🏆 HADIAH PEMENANG\n🥇 Juara 1: Rp1.000.000 + Slot Main Event\n🥈 Juara 2: Rp750.000 + Slot Main Event\n🥉 Juara 3: Rp500.000 + Slot Main Event\n\nSiapkan instrumenmu, setel distorsinya, dan sampai jumpa di panggung LISMA ART PARADE! 👋🏻🤘🏻`,
+        description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n📍 WAKTU & TEMPAT\n📅 Tanggal: 10 Mei 2026\n🕗 Waktu: 08.00 – 17.00 WIB\n🏢 Tempat: Stage FISS Kampus IV Unpas Setiabudhi\n\n🏆 HADIAH PEMENANG\n🥇 Juara 1: Rp1.000.000\n🥈 Juara 2: Rp750.000\n🥉 Juara 3: Rp500.000\n\nSiapkan instrumenmu, setel distorsinya, dan sampai jumpa di panggung LISMA ART PARADE! 👋🏻🤘🏻`,
         subEvents: ['Band Competition'],
         price: 50000,
         badgeText: "🎼 Paduan Suara dan Musik",
         colorClass: "indigo",
         iconId: "music",
-        highlightSubtitle: "Parkiran FISS Unpas Setiabudhi",
+        highlightSubtitle: "Stage FISS Kampus IV Unpas Setiabudhi",
         locationUrl: "https://maps.app.goo.gl/i8xg7gy4Pd297CfE6",
         cpName: "Kak Rayi (PSM)",
         cpWhatsapp: "628815724135",
@@ -83,7 +83,6 @@ export const UNITS_MOCK = [
         formFields: [
             { id: "bandName", label: "Nama Band", type: "text", required: true },
             { id: "members", label: "Nama Anggota", type: "textarea", placeholder: "Sebutkan nama anggota satu per satu...", required: true },
-            { id: "identityCard", label: "Kartu Identitas (Kartu Pelajar/dll)", type: "file", required: true },
             { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
             { id: "instagram", label: "Instagram", type: "text", required: true },
             { id: "email", label: "Email", type: "text", required: true },
@@ -151,9 +150,9 @@ export const UNITS_MOCK = [
         id: 'fg',
         name: 'FG',
         subTitle: '"Retak Tradisi" Photography & Short Movie Competition',
-        description: `✨LISMA ART PARADE 2.0 (LAP 2.0)✨\n\nWaktunya Cerita Kamu Jadi Pusat Perhatian! 📸🎬\n\nAyo tuangkan imajinasimu lewat lensa! Ikuti Kompetisi Foto & Film Pendek tingkat SMA/SMK dan Umum Dengan Genre Fiksi melalui tema:\n- Perubahan Budaya\n- Perubahan Sosial\n- Perubahan Personal`,
-        subEvents: ['Audiens short film', 'Lomba foto', 'Lomba short film'],
-        price: 30000,
+        description: `✨LISMA ART PARADE✨\n🚨 CALLING ALL CREATIVES! OPEN SUBMISSION! 🚨 \n\nSetiap sudut kota punya cerita, setiap detik punya perubahan. Kamu tipikal yang menangkap momen lewat lensa atau merangkai narasi lewat gerak kamera?\n\nLISMA ART PARADE 2.0 memanggilmu! Kami membuka pintu selebar-lebarnya untuk Open Submission karya:\n🎬 Short Film\n📸 Photography\nTema: Sosial | Budaya | Personal\n\nSiapa yang bisa ikut?\n✅ Siswa SMA/SMK Sederajat\n✅ Umum (Mahasiswa/Profesional/Hobi)\n\nKarya terbaikmu bakal dipajang di Pameran Foto dan ditonton bareng di Screening Film Pendek!\n\n📍 Lokasi: Bandung Creative Hub \n📅 Tanggal: 6 Mei 2026\n 🕗 Waktu: 08.00 WIB - Selesai`,
+        subEvents: ['Screening Short Film', 'Photo Exhibition', 'Audiens'],
+        price: 0,
         badgeText: "📸 Fotografi & Fun Games",
         colorClass: "indigo",
         iconId: "camera",
@@ -163,73 +162,45 @@ export const UNITS_MOCK = [
         cpWhatsapp: "6285320634272",
         cpDescription: "Tanya seputar link submit dan durasi video.",
         subEventConfigs: {
-            "Audiens short film": {
-                fields: [
-                    { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
-                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
-                    { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
-                    { id: "origin", label: "Asal", type: "text", required: true },
-                    { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1 (Hanya untuk SMA/SMK Free)", "Sesi 2 (Hanya untuk Umum Free)"], required: true }
-                ],
-                price: 0
-            },
-            "Lomba foto": {
-                price: 25000,
-                fields: [
-                    { id: "fullName", label: "Nama Fotografer", type: "text", required: true, persistent: true },
-                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
-                    { id: "origin", label: "Asal", type: "text", required: true },
-                    { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-                    { id: "instagram", label: "Instagram", type: "text", required: true },
-                    { id: "karya", label: "Pengumpulan foto", type: "file", multiple: true, required: true },
-                    { id: "photoName", label: "Nama Foto", type: "text", required: true },
-                    { id: "description", label: "Deskripsi Foto", type: "textarea", required: true }
-                ]
-            },
-            "Lomba short film": {
+            "Screening Short Film": {
+                price: 0,
                 fields: [
                     { id: "producer", label: "Nama Producer", type: "text", required: true },
                     { id: "director", label: "Nama Director", type: "text", required: true },
                     { id: "script", label: "Nama Script", type: "text", required: true },
-                    { id: "institution", label: "Nama PH/Komunitas/Sekolah", type: "text", required: true },
-                    { id: "origin", label: "Asal", type: "text", required: true },
-                    { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-                    { id: "email", label: "Alamat Email", type: "text", required: true, persistent: true },
+                    { id: "institution", label: "Nama Production House/Komunitas/Sekolah", type: "text", required: true },
+                    { id: "origin", label: "Asal Dari Mana", type: "text", required: true },
+                    { id: "phoneNumber", label: "No Telepon", type: "text", required: true, persistent: true },
                     { id: "instagram", label: "Instagram", type: "text", required: true },
-                    {
-                        id: "category", label: "Kategori Peserta", type: "radio",
-                        options: [
-                            { label: "SMA/SMK (Rp30.000)", value: "sma", price: 30000 },
-                            { label: "Umum (Rp50.000)", value: "umum", price: 50000 }
-                        ], required: true
-                    },
-                    { id: "karya", label: "Pengumpulan file", type: "file", multiple: true, required: true },
-                    { id: "synopsis", label: "Sinopsis", type: "textarea", required: true }
+                    { id: "email", label: "Gmail", type: "text", required: true, persistent: true },
+                    { id: "karya", label: "Pengumpulan Film", type: "file", multiple: true, required: true }
+                ]
+            },
+            "Photo Exhibition": {
+                price: 0,
+                fields: [
+                    { id: "fullName", label: "Nama Fotografer", type: "text", required: true, persistent: true },
+                    { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
+                    { id: "origin", label: "Asal Dari Mana", type: "text", required: true },
+                    { id: "phoneNumber", label: "No Telepon", type: "text", required: true, persistent: true },
+                    { id: "instagram", label: "Instagram", type: "text", required: true },
+                    { id: "email", label: "Gmail", type: "text", required: true, persistent: true },
+                    { id: "karya", label: "Pengumpulan Foto", type: "file", multiple: true, required: true },
+                    { id: "photoName", label: "Nama Foto", type: "text", required: true },
+                    { id: "description", label: "Deskripsi Foto", type: "textarea", required: true }
+                ]
+            },
+            "Audiens": {
+                price: 20000,
+                fields: [
+                    { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
+                    { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
+                    { id: "origin", label: "Asal", type: "text", required: true },
+                    { id: "sesi", label: "Sesi", type: "select", options: ["Sesi 1 (SMA)", "Sesi 2 (Umum)"], required: true },
+                    { id: "paymentProof", label: "Bukti Pembayaran", type: "file", required: true }
                 ]
             }
         }
-    },
-    {
-        id: "main-event",
-        name: "Main Event",
-        description: "Puncak acara Lisma Art Parade 2.0. Menghadirkan bintang tamu spesial dan penampilan terbaik dari seluruh unit kesenian.",
-        badgeText: "🌟 Puncak Acara",
-        highlightSubtitle: "UNPAS Setiabudi",
-        locationUrl: "https://maps.app.goo.gl/2B3B3B3B3B3B3B3B3",
-        price: 50000,
-        cpName: "Kak Talitha (Humas Lisma)",
-        cpWhatsapp: "6281324046884",
-        cpDescription: "Hubungi untuk informasi tiket dan acara puncak.",
-        pricingStages: [
-            { name: "Early", price: 35000, startDate: "2026-03-08", endDate: "2026-04-08" },
-            { name: "Presale 1", price: 45000, startDate: "2026-04-09", endDate: "2026-04-23" },
-            { name: "Presale 2", price: 50000, startDate: "2026-04-24", endDate: "2026-05-08" }
-        ],
-        formFields: [
-            { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
-            { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-            { id: "quantity", label: "Jumlah Tiket", type: "number", min: 1, defaultValue: 1, required: true }
-        ]
     }
 ];
 
