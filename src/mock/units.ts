@@ -149,7 +149,7 @@ export const UNITS_MOCK = [
     {
         id: 'fg',
         name: 'FG',
-        subTitle: '"Retak Tradisi" Photography & Short Movie Competition',
+        subTitle: 'Retak Tradisi Screening Short Film & Photo Exhibition',
         description: `✨LISMA ART PARADE✨\n🚨 CALLING ALL CREATIVES! OPEN SUBMISSION! 🚨 \n\nSetiap sudut kota punya cerita, setiap detik punya perubahan. Kamu tipikal yang menangkap momen lewat lensa atau merangkai narasi lewat gerak kamera?\n\nLISMA ART PARADE 2.0 memanggilmu! Kami membuka pintu selebar-lebarnya untuk Open Submission karya:\n🎬 Short Film\n📸 Photography\nTema: Sosial | Budaya | Personal\n\nSiapa yang bisa ikut?\n✅ Siswa SMA/SMK Sederajat\n✅ Umum (Mahasiswa/Profesional/Hobi)\n\nKarya terbaikmu bakal dipajang di Pameran Foto dan ditonton bareng di Screening Film Pendek!\n\n📍 Lokasi: Bandung Creative Hub \n📅 Tanggal: 6 Mei 2026\n 🕗 Waktu: 08.00 WIB - Selesai`,
         subEvents: ['Screening Short Film', 'Photo Exhibition', 'Audiens'],
         price: 0,
