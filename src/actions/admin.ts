@@ -408,9 +408,9 @@ export async function syncRegistrations() {
 
         let totalSynced = 0;
 
-        // Sync each unit to its specific sheet
+        // Sync each unit to its specific sheet (5 units)
         for (const [unit, data] of Object.entries(groupedByUnit)) {
-            const sheetName = `Reg-${unit}`;
+            const sheetName = unit; // Directly use unit name (e.g. TESAS, KDS, etc.)
             const response = await fetch(`${syncUrl}?sheet=${encodeURIComponent(sheetName)}`, {
                 method: "POST",
                 body: JSON.stringify({
@@ -427,7 +427,7 @@ export async function syncRegistrations() {
             totalSynced += data.length;
         }
 
-        // Also sync all to a master sheet
+        // Also sync all to a master sheet (1 sheet: ALL)
         const allFormatted = registrations.map(reg => ({
             registrationCode: reg.registrationCode,
             fullName: reg.fullName,
@@ -442,7 +442,7 @@ export async function syncRegistrations() {
             ...(typeof reg.detailedData === 'object' ? (reg.detailedData as any) : {})
         }));
 
-        await fetch(`${syncUrl}?sheet=All-Registrations`, {
+        await fetch(`${syncUrl}?sheet=ALL`, {
             method: "POST",
             body: JSON.stringify({ action: "sync", data: allFormatted })
         });
@@ -485,9 +485,9 @@ export async function syncTickets() {
 
         let totalSynced = 0;
 
-        // Sync each unit to its specific sheet
+        // Sync each unit to its specific sheet (5 units)
         for (const [unit, data] of Object.entries(groupedByUnit)) {
-            const sheetName = `Ticket-${unit}`;
+            const sheetName = unit; // Directly use unit name
             const response = await fetch(`${syncUrl}?sheet=${encodeURIComponent(sheetName)}`, {
                 method: "POST",
                 body: JSON.stringify({
@@ -504,7 +504,7 @@ export async function syncTickets() {
             totalSynced += data.length;
         }
 
-        // Also sync all to a master sheet
+        // Also sync all to a master sheet (1 sheet: ALL)
         const allFormatted = tickets.map(t => ({
             id: t.id,
             ticketCode: t.ticketCode,
@@ -516,7 +516,7 @@ export async function syncTickets() {
             event: t.registration.subEventName
         }));
 
-        await fetch(`${syncUrl}?sheet=All-Tickets`, {
+        await fetch(`${syncUrl}?sheet=ALL`, {
             method: "POST",
             body: JSON.stringify({ action: "sync", data: allFormatted })
         });

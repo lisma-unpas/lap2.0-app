@@ -8,6 +8,7 @@ import { Input } from "@/components/base/input/input";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { Select } from "@/components/base/select/select";
 import { RadioButton as RadioGroup } from "@/components/base/radio-groups/radio-groups";
+import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { Label } from "@/components/base/input/label";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
@@ -475,7 +476,9 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
 
             // Required check
             if (field.required) {
-                if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
+                const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+                const isUnchecked = field.type === "checkbox" && !value;
+                if (isEmpty || isUnchecked) {
                     errors[field.id] = `${field.label} wajib diisi`;
                 }
             }
@@ -494,6 +497,17 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                     new URL(value);
                 } catch (_) {
                     errors[field.id] = "Format URL tidak valid";
+                }
+            }
+
+            // Min/Max files check
+            if (field.type === "file") {
+                const files = Array.isArray(value) ? value : (value ? [value] : []);
+                if (field.minFiles && files.length < field.minFiles) {
+                    errors[field.id] = `Minimal harus mengunggah ${field.minFiles} foto`;
+                }
+                if (field.maxFiles && files.length > field.maxFiles) {
+                    errors[field.id] = `Maksimal hanya boleh mengunggah ${field.maxFiles} foto`;
                 }
             }
         });
@@ -781,6 +795,22 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                                 isInvalid={!!formErrors[field.id]}
                                                 errorMessage={formErrors[field.id]}
                                             />
+                                        );
+                                    }
+
+                                    if (field.type === "checkbox") {
+                                        return (
+                                            <div key={field.id} id={field.id} className="space-y-1.5">
+                                                <Checkbox
+                                                    isSelected={!!formData[field.id]}
+                                                    onChange={(val) => handleInputChange(field.id, val)}
+                                                    label={field.label}
+                                                    size="md"
+                                                />
+                                                {formErrors[field.id] && (
+                                                    <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
+                                                )}
+                                            </div>
                                         );
                                     }
 

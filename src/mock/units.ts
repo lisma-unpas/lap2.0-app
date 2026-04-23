@@ -68,31 +68,30 @@ export const UNITS_MOCK = [
     {
         id: 'psm',
         name: 'PSM',
-        subTitle: '"Soundclash Arena" Band Competition',
-        description: `✨ LISMA ART PARADE 2.0 (LAP 2.0): BAND COMPETITION ✨\n\nPunya karya yang cuma mentok di ruang latihan? Inilah saatnya menunjukkan taringmu di kompetisi band paling dinamis tahun ini! Unit PSM mengundang band berbakat untuk unjuk gigi. Bukan sekadar kompetisi, ini adalah pembuktian jati diri lewat nada dan harmoni!\n\n📍 WAKTU & TEMPAT\n📅 Tanggal: 10 Mei 2026\n🕗 Waktu: 08.00 – 17.00 WIB\n🏢 Tempat: Stage FISS Kampus IV Unpas Setiabudhi\n\n🏆 HADIAH PEMENANG\n🥇 Juara 1: Rp1.000.000\n🥈 Juara 2: Rp750.000\n🥉 Juara 3: Rp500.000\n\nSiapkan instrumenmu, setel distorsinya, dan sampai jumpa di panggung LISMA ART PARADE! 👋🏻🤘🏻`,
+        subTitle: 'LISMA ART PARADE 2.0: SOUNDCLASH ARENA',
+        description: `Panggung sudah siap—sekarang giliran band kamu.\n\nKalau musikmu selama ini cuma terdengar di ruang latihan, saatnya naik ke panggung sesungguhnya. Soundclash Arena adalah tempat band-band berbakat unjuk performa, menunjukkan karakter, dan membakar atmosfer dengan energi terbaik mereka!\n\n🔥 KENAPA HARUS IKUT?\nKarena ini bukan sekadar tampil—ini tentang eksistensi, koneksi, dan pengalaman panggung yang nyata.\n\n⚡ HIGHLIGHT ACARA\nBand terpilih akan tampil langsung di Soundclash Arena, di hadapan penonton dan komunitas musik yang siap merasakan gebrakanmu.\n\n🏆 KATEGORI JUARA\n🥇 Juara 1 — Best Band (Band Terbaik)\n🥈 Juara 2 — Best Arrangement (Aransemen Terbaik)\n🥉 Juara 3 — Best Act Performance (Penampilan Terbaik)\n\n📍 WAKTU & TEMPAT\n📅 10 Mei 2026\n🕗 08.00 – 17.00 WIB\n🏢 Stage FISS Kampus IV UNPAS Setiabudhi\n\n🎶 Saatnya naik panggung, tunjukkan warna musikmu, dan buat arena bergetar! 🤘🏻🔥`,
         subEvents: ['Band Competition'],
-        price: 50000,
+        price: 0,
         badgeText: "🎼 Paduan Suara dan Musik",
         colorClass: "indigo",
         iconId: "music",
-        highlightSubtitle: "Stage FISS Kampus IV Unpas Setiabudhi",
+        highlightSubtitle: "Stage FISS Kampus IV UNPAS Setiabudhi",
         locationUrl: "https://maps.app.goo.gl/i8xg7gy4Pd297CfE6",
         cpName: "Kak Rayi (PSM)",
         cpWhatsapp: "628815724135",
         cpDescription: "Pertanyaan seputar alat musik dan teknis panggung.",
         formFields: [
             { id: "bandName", label: "Nama Band", type: "text", required: true },
-            { id: "members", label: "Nama Anggota", type: "textarea", placeholder: "Sebutkan nama anggota satu per satu...", required: true },
-            { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-            { id: "instagram", label: "Instagram", type: "text", required: true },
+            { id: "personil", label: "Personil", type: "textarea", placeholder: "Sebutkan nama personil satu per satu...", required: true },
             { id: "email", label: "Email", type: "text", required: true },
-            { id: "domisili", label: "Domisili", type: "text", required: true },
+            { id: "phoneNumber", label: "Nomor WhatsApp", type: "text", required: true, persistent: true },
+            { id: "gmail", label: "Gmail", type: "text", required: true, persistent: true },
+            { id: "instagram", label: "Instagram", type: "text", required: true },
             { id: "bandPhoto", label: "Foto Band", type: "file", required: true },
-            { id: "videoBand", label: "Video Penampilan Band", type: "file", required: true, accept: "video/*", maxSize: 100 * 1024 * 1024 },
-            { id: "selectionInfo", label: "Keterangan Seleksi", type: "info", text: "Peserta yang terpilih ke audisi tahap 2 akan dihubungi melalui WhatsApp Ketua Tim dan wajib berkomitmen untuk berkompetisi dan membayar biaya registrasi sebesar Rp150.000" },
-            { id: "catatan", label: "🔌 CATATAN PESERTA", type: "info", text: "Bagi peserta yang memiliki gearband atau kabel jack sendiri, dipersilakan untuk membawanya masing-masing demi kenyamanan performa." }
+            { id: "bandLogo", label: "Logo Band", type: "file", required: true },
+            { id: "catatan", label: "CATATAN PENTING", type: "info", text: "Untuk kenyamanan performa, peserta disarankan membawa gear pribadi seperti kabel jack atau perlengkapan tambahan lainnya." }
         ],
-        fixedPrice: 50000
+        fixedPrice: 0
     },
     {
         id: 'takre',
@@ -165,7 +164,6 @@ export const UNITS_MOCK = [
             "Screening Short Film": {
                 price: 0,
                 fields: [
-                    { id: "info_syarat", type: "info", text: "Tim yang dinyatakan lolos kurasi, wajib mengundang 10 audiens untuk membeli tiket (minimal 5 saat pendaftaran dan wajib mengirimkan bukti)." },
                     { id: "producer", label: "Nama Producer", type: "text", required: true },
                     { id: "director", label: "Nama Director", type: "text", required: true },
                     { id: "script", label: "Nama Script", type: "text", required: true },
@@ -174,7 +172,9 @@ export const UNITS_MOCK = [
                     { id: "phoneNumber", label: "No Telepon", type: "text", required: true, persistent: true },
                     { id: "instagram", label: "Instagram", type: "text", required: true },
                     { id: "email", label: "Gmail", type: "text", required: true, persistent: true },
-                    { id: "karya", label: "Pengumpulan Film", type: "file", multiple: true, required: true }
+                    { id: "karya", label: "Pengumpulan Film", type: "file", required: true, hint: "Gunakan link Google Drive atau YouTube" },
+                    { id: "syarat_1", label: "Wajib membawa lima audiens", type: "checkbox", required: true },
+                    { id: "bukti_audiens", label: "Bukti lima audiens", type: "file", required: true }
                 ]
             },
             "Photo Exhibition": {
@@ -186,9 +186,11 @@ export const UNITS_MOCK = [
                     { id: "phoneNumber", label: "No Telepon", type: "text", required: true, persistent: true },
                     { id: "instagram", label: "Instagram", type: "text", required: true },
                     { id: "email", label: "Gmail", type: "text", required: true, persistent: true },
-                    { id: "karya", label: "Pengumpulan Foto", type: "file", multiple: true, required: true },
+                    { id: "karya", label: "Pengumpulan Foto (Wajib membawa/upload 3 foto)", type: "file", multiple: true, required: true, hint: "Wajib membawa/upload 3 foto", minFiles: 3, maxFiles: 3 },
                     { id: "photoName", label: "Nama Foto", type: "text", required: true },
-                    { id: "description", label: "Deskripsi Foto", type: "textarea", required: true }
+                    { id: "description", label: "Deskripsi Foto", type: "textarea", required: true },
+                    { id: "syarat_1", label: "Wajib membawa tiga audiens", type: "checkbox", required: true },
+                    { id: "bukti_audiens", label: "Bukti tiga audiens", type: "file", required: true }
                 ]
             },
             "Audiens": {
@@ -197,7 +199,7 @@ export const UNITS_MOCK = [
                     { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
-                    { id: "sesi", label: "Sesi", type: "select", options: ["Sesi 1 (SMA)", "Sesi 2 (Umum)"], required: true },
+                    { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1 (SMA)", "Sesi 2 (Umum)"], required: true },
                     { id: "paymentProof", label: "Bukti Pembayaran", type: "file", required: true }
                 ]
             }
