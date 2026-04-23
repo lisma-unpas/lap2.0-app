@@ -173,7 +173,7 @@ export const UNITS_MOCK = [
                     { id: "instagram", label: "Instagram", type: "text", required: true },
                     { id: "email", label: "Gmail", type: "text", required: true, persistent: true },
                     { id: "karya", label: "Pengumpulan Film", type: "file", required: true, hint: "Gunakan link Google Drive atau YouTube" },
-                    { id: "syarat_1", label: "Wajib membawa lima audiens", type: "checkbox", required: true },
+                    { id: "syarat_1", label: "Info PENTING", type: "info", text: "Wajib membawa lima audiens" },
                     { id: "bukti_audiens", label: "Bukti lima audiens", type: "file", required: true }
                 ]
             },
@@ -189,7 +189,7 @@ export const UNITS_MOCK = [
                     { id: "karya", label: "Pengumpulan Foto (Wajib membawa/upload 3 foto)", type: "file", multiple: true, required: true, hint: "Wajib membawa/upload 3 foto", minFiles: 3, maxFiles: 3 },
                     { id: "photoName", label: "Nama Foto", type: "text", required: true },
                     { id: "description", label: "Deskripsi Foto", type: "textarea", required: true },
-                    { id: "syarat_1", label: "Wajib membawa tiga audiens", type: "checkbox", required: true },
+                    { id: "syarat_1", label: "Info PENTING", type: "info", text: "Wajib membawa tiga audiens" },
                     { id: "bukti_audiens", label: "Bukti tiga audiens", type: "file", required: true }
                 ]
             },
