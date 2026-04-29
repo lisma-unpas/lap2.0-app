@@ -16,7 +16,7 @@ export const UNITS_MOCK = [
         formFields: [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
             { id: "phoneNumber", label: "Nomor Telepon", type: "text", required: true, persistent: true },
-            { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1", "Sesi 2"], required: true },
+            { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1: 08.00", "Sesi 2: 13.00"], required: true },
             { id: "asal", label: "Asal Kampus/Sekolah/Instansi", type: "text", required: true },
             {
                 id: "category", label: "Kategori Peserta", type: "radio",
@@ -48,14 +48,15 @@ export const UNITS_MOCK = [
             { id: "fullName", label: "Nama Lengkap", type: "text", required: true, persistent: true },
             { id: "phoneNumber", label: "Nomor WhatsApp", type: "text", required: true, persistent: true },
             {
-                id: "category", label: "Kategori", type: "radio",
+                id: "category", label: "Kategori Tiket", type: "radio",
                 options: [
-                    { label: "Umum (Rp100.000)", value: "umum", price: 100000 },
+                    { label: "Umum (Tiket + Minuman) - Rp100.000", value: "umum_minuman", price: 100000 },
+                    { label: "Umum (Tiket tanpa Minuman) - Rp80.000", value: "umum_no_minuman", price: 80000 },
                     { label: "SMA (Free)", value: "sma", price: 0 }
                 ], required: true
             },
             {
-                id: "ticketType", label: "Kategori tiket (Umum)", type: "radio",
+                id: "ticketType", label: "Pilihan Minuman", type: "radio",
                 options: [
                     { label: "Tiket + eskosu 2 kaum", value: "eskosu", image: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=2000&auto=format&fit=crop" },
                     { label: "Tiket + hazelnut choco", value: "hazelnut", image: "https://images.unsplash.com/photo-1650793456548-733c7c656da2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
@@ -69,7 +70,7 @@ export const UNITS_MOCK = [
         id: 'psm',
         name: 'PSM',
         subTitle: 'LISMA ART PARADE 2.0: SOUNDCLASH ARENA',
-        description: `Panggung sudah siap—sekarang giliran band kamu.\n\nKalau musikmu selama ini cuma terdengar di ruang latihan, saatnya naik ke panggung sesungguhnya. Soundclash Arena adalah tempat band-band berbakat unjuk performa, menunjukkan karakter, dan membakar atmosfer dengan energi terbaik mereka!\n\n🔥 KENAPA HARUS IKUT?\nKarena ini bukan sekadar tampil—ini tentang eksistensi, koneksi, dan pengalaman panggung yang nyata.\n\n⚡ HIGHLIGHT ACARA\nBand terpilih akan tampil langsung di Soundclash Arena, di hadapan penonton dan komunitas musik yang siap merasakan gebrakanmu.\n\n🏆 KATEGORI JUARA\n🥇 Juara 1 — Best Band (Band Terbaik)\n🥈 Juara 2 — Best Arrangement (Aransemen Terbaik)\n🥉 Juara 3 — Best Act Performance (Penampilan Terbaik)\n\n📍 WAKTU & TEMPAT\n📅 10 Mei 2026\n🕗 08.00 – 17.00 WIB\n🏢 Stage FISS Kampus IV UNPAS Setiabudhi\n\n🎶 Saatnya naik panggung, tunjukkan warna musikmu, dan buat arena bergetar! 🤘🏻🔥`,
+        description: `Panggung sudah siap—sekarang giliran band kamu.\n\nKalau musikmu selama ini cuma terdengar di ruang latihan, saatnya naik ke panggung sesungguhnya. Soundclash Arena adalah tempat band-band berbakat unjuk performa, menunjukkan karakter, dan membakar atmosfer dengan energi terbaik mereka!\n\n🔥 KENAPA HARUS IKUT?\nKarena ini bukan sekadar tampil—ini tentang eksistensi, koneksi, dan pengalaman panggung yang nyata.\n\n⚡ HIGHLIGHT ACARA\nBand terpilih akan tampil langsung di Soundclash Arena, di hadapan penonton dan komunitas musik yang siap merasakan gebrakanmu.\n\n📍 WAKTU & TEMPAT\n📅 10 Mei 2026\n🕗 08.00 – 17.00 WIB\n🏢 Stage FISS Kampus IV UNPAS Setiabudhi\n\n🎶 Saatnya naik panggung, tunjukkan warna musikmu, dan buat arena bergetar! 🤘🏻🔥`,
         subEvents: ['Band Competition'],
         price: 0,
         badgeText: "🎼 Paduan Suara dan Musik",
@@ -199,8 +200,6 @@ export const UNITS_MOCK = [
                     { id: "fullName", label: "Nama", type: "text", required: true, persistent: true },
                     { id: "institution", label: "Nama Komunitas/Sekolah", type: "text", required: true },
                     { id: "origin", label: "Asal", type: "text", required: true },
-                    { id: "sesi", label: "Pilih Sesi", type: "select", options: ["Sesi 1 (SMA)", "Sesi 2 (Umum)"], required: true },
-                    { id: "paymentProof", label: "Bukti Pembayaran", type: "file", required: true }
                 ]
             }
         }

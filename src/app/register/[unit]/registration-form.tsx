@@ -206,15 +206,15 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         }
 
         if (fieldId === "ticketType") {
-            return formData.category !== "umum";
+            return formData.category !== "umum" && formData.category !== "umum_minuman";
         }
 
         return false;
     };
 
-    // Clear ticketType if category is changed from 'umum'
+    // Clear ticketType if category is changed from 'umum' or 'umum_minuman'
     useEffect(() => {
-        const isNotUmum = formData.category !== "umum";
+        const isNotUmum = formData.category !== "umum" && formData.category !== "umum_minuman";
         if (isNotUmum && formData.ticketType) {
             setFormData(prev => ({ ...prev, ticketType: null }));
         }
@@ -283,8 +283,8 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         setFormData(prev => {
             const next = { ...prev, [id]: finalValue };
 
-            // Clear ticketType if category is changed to anything other than "umum"
-            if (id === "category" && finalValue !== "umum") {
+            // Clear ticketType if category is changed to anything other than "umum" or "umum_minuman"
+            if (id === "category" && finalValue !== "umum" && finalValue !== "umum_minuman") {
                 return { ...next, ticketType: null };
             }
 
@@ -470,9 +470,9 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             const value = finalData[field.id];
 
             // Skip validation for fields hidden by category logic
-            const isNotUmum = finalData.category && finalData.category !== "umum";
+            const isNotUmum = finalData.category && finalData.category !== "umum" && finalData.category !== "umum_minuman";
             if (field.id === "ticketType" && isNotUmum) return;
-            if (field.id === "note_1" && unit.toLowerCase() === "kds" && isNotUmum) return;
+            if (field.id === "note_1" && unit.toLowerCase() === "kds" && (finalData.category !== "umum_minuman" && finalData.category !== "umum")) return;
 
             // Required check
             if (field.required) {
@@ -675,11 +675,11 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                             <div className="mt-10 space-y-8">
                                 {fields.map((field: any) => {
                                     // Conditional visibility logic
-                                    const isNotUmum = formData.category && formData.category !== "umum";
+                                    const isNotUmum = formData.category && formData.category !== "umum" && formData.category !== "umum_minuman";
                                     if (field.id === "ticketType" && isNotUmum) {
                                         return null;
                                     }
-                                    if (field.id === "note_1" && unit.toLowerCase() === "kds" && isNotUmum) {
+                                    if (field.id === "note_1" && unit.toLowerCase() === "kds" && (formData.category !== "umum_minuman" && formData.category !== "umum")) {
                                         return null;
                                     }
 
@@ -702,7 +702,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                                     items={field.options.map((opt: any) => {
                                                         const disabled = isOptionDisabled(field.id, opt.value);
                                                         // Only show "Sold Out" if it's not the ticketType field being disabled by category
-                                                        const showSoldOut = disabled && (field.id !== "ticketType" || formData.category === "umum");
+                                                        const showSoldOut = disabled && (field.id !== "ticketType" || (formData.category === "umum" || formData.category === "umum_minuman"));
 
                                                         return {
                                                             value: opt.value,
