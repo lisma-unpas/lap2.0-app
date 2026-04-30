@@ -565,12 +565,16 @@ const RegistrationDetailModal = memo(({
         >
             <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
+                        <p className="text-xs font-bold text-quaternary uppercase">Registration Code</p>
+                        <p className="text-md font-mono font-bold text-brand-600">{registration?.registrationCode}</p>
+                    </div>
+                    <div className="col-span-2 sm:col-span-1">
                         <p className="text-xs font-bold text-quaternary uppercase">Unit</p>
                         <p className="text-sm font-semibold text-primary">{UNIT_CONFIG[registration?.unitId.toLowerCase()]?.name || registration?.unitId}</p>
                     </div>
                     {registration?.subEventName && registration?.subEventName !== (UNIT_CONFIG[registration?.unitId.toLowerCase()]?.name || registration?.unitId) && (
-                        <div>
+                        <div className="col-span-2">
                             <p className="text-xs font-bold text-quaternary uppercase">Event</p>
                             <p className="text-sm font-semibold text-primary">{registration?.subEventName}</p>
                         </div>

@@ -53,9 +53,10 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
     const labelElement = (
         <span
             className={cx(
-                "flex-1 text-md font-semibold text-secondary transition-inherit-all group-hover:text-secondary_hover",
+                "flex-1 text-md font-semibold text-secondary transition-inherit-all",
+                // "group-hover:text-secondary_hover"
                 truncate && "truncate",
-                current && "text-brand-600",
+                current && "text-brand-600 hover:text-brand-600",
             )}
         >
             {children}
