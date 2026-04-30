@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AdminTicketsPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div></div>}>
             <TicketsClient />
         </Suspense>
     );

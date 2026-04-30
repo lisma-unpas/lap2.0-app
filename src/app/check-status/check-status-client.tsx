@@ -13,10 +13,13 @@ import { useClipboard } from "@/hooks/use-clipboard";
 import { UNIT_CONFIG } from "@/constants/units";
 import { cx } from "@/utils/cx";
 import { formatDateTime } from "@/utils/date";
+import { useRouter, usePathname } from "next/navigation";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export default function CheckStatusClient() {
+    const router = useRouter();
+    const pathname = usePathname();
     const [search, setSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState<any[] | null>(null);
@@ -44,6 +47,27 @@ export default function CheckStatusClient() {
             handleSearch(undefined, code);
         }
     }, []);
+
+    // Sync search to URL query param (?code=) with debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            if (search.trim()) {
+                params.set("code", search.trim().toUpperCase());
+            } else {
+                params.delete("code");
+            }
+            
+            const newQuery = params.toString();
+            const currentQuery = window.location.search.replace(/^\?/, "");
+            
+            if (newQuery !== currentQuery) {
+                router.replace(`${pathname}${newQuery ? "?" + newQuery : ""}`, { scroll: false });
+            }
+        }, 800);
+        
+        return () => clearTimeout(timer);
+    }, [search, pathname, router]);
 
     const handleSearch = async (e?: React.FormEvent, manualSearch?: string) => {
         if (e) e.preventDefault();
@@ -177,8 +201,13 @@ export default function CheckStatusClient() {
                                                     {reg.status}
                                                 </BadgeWithIcon>
                                                 {reg.status === 'VERIFIED' && (
-                                                    <Button size="sm" color="primary" className="gap-2 font-bold" onClick={() => openTicket(reg)}>
-                                                        <Ticket01 className="size-4" />
+                                                    <Button 
+                                                        size="sm" 
+                                                        color="primary" 
+                                                        className="font-bold" 
+                                                        iconLeading={Ticket01}
+                                                        onClick={() => openTicket(reg)}
+                                                    >
                                                         Lihat {reg.tickets?.length || 0} Tiket
                                                     </Button>
                                                 )}
@@ -284,7 +313,7 @@ export default function CheckStatusClient() {
 
             {/* Ticket Modal */}
             <ModalOverlay isOpen={isTicketModalOpen} onOpenChange={setIsTicketModalOpen}>
-                <Modal className="max-w-md w-full overflow-hidden rounded-lg md:rounded-[32px] p-0 border-none shadow-2xl">
+                <Modal className="max-w-md w-full max-h-[90dvh] overflow-y-auto rounded-lg md:rounded-[32px] p-0 border-none shadow-2xl custom-scrollbar">
                     <Dialog className="p-0 outline-none">
                         {selectedRegistration && selectedRegistration.tickets && selectedRegistration.tickets.length > 0 && (
                             <div className="relative bg-primary">
@@ -295,7 +324,7 @@ export default function CheckStatusClient() {
                                     return (
                                         <>
                                             {/* Scrollable Area for PDF Content */}
-                                            <div ref={ticketRef} className="bg-white">
+                                            <div ref={ticketRef} className="bg-primary">
                                                 <div className="bg-brand-solid p-8 text-white text-center rounded-b-[40px] shadow-lg">
                                                     <h3 className="text-xl font-bold tracking-tight">E-TICKET RESMI</h3>
                                                     <p className="text-brand-primary-100 text-sm mt-1 uppercase tracking-[0.2em] font-bold">{config.name}</p>
@@ -376,11 +405,11 @@ export default function CheckStatusClient() {
                                                     <Button
                                                         color="primary"
                                                         size="md"
-                                                        className="w-full gap-2 rounded-2xl shadow-lg shadow-brand-solid/20 font-bold"
+                                                        className="w-full rounded-2xl shadow-lg shadow-brand-solid/20 font-bold"
                                                         onClick={handleDownloadPDF}
                                                         isLoading={isDownloading}
+                                                        iconLeading={Download01}
                                                     >
-                                                        <Download01 className="size-5" />
                                                         Download E-Ticket (PDF)
                                                     </Button>
                                                     <Button

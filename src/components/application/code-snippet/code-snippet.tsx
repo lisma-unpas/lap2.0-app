@@ -93,7 +93,7 @@ export const CodeSnippet = ({ children, code, language, showLineNumbers = true, 
                 className,
             )}
         >
-            {nodes ?? code ?? <p>Loading...</p>}
+            {nodes ?? code ?? <p></p>}
         </div>
     );
 };

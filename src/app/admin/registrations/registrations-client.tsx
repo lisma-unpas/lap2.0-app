@@ -60,7 +60,6 @@ export default function RegistrationsClient() {
 
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [filter, setFilter] = useState(initialStatus);
     const [unitId, setUnitId] = useState(initialUnit);
@@ -134,8 +133,8 @@ export default function RegistrationsClient() {
         setIsInitialLoading(false);
     }
 
-    const fetchData = useCallback(async (isInitial = false) => {
-        if (!isInitial) setIsLoading(true);
+    const fetchData = useCallback(async (isInitial = false, silent = false) => {
+        if (!isInitial && !silent) setIsLoading(true);
         const [regRes, statsRes] = await Promise.all([
             getRegistrations({
                 search: debouncedSearch,
@@ -154,20 +153,28 @@ export default function RegistrationsClient() {
             toastError("Kesalahan", regRes.message || "Gagal mengambil data");
         }
         if (statsRes.success) setStats(statsRes.data?.registrations);
-        if (!isInitial) setIsLoading(false);
-    }, [debouncedSearch, filter, page, toastError]);
+        if (!isInitial && !silent) setIsLoading(false);
+    }, [debouncedSearch, filter, page, unitId, toastError]);
 
     const handleStatusUpdate = useCallback(async (id: string, status: string) => {
-        setUpdatingStatusId(id);
+        // Optimistic update
+        const previousRegistrations = [...registrations];
+        setRegistrations(prev => prev.map(reg => 
+            reg.id === id ? { ...reg, status } : reg
+        ));
+
         const res = await updateRegistrationStatus(id, status as any);
+        
         if (res.success) {
             toastSuccess("Berhasil", `Status diperbarui ke ${status}`);
-            await fetchData();
+            // Re-fetch to ensure everything (like tickets) is in sync without showing skeleton
+            await fetchData(false, true);
         } else {
+            // Revert on failure
+            setRegistrations(previousRegistrations);
             toastError("Gagal", res.message || "Gagal memperbarui status");
         }
-        setUpdatingStatusId(null);
-    }, [fetchData, toastSuccess, toastError]);
+    }, [registrations, fetchData, toastSuccess, toastError]);
 
     const handleFilterChange = useCallback((key: string) => {
         setFilter(key);
@@ -324,7 +331,6 @@ export default function RegistrationsClient() {
                                             onExpand={handleExpand}
                                             onViewDetail={handleViewDetail}
                                             onStatusUpdate={handleStatusUpdate}
-                                            isUpdating={updatingStatusId === reg.id}
                                         />
                                     ))
                                 ) : (
@@ -385,15 +391,13 @@ const RegistrationRow = memo(({
     isExpanded,
     onExpand,
     onViewDetail,
-    onStatusUpdate,
-    isUpdating
+    onStatusUpdate
 }: {
     reg: any;
     isExpanded: boolean;
     onExpand: (id: string) => void;
     onViewDetail: (reg: any) => void;
     onStatusUpdate: (id: string, status: string) => void;
-    isUpdating: boolean;
 }) => {
     const config = UNIT_CONFIG[reg.unitId.toLowerCase()] || { name: reg.unitId };
 
@@ -417,7 +421,6 @@ const RegistrationRow = memo(({
                 <Select
                     size="sm"
                     selectedKey={reg.status}
-                    isLoading={isUpdating}
                     onSelectionChange={(key) => onStatusUpdate(reg.id, key as string)}
                 >
                     <Select.Item id="PENDING">Pending</Select.Item>
