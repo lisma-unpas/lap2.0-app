@@ -2,31 +2,23 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { ArrowLeft, ShoppingCart01, InfoCircle, CheckCircle, Upload01, Copy01, Eraser, LogIn01, RefreshCw01 } from "@untitledui/icons";
+import { ArrowLeft, ShoppingCart01, LogIn01, RefreshCw01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
-import { Input } from "@/components/base/input/input";
-import { TextArea } from "@/components/base/textarea/textarea";
-import { Select } from "@/components/base/select/select";
-import { RadioButton as RadioGroup } from "@/components/base/radio-groups/radio-groups";
-import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { Label } from "@/components/base/input/label";
 import Container from "@/components/shared/container";
 import Section from "@/components/shared/section";
 import { UNIT_CONFIG } from "@/constants/units";
 import { useCart } from "@/context/cart-context";
 import { cx } from "@/utils/cx";
-import { uploadImage } from "@/actions/upload";
 import FloatingWhatsApp from "@/components/shared/floating-whatsapp";
 import { Modal as SharedModal } from "@/components/shared/modals/modal/index";
 import { useToast } from "@/context/toast-context";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
-import { FileUpload } from "@/components/application/file-upload/file-upload-base";
-import FileUploadWithUrl from "@/components/application/file-upload-with-url";
-import { Tabs } from "@/components/application/tabs/tabs";
 import { compressImage } from "@/utils/image-converter";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { getUnitAvailability, checkUnitAvailability } from "@/actions/admin";
 import { uploadToDriveClient } from "@/utils/google-drive-client-upload";
+import RegistrationField from "./registration-field";
 
 interface RegistrationFormProps {
     unit: string;
@@ -300,13 +292,7 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
         }
     };
 
-    const getFileType = (file: File) => {
-        const ext = file.name.split('.').pop()?.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return 'image';
-        if (['mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', 'webm', '3gp'].includes(ext || '')) return 'video';
-        if (ext === 'pdf') return 'pdf';
-        return 'empty';
-    };
+
 
     const handleFileUpload = async (id: string, file: File, isMultiple: boolean = false) => {
         if (!isConnected) {
@@ -503,7 +489,12 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
             // Min/Max files check
             if (field.type === "file") {
                 const files = Array.isArray(value) ? value : (value ? [value] : []);
-                if (field.minFiles && files.length < field.minFiles) {
+                
+                // If the user provided a single URL string for a field that allows multiple files,
+                // we treat it as a "collection URL" (like Google Drive) and skip the count check.
+                const isCollectionUrl = !Array.isArray(value) && typeof value === 'string' && value.startsWith('http');
+
+                if (!isCollectionUrl && field.minFiles && files.length < field.minFiles) {
                     errors[field.id] = `Minimal harus mengunggah ${field.minFiles} foto`;
                 }
                 if (field.maxFiles && files.length > field.maxFiles) {
@@ -683,164 +674,21 @@ export default function RegistrationForm({ unit, subEvents }: RegistrationFormPr
                                         return null;
                                     }
 
-                                    if (field.type === "info") {
-                                        return (
-                                            <div key={field.id} className="p-4 rounded-lg bg-utility-blue-50 border border-utility-blue-100 flex gap-3">
-                                                <InfoCircle className="size-5 text-utility-blue-700 shrink-0 mt-0.5" />
-                                                <p className="text-sm text-utility-blue-700 whitespace-pre-line leading-relaxed">{field.text}</p>
-                                            </div>
-                                        );
-                                    }
-
-                                    if (field.type === "radio") {
-                                        return (
-                                            <div key={field.id} id={field.id} className="space-y-1.5">
-                                                <Label isRequired={field.required}>{field.label}</Label>
-                                                <RadioGroup
-                                                    value={formData[field.id]}
-                                                    onChange={(val) => handleInputChange(field.id, val)}
-                                                    items={field.options.map((opt: any) => {
-                                                        const disabled = isOptionDisabled(field.id, opt.value);
-                                                        // Only show "Sold Out" if it's not the ticketType field being disabled by category
-                                                        const showSoldOut = disabled && (field.id !== "ticketType" || (formData.category === "umum" || formData.category === "umum_minuman"));
-
-                                                        return {
-                                                            value: opt.value,
-                                                            title: opt.label + (showSoldOut ? " (Sold Out)" : ""),
-                                                            description: "",
-                                                            secondaryTitle: "",
-                                                            image: opt.image,
-                                                            icon: () => null,
-                                                            disabled: disabled
-                                                        };
-                                                    })}
-                                                />
-                                                {formErrors[field.id] && (
-                                                    <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
-                                                )}
-                                            </div>
-                                        );
-                                    }
-
-                                    if (field.type === "select") {
-                                        return (
-                                            <div key={field.id} id={field.id}>
-                                                <Select
-                                                    label={field.label}
-                                                    isRequired={field.required}
-                                                    placeholder="Pilih salah satu..."
-                                                    selectedKey={formData[field.id]}
-                                                    onSelectionChange={(val) => handleInputChange(field.id, val)}
-                                                    items={field.options.map((opt: any) => {
-                                                        const disabled = isOptionDisabled(field.id, opt);
-                                                        return {
-                                                            id: opt,
-                                                            label: opt + (disabled ? " (Sold Out)" : ""),
-                                                            isDisabled: disabled
-                                                        };
-                                                    })}
-                                                    size="md"
-                                                    isInvalid={!!formErrors[field.id]}
-                                                    errorMessage={formErrors[field.id]}
-                                                >
-                                                    {(item) => <Select.Item key={item.id} id={item.id as string} isDisabled={item.isDisabled}>{item.label}</Select.Item>}
-                                                </Select>
-                                            </div>
-                                        );
-                                    }
-
-                                    if (field.type === "textarea") {
-                                        return (
-                                            <div key={field.id} id={field.id}>
-                                                <TextArea
-                                                    label={field.label}
-                                                    isRequired={field.required}
-                                                    placeholder={field.placeholder}
-                                                    value={formData[field.id] || ""}
-                                                    onChange={(val) => handleInputChange(field.id, val)}
-                                                    rows={4}
-                                                    isInvalid={!!formErrors[field.id]}
-                                                    errorMessage={formErrors[field.id]}
-                                                />
-                                            </div>
-                                        );
-                                    }
-
-                                    if (field.type === "file") {
-                                        const attachments = fileAttachments[field.id] || [];
-
-                                        return (
-                                            <FileUploadWithUrl
-                                                key={field.id}
-                                                id={field.id}
-                                                label={field.label}
-                                                isRequired={field.required}
-                                                isConnected={isConnected}
-                                                accept={field.accept}
-                                                multiple={field.multiple}
-                                                maxSize={field.maxSize}
-                                                hint={field.hint}
-                                                value={formData[field.id]}
-                                                onValueChange={(val) => handleInputChange(field.id, val)}
-                                                attachments={attachments}
-                                                onUpload={(file) => handleFileUpload(field.id, file, field.multiple)}
-                                                onRetry={(file) => handleFileUpload(field.id, file, field.multiple)}
-                                                onDelete={(index) => {
-                                                    const newList = attachments.filter((_, i) => i !== index);
-                                                    setFileAttachments(prev => ({ ...prev, [field.id]: newList }));
-                                                    const urls = newList.filter(a => a.status === 'success' && a.url).map(a => a.url);
-                                                    handleInputChange(field.id, field.multiple ? urls : urls[0] || undefined);
-                                                }}
-                                                isUploading={isUploading}
-                                                isInvalid={!!formErrors[field.id]}
-                                                errorMessage={formErrors[field.id]}
-                                            />
-                                        );
-                                    }
-
-                                    if (field.type === "checkbox") {
-                                        return (
-                                            <div key={field.id} id={field.id} className="space-y-1.5">
-                                                <Checkbox
-                                                    isSelected={!!formData[field.id]}
-                                                    onChange={(val) => handleInputChange(field.id, val)}
-                                                    label={field.label}
-                                                    size="md"
-                                                />
-                                                {formErrors[field.id] && (
-                                                    <p className="text-sm font-medium text-error-600">{formErrors[field.id]}</p>
-                                                )}
-                                            </div>
-                                        );
-                                    }
-
-                                    const isQuantity = field.id === "quantity";
-                                    const isQuantityDisabled = isQuantity && !availability;
-
                                     return (
-                                        <div key={field.id} id={field.id}>
-                                            <Input
-                                                type={
-                                                    (field.id === "phoneNumber" || field.type === "number") ? "text" :
-                                                        field.type === "url" ? "url" :
-                                                            field.type === "email" ? "email" :
-                                                                "text"
-                                                }
-                                                inputMode={
-                                                    (field.id === "phoneNumber" || field.type === "number") ? "numeric" : undefined
-                                                }
-                                                label={field.label}
-                                                isRequired={field.required}
-                                                hint={isQuantity && availability ? `Sisa kuota: ${availability.remaining} tiket` : undefined}
-                                                placeholder={isQuantityDisabled ? "Pilih kategori terlebih dahulu..." : (field.placeholder || `Masukkan ${field.label}...`)}
-                                                value={formData[field.id] ?? (field.type === "number" ? (field.defaultValue?.toString() || "0") : "")}
-                                                onChange={(val) => handleInputChange(field.id, val)}
-                                                size="md"
-                                                isDisabled={isQuantityDisabled}
-                                                isInvalid={!!formErrors[field.id]}
-                                                errorMessage={formErrors[field.id]}
-                                            />
-                                        </div>
+                                        <RegistrationField
+                                            key={field.id}
+                                            field={field}
+                                            formData={formData}
+                                            formErrors={formErrors}
+                                            handleInputChange={handleInputChange}
+                                            isOptionDisabled={isOptionDisabled}
+                                            fileAttachments={fileAttachments}
+                                            isConnected={isConnected}
+                                            isUploading={isUploading}
+                                            handleFileUpload={handleFileUpload}
+                                            setFileAttachments={setFileAttachments}
+                                            availability={availability}
+                                        />
                                     );
                                 })}
                             </div>

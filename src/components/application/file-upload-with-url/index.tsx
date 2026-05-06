@@ -27,6 +27,7 @@ interface FileUploadWithUrlProps {
     isConnected?: boolean;
     className?: string;
     id?: string;
+    minFiles?: number;
 }
 
 export default function FileUploadWithUrl({
@@ -47,7 +48,8 @@ export default function FileUploadWithUrl({
     errorMessage,
     isConnected,
     className,
-    id
+    id,
+    minFiles
 }: FileUploadWithUrlProps) {
     const [method, setMethod] = useState<'upload' | 'url'>('upload');
 
@@ -113,18 +115,26 @@ export default function FileUploadWithUrl({
                             value={typeof value === 'string' ? value : ""}
                             onChange={(val) => onValueChange(val)}
                             isInvalid={isInvalid}
+                            errorMessage={errorMessage}
                         />
                         <div className="flex gap-2 p-3 rounded-lg bg-orange-50/50 border border-orange-100">
                             <InfoCircle className="size-4 text-orange-600 mt-0.5 shrink-0" />
-                            <p className="text-[10px] text-orange-800 leading-normal">
-                                <strong>Penting!</strong> Pastikan file di Google Drive Anda sudah diatur ke <strong>"Siapa saja yang memiliki link"</strong> (Public) agar pendaftaran lancar.
-                            </p>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-orange-800 leading-normal">
+                                    <strong>Penting!</strong> Pastikan file di Google Drive Anda sudah diatur ke <strong>"Siapa saja yang memiliki link"</strong> (Public) agar pendaftaran lancar.
+                                </p>
+                                {minFiles && minFiles > 1 && (
+                                    <p className="text-[10px] text-orange-800 leading-normal italic font-medium">
+                                        * Pastikan link Drive tersebut berisi minimal {minFiles} gambar.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </Tabs.Panel>
             </Tabs>
 
-            {errorMessage && (
+            {method === 'upload' && errorMessage && (
                 <p className="text-sm font-medium text-error-600">{errorMessage}</p>
             )}
         </div>
